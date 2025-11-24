@@ -15,8 +15,7 @@ public class Target {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long region_code;
+    private Long id;
 
-    private String province;
-    private String district;
+    private String targetName;   // 아동,노인 등
 }

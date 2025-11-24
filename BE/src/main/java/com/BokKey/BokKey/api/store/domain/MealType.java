@@ -17,5 +17,5 @@ public class MealType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String type;  // 조식, 중식, 석식
 }
