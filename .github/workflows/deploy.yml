@@ -1,0 +1,24 @@
+name: Deploy BokKey Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ✅ Repository Checkout
+        uses: actions/checkout@v4
+
+      - name: 🧩 SSH 연결 및 배포 스크립트 실행
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/BokKey/BE
+            ./deploy.sh
