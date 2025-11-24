@@ -14,7 +14,7 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long category_id;
+    private Long id;
 
-    private String category_name;
+    private String name;   // 복지관, 무료급식소 등
 }

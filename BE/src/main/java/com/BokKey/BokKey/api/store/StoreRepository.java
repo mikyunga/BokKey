@@ -2,20 +2,20 @@ package com.BokKey.BokKey.api.store;
 
 import com.BokKey.BokKey.api.store.domain.Store;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
-@Repository
+
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    List<Store> findByArea(String area);
+    List<Store> findByNameContaining(String name);
 
     List<Store> findByIsLive(boolean isLive);
 
-    @Query("SELECT s FROM Store s JOIN s.Target st WHERE st.province = :Target")
-    List<Store> findBySupportType(@Param("supportType") String supportType);
+    // 지역 정보 기반
+    List<Store> findByRegion_CityContaining(String city);
+    List<Store> findByRegion_AreaNameContaining(String areaName);
 
-    List<Store> findByNameContaining(String name);
+    // 카테고리, 대상
+    List<Store> findByCategories_NameContaining(String category);
+    List<Store> findByTargets_DistrictContaining(String target);
 }
