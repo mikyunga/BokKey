@@ -47,6 +47,7 @@ const SignUpForm = () => {
         {errorMsg && <div className="text-rederror text-[14px] leading-[1.4]">{errorMsg}</div>}
         <div className="mt-[28px] mb-[48px] w-full">
           <Button
+            className="text-white"
             text="회원가입 완료"
             onClick={handleSignupSubmit}
             disabled={!nickname || !email || !isPasswordValidAll}

@@ -54,14 +54,14 @@ const EmailVerify = ({ value, onChange }) => {
           disabled={emailVerified}
         />
         <button
-          className={`text-[14px] font-medium tracking-[-0.025em]
+          className={`text-[14px] font-regular tracking-[-0.025em]
           px-[14px] rounded-[5px] h-[39px]
           transition-colors duration-100
   ${
     emailVerified
       ? 'bg-gray-stroke02 text-gray-stroke30'
       : isValidEmail(value)
-        ? ' bg-main-typeStroke text-main'
+        ? ' bg-main-_10 text-main'
         : 'bg-gray-stroke02 text-gray-stroke30'
   }`}
           onClick={handleSendCode}

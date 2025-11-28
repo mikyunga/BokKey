@@ -13,9 +13,9 @@ body {
 }
 
 :root {
-  --color-main: 59 104 239;
-  --color-main-hover: 38 83 217;
-  --color-login: 210 213 214;
+  --color-main: 149 215 105;
+  /* --color-main-hover: 38 83 217; */
+  --color-orange: 255 146 56;
   --color-star: 255 217 25;
   --color-gray: 0 0 0;
   --color-bubble: 250 250 250;
