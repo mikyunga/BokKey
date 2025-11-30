@@ -9,6 +9,8 @@ export default {
       colors: {
         main: {
           DEFAULT: 'rgb(var(--color-main) / <alpha-value>)',
+          _10: 'rgba(149, 215, 105, 0.1)',
+          _30: 'rgba(149, 215, 105, 0.3)',
         },
         filter: {
           DEFAULT: 'rgb(var(--color-filter) / <alpha-value>)',
@@ -18,9 +20,8 @@ export default {
         },
         black: {
           DEFAULT: 'rgb(var(--color-black) / <alpha-value>)',
-          hover: 'rgb(var(--color-main-hover) / <alpha-value>)',
-          buttonStroke: 'rgba(59, 104, 239, 0.3)', // 버튼 테두리 고정값
-          buttonFill: 'rgba(59, 104, 239, 0.05)', // 버튼 fill 고정값
+          buttonStroke: 'rgba(0,0,0, 0.05)', // 버튼 테두리 고정값
+          buttonFill: 'rgba(149, 215, 105, 0.1)', // 버튼 fill 고정값
           _01: 'rgba(0, 0, 0, 0.01)',
           _02: 'rgba(0, 0, 0, 0.02)',
           _03: 'rgba(0, 0, 0, 0.03)',
@@ -54,6 +55,7 @@ export default {
         white: {
           DEFAULT: 'rgb(var(--color-white) / <alpha-value>)',
           _05: 'rgba(255,255,255,0.5)',
+          _100: 'rgba(255,255,255,1)',
         },
         border: {
           DEFAULT: 'rgba(221, 221, 221, <alpha-value>)',
@@ -61,9 +63,11 @@ export default {
         rederror: {
           DEFAULT: 'rgba(255,88,88,1)',
         },
-        login: {
-          DEFAULT: 'rgb(var(--color-login) / <alpha-value>)',
+        orange: {
+          DEFAULT: 'rgb(var(--color-orange) / <alpha-value>)',
         },
+        _80: 'rgba(255, 146, 56, 0.8)',
+        _05: 'rgba(255, 146, 56, 0.05)',
       },
       boxShadow: {
         'custom-drop': '0px 0px 40px 0px rgba(0, 0, 0, 0.1)',

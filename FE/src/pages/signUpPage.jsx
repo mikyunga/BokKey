@@ -1,26 +1,23 @@
-// import Header from '../components/header';
-// import SignUpForm from '../components/Store/Common/SignUp/SignUpForm';
+import Header from '../components/header';
+import SignUpForm from '../components/common/signUp/signUpForm';
 
-// const signUpPage = () => {
-//   return (
-//     <div className="h-screen flex flex-col">
-//       {/* 헤더: 고정 */}
-//       <div className="shrink-0">
-//         <Header />
-//       </div>
-//       {/* 본문 전체: 헤더 제외 + InputBox 제외 */}
-//       <div className="flex justify-center items-center">
-//         <div
-//           className=" gap-8 overflow-hidden
-//             flex flex-col justify-center items-center w-full px-[22px]"
-//         >
-//           <h1 className="text-xl font-bold text-main text-center pt-[52px] pb-2">
-//             <span className="inline-block border-b-[2.5px] border-main pb-1">회원가입</span>
-//           </h1>
-//           <SignUpForm />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-// export default signUpPage;
+const signUpPage = () => {
+  return (
+    <div className="">
+      <div className="relative h-screen overflow-y-auto">
+        <Header />
+        {/* 본문 전체: 헤더 제외 + InputBox 제외 */}
+        <div className="flex justify-center items-center">
+          <div
+            className="pt-[60px] w-[320px] gap-[42px] overflow-hidden
+            flex flex-col justify-center items-center"
+          >
+            <div className="text-[28px] font-bold mt-[42px]">회원가입</div>
+            <SignUpForm />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default signUpPage;

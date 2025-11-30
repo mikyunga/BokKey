@@ -1,3 +1,138 @@
+/* 테일윈드 초기세팅 */
+/* reset */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html {
+  font-family: 'Pretendard';
+}
+
+body {
+  @apply bg-white text-black m-0 p-0;
+}
+
+:root {
+  --color-main: 149 215 105;
+  /* --color-main-hover: 38 83 217; */
+  --color-orange: 255 146 56;
+  --color-star: 255 217 25;
+  --color-gray: 0 0 0;
+  --color-bubble: 250 250 250;
+}
+
+@layer utilities {
+  .scrollbar-custom {
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 0px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(100, 100, 100, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(100, 100, 100, 0.3);
+    }
+    &::-webkit-scrollbar-track {
+      background-color: rgba(0, 0, 0, 0.01);
+    }
+  }
+
+  .chat-scrollbar-custom {
+    &::-webkit-scrollbar {
+      width: 5px;
+      height: 0px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(100, 100, 100, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(100, 100, 100, 0.2);
+    }
+    &::-webkit-scrollbar-track {
+      background-color: rgba(0, 0, 0, 0.01);
+    }
+  }
+}
+@layer utilities {
+  @keyframes pulseBackground {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .text-glass {
+    background: linear-gradient(
+      130deg,
+      rgba(59, 104, 239, 1),
+      rgba(140, 82, 255, 0.5),
+      rgba(59, 104, 239, 1)
+    );
+    background-size: 300% 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: pulseBackground 6s ease-in-out infinite;
+  }
+
+  .timer-glass {
+    position: relative; /* ✅ 부모 요소 기준 */
+    display: inline-block; /* span에서 필수 */
+    overflow: hidden; /* 넘치는 ::after 숨기기 */
+  }
+
+  .timer-glass::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%; /* ✅ 부모 span만큼만 적용 */
+    height: 100%;
+    background: linear-gradient(
+      130deg,
+      rgba(255, 255, 255, 0),
+      rgba(255, 255, 255, 0.7),
+      rgba(255, 255, 255, 0)
+    );
+    animation: shine 3s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes shine {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+}
+
+/* index.css에 추가 */
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+@layer utilities {
+  .animate-blink {
+    animation: blink 0.8s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+}
