@@ -1,9 +1,19 @@
 'use client';
 
+// ✅ 수정: Link 대신 useNavigate를 가져옵니다.
+import { useNavigate } from 'react-router-dom';
 import { IconArrowRight, IconIphone, IconLogo } from '../utils/icons';
 import Header from '../components/header';
 
 export default function Index() {
+  // 1. useNavigate 훅을 사용해 navigate 함수 정의
+  const navigate = useNavigate();
+
+  // 2. 버튼 클릭 핸들러: /map 경로로 이동
+  const handleNavigate = () => {
+    navigate('/map');
+  };
+
   return (
     <section
       style={{ background: 'linear-gradient(to bottom, #FFFFFF, rgba(149, 215, 105, 0.1))' }}
@@ -36,15 +46,15 @@ export default function Index() {
             style={{ maxHeight: '80vh' }}
           />
 
-          {/* 💡 [수정됨] Wrapper Div 추가: 얘는 오직 '위치(가운데 정렬)'만 담당합니다. */}
           <div className="absolute top-[35%] left-1/2 -translate-x-1/2 pointer-events-auto z-10">
-            {/* 💡 [수정됨] Button: 위치 관련 클래스는 부모에게 넘기고, 얘는 '애니메이션'과 '스타일'만 담당합니다. */}
+            {/* ✅ 수정: Link 컴포넌트 제거, onClick 핸들러 추가 */}
             <button
+              onClick={handleNavigate} // 👈 클릭 시 navigate('/map') 실행
               className="
               flex items-center gap-[3px] 
               rounded-[10px] px-6 py-[12px]
               transition-all duration-300 whitespace-nowrap
-              animate-float hover:animate-none group" // 👈 animate-float는 여기 그대로
+              animate-float hover:animate-none group"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.75)',
                 backdropFilter: 'blur(5px)',
@@ -53,7 +63,7 @@ export default function Index() {
                 boxShadow: '0px 4px 10px 0px rgba(0, 0, 0, 0.05)',
               }}
             >
-              {/* 텍스트 */}
+              {/* 텍스트 및 아이콘 로직은 동일 */}
               <span
                 className="text-[16px] font-medium tracking-[-0.025em] mr-3"
                 style={{ color: 'rgba(0, 0, 0, 0.7)' }}
