@@ -29,7 +29,7 @@ const Header = () => {
           onClick={() => navigate('/')}
         />
 
-        {isRootPage && (
+        {(isRootPage || isSignupPage) && (
           <button
             // 💡 수정됨: hover:bg-[#E2F0DD] -> hover:bg-[#EAF6E6] (아주 미세하게 진해짐)
             className="flex items-center gap-[8px] bg-[#F1F9EE] hover:bg-[#EAF6E6] px-4 py-[8px] rounded-[8px] cursor-pointer transition-colors duration-200"
