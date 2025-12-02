@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom'; // 💡 Link 컴포넌트 import 추가
 import InputField from './InputField';
 import Checkbox from './Checkbox';
 import KakaoLoginButton from './KakaoLoginButton';
@@ -63,12 +64,14 @@ export default function LoginForm() {
         {/* 자동 로그인 & 회원가입 */}
         <div className="flex items-center justify-between pt-4 w-full px-[1px]">
           <Checkbox checked={autoLogin} onChange={setAutoLogin} label="자동 로그인" />
-          <button
-            type="button"
+
+          {/* 💡 수정됨: button 태그를 Link 컴포넌트로 교체 */}
+          <Link
+            to="/signup"
             className="text-[14px] leading-[140%] tracking-[-0.025em] text-black-_30 hover:text-black-_50 transition-colors"
           >
             회원가입
-          </button>
+          </Link>
         </div>
 
         {/* 로그인 버튼 */}
