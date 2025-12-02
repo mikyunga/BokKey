@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     extend: {
       fontFamily: {
@@ -20,8 +20,8 @@ export default {
         },
         black: {
           DEFAULT: 'rgb(var(--color-black) / <alpha-value>)',
-          buttonStroke: 'rgba(0,0,0, 0.05)', // 버튼 테두리 고정값
-          buttonFill: 'rgba(149, 215, 105, 0.1)', // 버튼 fill 고정값
+          buttonStroke: 'rgba(0,0,0, 0.05)',
+          buttonFill: 'rgba(149, 215, 105, 0.1)',
           _01: 'rgba(0, 0, 0, 0.01)',
           _02: 'rgba(0, 0, 0, 0.02)',
           _03: 'rgba(0, 0, 0, 0.03)',
@@ -76,22 +76,31 @@ export default {
         custom: '0px 1px 4px 0px rgba(0,0,0,0.1)',
         dropDown: '0px 0px 10px 0px rgba(0,0,0,0.03)',
       },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
+        'opacity-pulse': {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '1' },
+        },
+      },
       animation: {
         typing: 'typing 1s steps(16) alternate, blink .4s infinite',
         fadeIn: 'fadeIn 0.3s ease-out forwards',
         modalIn: 'modalIn 0.3s ease-out forwards',
-        float: 'float 1.5s ease-in-out infinite',
-
+        float: 'float 3s ease-in-out infinite',
+        'opacity-pulse': 'opacity-pulse 1.2s ease-in-out infinite',
         blinkFade: 'blinkFade 1s ease-in-out infinite',
       },
     },
-    plugins: [],
-    experimental: {
-      // Tailwind가 className 내부의 동적 표현식을 더 잘 감지하게 해주는 설정
-      classRegex: [
-        ['className="([^"]+)"', 1],
-        ['className={`([^`]+)`', 1],
-      ],
-    },
+  },
+  plugins: [],
+  experimental: {
+    classRegex: [
+      ['className="([^"]+)"', 1],
+      ['className={`([^`]+)`', 1],
+    ],
   },
 };

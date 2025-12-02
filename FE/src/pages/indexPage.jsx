@@ -36,33 +36,51 @@ export default function Index() {
             style={{ maxHeight: '80vh' }}
           />
 
-          {/* 💡 [수정됨] 피그마 스타일 강제 적용 (인라인 스타일 사용) */}
-          <button
-            className="absolute top-[35%] left-1/2 -translate-x-1/2 pointer-events-auto 
-            rounded-[10px] px-6 py-[12px]
-            flex items-center gap-[3px] 
-            hover:bg-white transition-all duration-300 whitespace-nowrap"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.75)', // 흰색 80%
-              backdropFilter: 'blur(5px)', // 블러 10
-              WebkitBackdropFilter: 'blur(5px)', // 사파리용 블러
-              border: '2px solid rgba(0, 0, 0, 0.1)', // 검정 6%, 두께 2px
-              boxShadow: '0px 4px 10px 0px rgba(0, 0, 0, 0.05)', // 그림자
-            }}
-          >
-            {/* 텍스트: 검정 70% */}
-            <span
-              className="text-[16px] font-medium tracking-[-0.025em] mr-3"
-              style={{ color: 'rgba(0, 0, 0, 0.7)' }}
+          {/* 💡 [수정됨] Wrapper Div 추가: 얘는 오직 '위치(가운데 정렬)'만 담당합니다. */}
+          <div className="absolute top-[35%] left-1/2 -translate-x-1/2 pointer-events-auto z-10">
+            {/* 💡 [수정됨] Button: 위치 관련 클래스는 부모에게 넘기고, 얘는 '애니메이션'과 '스타일'만 담당합니다. */}
+            <button
+              className="
+              flex items-center gap-[3px] 
+              rounded-[10px] px-6 py-[12px]
+              transition-all duration-300 whitespace-nowrap
+              animate-float hover:animate-none group" // 👈 animate-float는 여기 그대로
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.75)',
+                backdropFilter: 'blur(5px)',
+                WebkitBackdropFilter: 'blur(5px)',
+                border: '2px solid rgba(0, 0, 0, 0.1)',
+                boxShadow: '0px 4px 10px 0px rgba(0, 0, 0, 0.05)',
+              }}
             >
-              내 주변 식사 장소 찾기
-            </span>
+              {/* 텍스트 */}
+              <span
+                className="text-[16px] font-medium tracking-[-0.025em] mr-3"
+                style={{ color: 'rgba(0, 0, 0, 0.7)' }}
+              >
+                내 주변 식사 장소 찾기
+              </span>
 
-            {/* 화살표 3개: 투명도 30% */}
-            <img src={IconArrowRight} alt="" className="h-3 opacity-30" />
-            <img src={IconArrowRight} alt="" className="h-3 opacity-30" />
-            <img src={IconArrowRight} alt="" className="h-3 opacity-30" />
-          </button>
+              {/* 화살표 3개 (순차적 깜빡임) */}
+              <img
+                src={IconArrowRight}
+                alt=""
+                className="h-3 opacity-30 group-hover:animate-opacity-pulse"
+              />
+              <img
+                src={IconArrowRight}
+                alt=""
+                className="h-3 opacity-30 group-hover:animate-opacity-pulse"
+                style={{ animationDelay: '200ms' }}
+              />
+              <img
+                src={IconArrowRight}
+                alt=""
+                className="h-3 opacity-30 group-hover:animate-opacity-pulse"
+                style={{ animationDelay: '400ms' }}
+              />
+            </button>
+          </div>
         </div>
       </main>
     </section>
