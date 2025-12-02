@@ -45,6 +45,7 @@ import IconTriangleDown from '../assets/icon-triangle-down.svg';
 import IconTriangleRight from '../assets/icon-triangle-right.svg';
 import IconTuneMain from '../assets/icon-tune-main.svg';
 import IconTune from '../assets/icon-tune.svg';
+import IconIphone from '../assets/icon-iphone.svg';
 
 export {
   IconAlarmBlack,
@@ -94,4 +95,5 @@ export {
   IconTriangleRight,
   IconTuneMain,
   IconTune,
+  IconIphone,
 };
