@@ -3,6 +3,7 @@ import IconAlarmMain from '../assets/icon-alarm-main.svg';
 import IconAlarm from '../assets/icon-alarm.svg';
 import IconArrowLeft from '../assets/icon-arrow-left.svg';
 import IconArrowRight from '../assets/icon-arrow-right.svg';
+import IconArrowDown from '../assets/icon-arrow-down.svg';
 import IconArrowSign from '../assets/icon-arrow-sign.svg';
 import IconBike from '../assets/icon-bike.svg';
 import IconBookmark from '../assets/icon-bookmark.svg';
@@ -110,4 +111,5 @@ export {
   IconSkyblue,
   IconBlue,
   IconPurple,
+  IconArrowDown,
 };
