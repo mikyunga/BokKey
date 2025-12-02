@@ -29,7 +29,7 @@ const Header = () => {
         <img
           src={IconLogo}
           alt="로고"
-          className="h-5 cursor-pointer"
+          className="h-6 cursor-pointer"
           onClick={() => navigate('/')}
         />
         {/* 루트 페이지일 때만 로그인/로그아웃 버튼 표시 */}
