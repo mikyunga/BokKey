@@ -2,7 +2,7 @@
 
 export default function Checkbox({ checked, onChange, label }) {
   return (
-    <label className="flex items-center gap-2 cursor-pointer group">
+    <label className="flex items-center gap-[6px] cursor-pointer group">
       <div className="relative">
         <input
           type="checkbox"
@@ -11,7 +11,7 @@ export default function Checkbox({ checked, onChange, label }) {
           className="sr-only"
         />
         <div
-          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center ${
+          className={`w-4 h-4 rounded-full border transition-all flex items-center justify-center ${
             checked
               ? 'bg-main border-main'
               : 'bg-white border-gray-stroke10 group-hover:border-gray-stroke20'
@@ -36,7 +36,8 @@ export default function Checkbox({ checked, onChange, label }) {
           )}
         </div>
       </div>
-      <span className="text-[14px] leading-[140%] tracking-[-0.025em] text-black-_30 select-none">
+      {/* 💡 수정됨: group-hover:text-black-_50 및 transition-colors 추가 */}
+      <span className="text-[14px] leading-[140%] tracking-[-0.025em] text-black-_30 group-hover:text-black-_50 transition-colors select-none">
         {label}
       </span>
     </label>
