@@ -4,6 +4,7 @@ import {
   IconCheckNobackgroundActive,
   IconCheckNobackgroundInactive,
 } from '../../../utils/icons';
+import { Eye, EyeOff } from 'lucide-react';
 
 const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
@@ -78,8 +79,12 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
             placeholder="비밀번호를 입력해주세요."
             className="w-full outline-none placeholder-gray-stroke30"
           />
-          <button type="button" onClick={() => setShowPassword(!showPassword)}>
-            <img className="h-[11px]" src={IconEye} alt="eye" />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="z-20 text-gray-stroke30 hover:text-gray-stroke50 transition-colors cursor-pointer"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
 
@@ -138,8 +143,12 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
             placeholder="비밀번호를 재입력해주세요."
             className="w-full outline-none placeholder-gray-stroke30"
           />
-          <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-            <img className="h-[11px]" src={IconEye} alt="eye" />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="z-20 text-gray-stroke30 hover:text-gray-stroke50 transition-colors cursor-pointer"
+          >
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
         {!isPasswordMatch && (
