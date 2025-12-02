@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import InputField from './InputField';
-import KakaoLoginButton from './KakaoLoginButton';
 import Checkbox from './Checkbox';
+import KakaoLoginButton from './KakaoLoginButton';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -65,6 +65,7 @@ export default function LoginForm() {
           type={showPassword ? 'text' : 'password'}
           showPasswordToggle
           onTogglePassword={() => setShowPassword(!showPassword)}
+          showPassword={showPassword}
         />
 
         {/* 자동 로그인 & 회원가입 */}
