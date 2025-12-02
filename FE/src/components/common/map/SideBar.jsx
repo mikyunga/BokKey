@@ -19,11 +19,13 @@ export default function Sidebar({
   filteredPlaces,
   selectedPlace,
   setSelectedPlace,
+  showOpenOnly,
+  setShowOpenOnly,
+  showDeliveryOnly,
+  setShowDeliveryOnly,
 }) {
   const handleFilterToggle = (filterId) => {
-    setSelectedFilters((prev) =>
-      prev.includes(filterId) ? prev.filter((id) => id !== filterId) : [...prev, filterId]
-    );
+    setSelectedFilters((prev) => (prev.includes(filterId) ? [] : [filterId]));
   };
 
   return (
@@ -57,6 +59,10 @@ export default function Sidebar({
         places={filteredPlaces}
         selectedPlace={selectedPlace}
         onSelectPlace={setSelectedPlace}
+        showOpenOnly={showOpenOnly}
+        setShowOpenOnly={setShowOpenOnly}
+        showDeliveryOnly={showDeliveryOnly}
+        setShowDeliveryOnly={setShowDeliveryOnly}
       />
     </div>
   );

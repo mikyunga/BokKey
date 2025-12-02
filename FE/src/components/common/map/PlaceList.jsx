@@ -3,26 +3,56 @@
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
 
-export default function PlaceList({ mode, places, selectedPlace, onSelectPlace }) {
+// ✅ 퀵 필터 상태를 props로 받습니다.
+export default function PlaceList({
+  mode,
+  places,
+  selectedPlace,
+  onSelectPlace,
+  showOpenOnly,
+  setShowOpenOnly,
+  showDeliveryOnly,
+  setShowDeliveryOnly,
+}) {
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-bold text-base">검색 결과 ({places.length})</h3>
+          <h3 className="font-bold text-base">검색 결과</h3>
 
-          <div className="flex items-center gap-2 text-sm text-gray-stroke60">
-            <button className="flex items-center gap-1 hover:text-black transition-colors">
+          <div className="flex items-center gap-2 text-sm">
+            {/* ✅ 1. 영업중 버튼 (공통) */}
+            <button
+              onClick={() => setShowOpenOnly((prev) => !prev)}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full font-medium transition-colors 
+                ${
+                  showOpenOnly
+                    ? 'bg-main text-white'
+                    : 'bg-gray-stroke03 text-gray-stroke60 hover:bg-gray-stroke05'
+                }`}
+            >
               <Clock className="w-4 h-4" />
               <span>영업중</span>
             </button>
 
+            {/* ✅ 2. 배달가능 / 상세조건 버튼 (모드별 분기) */}
             {mode === 'child' ? (
-              <button className="flex items-center gap-1 hover:text-black transition-colors">
+              // 아동 모드: 배달가능 필터
+              <button
+                onClick={() => setShowDeliveryOnly((prev) => !prev)}
+                className={`flex items-center gap-1 px-2 py-1 rounded-full font-medium transition-colors 
+                  ${
+                    showDeliveryOnly
+                      ? 'bg-main text-white'
+                      : 'bg-gray-stroke03 text-gray-stroke60 hover:bg-gray-stroke05'
+                  }`}
+              >
                 <ShoppingBag className="w-4 h-4" />
                 <span>배달가능</span>
               </button>
             ) : (
-              <button className="flex items-center gap-1 hover:text-black transition-colors">
+              // 노인 모드: 상세조건 (필터링 로직은 없지만 UI는 유지)
+              <button className="flex items-center gap-1 px-2 py-1 rounded-full font-medium bg-gray-stroke03 text-gray-stroke60 hover:bg-gray-stroke05 cursor-default">
                 <SlidersHorizontal className="w-4 h-4" />
                 <span>상세조건</span>
               </button>
