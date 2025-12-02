@@ -77,7 +77,10 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
             onFocus={() => setIsPasswordFocused(true)}
             onBlur={() => setIsPasswordFocused(false)}
             placeholder="비밀번호를 입력해주세요."
-            className="w-full outline-none placeholder-gray-stroke30"
+            className="w-full outline-none placeholder-gray-stroke30
+            placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main 
+          transition-all duration-300 ease-in-out
+          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300"
           />
           <button
             type="button"
@@ -89,9 +92,9 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
         </div>
 
         {isPasswordFocused && (
-          <div className="flex flex-col font-medium gap-[4px] text-[13px]">
+          <div className="flex flex-col font-medium gap-[4px] text-[13px] ">
             <div
-              className={`flex items-center gap-[6px] ${
+              className={`flex items-center gap-[6px]   ${
                 validateCondition1(value) ? 'text-main' : 'text-gray-stroke30'
               }`}
             >
@@ -141,7 +144,10 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="비밀번호를 재입력해주세요."
-            className="w-full outline-none placeholder-gray-stroke30"
+            className="w-full outline-none
+            placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main 
+          transition-all duration-300 ease-in-out
+          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300"
           />
           <button
             type="button"
