@@ -2,25 +2,24 @@
 
 import { useState, useMemo } from 'react';
 
-// 컴포넌트 import
+// ⚠️ Import 경로는 고객님 프로젝트 구조에 맞게 조정하세요.
 import MapContainer from '../components/common/map/MapContainer';
 import CategoryToggle from '../components/common/map/CategoryToggle';
 import Sidebar from '../components/common/map/SideBar';
 
-// 데이터 import (경로는 프로젝트 구조에 맞춰 조정 필요)
 import { CHILD_PLACES, SENIOR_PLACES } from '../constants/mockData';
 import { REGIONS } from '../constants/region';
 
 export default function MapPage() {
-  const [mode, setMode] = useState('child'); // 'child' or 'senior'
+  const [mode, setMode] = useState('child');
 
-  // Sidebar에 있던 상태들을 여기로 이사시킴 (State Lifting)
   const [sido, setSido] = useState('');
   const [sigungu, setSigungu] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState([]);
 
-  // ✅ 필터링 로직을 여기서 수행 (MapContainer와 Sidebar가 같은 데이터를 보게 하기 위함)
+  const [selectedPlace, setSelectedPlace] = useState(null);
+
   const filteredPlaces = useMemo(() => {
     const places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
@@ -48,23 +47,20 @@ export default function MapPage() {
     });
   }, [mode, searchQuery, selectedFilters, sido, sigungu]);
 
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    setSelectedFilters([]);
+    setSido('');
+    setSigungu('');
+    setSearchQuery('');
+    setSelectedPlace(null);
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col">
-      {/* 카테고리 토글 */}
-      <CategoryToggle
-        mode={mode}
-        onModeChange={(newMode) => {
-          setMode(newMode);
-          // 모드 변경 시 필터 초기화
-          setSelectedFilters([]);
-          setSido('');
-          setSigungu('');
-          setSearchQuery('');
-        }}
-      />
+      <CategoryToggle mode={mode} onModeChange={handleModeChange} />
 
       <div className="flex w-full h-full relative">
-        {/* Sidebar에 상태와 결과 데이터 전달 */}
         <Sidebar
           mode={mode}
           sido={sido}
@@ -75,11 +71,12 @@ export default function MapPage() {
           setSearchQuery={setSearchQuery}
           selectedFilters={selectedFilters}
           setSelectedFilters={setSelectedFilters}
-          filteredPlaces={filteredPlaces} // 필터링된 결과 전달
+          filteredPlaces={filteredPlaces}
+          selectedPlace={selectedPlace}
+          setSelectedPlace={setSelectedPlace}
         />
 
-        {/* ✅ MapContainer에도 필터링된 결과(places) 전달 */}
-        <MapContainer mode={mode} places={filteredPlaces} />
+        <MapContainer mode={mode} places={filteredPlaces} selectedPlace={selectedPlace} />
       </div>
     </div>
   );

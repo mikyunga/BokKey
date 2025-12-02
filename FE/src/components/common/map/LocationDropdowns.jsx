@@ -1,24 +1,22 @@
+// LocationDropdowns.jsx
 'use client';
 
 import { REGIONS } from '../../../constants/region';
 
 export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }) {
-  // 1. 중복 제거된 시도 목록 추출
   const sidoOptions = [...new Set(REGIONS.map((r) => r.province).filter(Boolean))].sort();
 
-  // 2. 선택된 시도에 해당하는 시군구 목록 추출
-  const sigunguOptions = REGIONS.filter((r) => r.province === sido && r.district) // 시도가 맞고, 시군구가 있는 경우만
+  const sigunguOptions = REGIONS.filter((r) => r.province === sido && r.district)
     .map((r) => r.district)
     .sort();
 
   const handleSidoChange = (e) => {
     setSido(e.target.value);
-    setSigungu(''); // 시도가 바뀌면 시군구 초기화
+    setSigungu('');
   };
 
   return (
     <div className="flex gap-2">
-      {/* 시도 선택 */}
       <select
         value={sido}
         onChange={handleSidoChange}
@@ -32,7 +30,6 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
         ))}
       </select>
 
-      {/* 시군구 선택 */}
       <select
         value={sigungu}
         onChange={(e) => setSigungu(e.target.value)}

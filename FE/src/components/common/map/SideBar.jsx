@@ -16,7 +16,9 @@ export default function Sidebar({
   setSearchQuery,
   selectedFilters,
   setSelectedFilters,
-  filteredPlaces, // 부모로부터 받은 데이터
+  filteredPlaces,
+  selectedPlace,
+  setSelectedPlace,
 }) {
   const handleFilterToggle = (filterId) => {
     setSelectedFilters((prev) =>
@@ -40,6 +42,7 @@ export default function Sidebar({
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </div>
 
+      {/* 필터 */}
       {mode === 'child' && (
         <SearchFilter
           mode={mode}
@@ -48,8 +51,13 @@ export default function Sidebar({
         />
       )}
 
-      {/* 필터링 로직 없이 결과 데이터만 넘겨줌 */}
-      <PlaceList mode={mode} places={filteredPlaces} />
+      {/* 결과 리스트 */}
+      <PlaceList
+        mode={mode}
+        places={filteredPlaces}
+        selectedPlace={selectedPlace}
+        onSelectPlace={setSelectedPlace}
+      />
     </div>
   );
 }

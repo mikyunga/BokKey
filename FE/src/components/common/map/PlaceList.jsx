@@ -3,9 +3,7 @@
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
 
-export default function PlaceList({ mode, places }) {
-  // props로 받은 places(이미 필터링됨)를 그대로 사용
-
+export default function PlaceList({ mode, places, selectedPlace, onSelectPlace }) {
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="p-4">
@@ -34,7 +32,13 @@ export default function PlaceList({ mode, places }) {
 
         <div className="space-y-3">
           {places.map((place) => (
-            <PlaceItem key={place.id} place={place} mode={mode} />
+            <PlaceItem
+              key={place.id}
+              place={place}
+              mode={mode}
+              isSelected={selectedPlace && selectedPlace.id === place.id}
+              onSelect={onSelectPlace}
+            />
           ))}
           {places.length === 0 && (
             <div className="text-center text-gray-400 py-10 text-sm">
