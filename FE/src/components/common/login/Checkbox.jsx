@@ -11,7 +11,7 @@ export default function Checkbox({ checked, onChange, label }) {
           className="sr-only"
         />
         <div
-          className={`w-5 h-5 rounded-md border transition-all ${
+          className={`w-5 h-5 rounded-md border transition-all flex items-center justify-center ${
             checked
               ? 'bg-main border-main'
               : 'bg-white border-gray-stroke10 group-hover:border-gray-stroke20'
@@ -36,7 +36,9 @@ export default function Checkbox({ checked, onChange, label }) {
           )}
         </div>
       </div>
-      <span className="text-sm text-gray-stroke50 select-none">{label}</span>
+      <span className="text-[14px] leading-[140%] tracking-[-0.025em] text-black-_30 select-none">
+        {label}
+      </span>
     </label>
   );
 }

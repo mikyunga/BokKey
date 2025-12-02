@@ -11,7 +11,8 @@ const LoginPage = () => {
       </header>
 
       {/* 중앙 로그인 폼 */}
-      <main className="flex-1 flex items-center justify-center px-4">
+
+      <main className="flex-1 flex items-start justify-center px-4 pt-[100px]">
         <LoginForm />
       </main>
     </div>

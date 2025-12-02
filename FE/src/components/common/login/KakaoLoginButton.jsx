@@ -5,7 +5,7 @@ export default function KakaoLoginButton({ onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="w-full bg-[#FEE500] text-black font-medium py-4 rounded-xl hover:bg-[#FDD835] transition-colors flex items-center justify-center gap-2"
+      className="w-full h-[51px] bg-[#FEE500] hover:bg-[#FDD835] text-black text-[16px] font-medium tracking-[-0.025em] rounded-[8px] flex items-center justify-center gap-2 transition-colors"
     >
       <svg
         width="20"
