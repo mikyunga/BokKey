@@ -46,6 +46,13 @@ import IconTriangleRight from '../assets/icon-triangle-right.svg';
 import IconTuneMain from '../assets/icon-tune-main.svg';
 import IconTune from '../assets/icon-tune.svg';
 import IconIphone from '../assets/icon-iphone.svg';
+import IconRed from '../assets/icon-red.svg';
+import IconOrange from '../assets/icon-orange.svg';
+import IconYellow from '../assets/icon-yellow.svg';
+import IconGreen from '../assets/icon-green.svg';
+import IconSkyblue from '../assets/icon-skyblue.svg';
+import IconBlue from '../assets/icon-blue.svg';
+import IconPurple from '../assets/icon-purple.svg';
 
 export {
   IconAlarmBlack,
@@ -96,4 +103,11 @@ export {
   IconTuneMain,
   IconTune,
   IconIphone,
+  IconRed,
+  IconOrange,
+  IconYellow,
+  IconGreen,
+  IconSkyblue,
+  IconBlue,
+  IconPurple,
 };
