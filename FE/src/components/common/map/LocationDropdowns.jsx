@@ -1,4 +1,3 @@
-// LocationDropdowns.jsx
 'use client';
 
 import { REGIONS } from '../../../constants/region';
@@ -16,11 +15,14 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
   };
 
   return (
+    // 이 컨테이너는 이제 유연한 너비를 가집니다.
     <div className="flex gap-2">
+      {/* 1. 시도 선택 */}
       <select
         value={sido}
         onChange={handleSidoChange}
-        className="flex-1 px-3 py-2 border border-gray-stroke10 rounded-lg text-sm min-w-[100px]"
+        // ✅ 수정: flex-1 제거! -> 내용물 길이에 맞춰 너비가 결정됩니다.
+        className="px-3 py-2 border border-gray-stroke10 rounded-lg text-sm"
       >
         <option value="">시도명</option>
         {sidoOptions.map((province) => (
@@ -30,10 +32,12 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
         ))}
       </select>
 
+      {/* 2. 시군구 선택 */}
       <select
         value={sigungu}
         onChange={(e) => setSigungu(e.target.value)}
-        className="flex-1 px-3 py-2 border border-gray-stroke10 rounded-lg text-sm min-w-[100px]"
+        // ✅ 수정: flex-1 제거! -> 내용물 길이에 맞춰 너비가 결정됩니다.
+        className="px-3 py-2 border border-gray-stroke10 rounded-lg text-sm"
       >
         <option value="">시군구명</option>
         {sigunguOptions.map((district) => (

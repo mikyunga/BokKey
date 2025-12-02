@@ -29,18 +29,26 @@ export default function Sidebar({
   };
 
   return (
-    <div className="w-[380px] h-full bg-white shadow-custom-drop flex flex-col z-10">
+    // 사이드바 너비는 이제 내용물에 맞춰 유동적입니다.
+    <div className="w-[380px] h-full bg-white shadow-custom-drop flex flex-col z-10 flex-shrink-0">
       {/* 헤더 */}
       <div className="p-4 border-b border-gray-stroke05">
+        {/* ✅ 수정: justify-between 적용하여 좌우 끝에 배치 */}
         <div className="flex items-center justify-between mb-4">
-          <img src={IconLogo} alt="복키 로고" className="h-[24px] object-contain" />
-          <LocationDropdowns
-            sido={sido}
-            setSido={setSido}
-            sigungu={sigungu}
-            setSigungu={setSigungu}
-          />
+          {/* Logo (좌측) */}
+          <img src={IconLogo} alt="복키 로고" className="h-[24px] object-contain flex-shrink-0" />
+
+          {/* Dropdowns Wrapper (우측) */}
+          <div className="flex-shrink-0">
+            <LocationDropdowns
+              sido={sido}
+              setSido={setSido}
+              sigungu={sigungu}
+              setSigungu={setSigungu}
+            />
+          </div>
         </div>
+
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </div>
 
