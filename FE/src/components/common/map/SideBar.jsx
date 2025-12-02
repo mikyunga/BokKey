@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SearchBar from './SearchBar';
 import LocationDropdowns from './LocationDropdowns';
 import SearchFilter from './SearchFilter';
@@ -11,6 +11,11 @@ export default function Sidebar({ mode }) {
   const [sigungu, setSigungu] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState([]);
+
+  // 모드가 변경되면 선택된 필터 초기화 (아동 <-> 노인 전환 시 꼬임 방지)
+  useEffect(() => {
+    setSelectedFilters([]);
+  }, [mode]);
 
   const handleFilterToggle = (filterId) => {
     setSelectedFilters((prev) =>
@@ -36,12 +41,16 @@ export default function Sidebar({ mode }) {
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
       </div>
 
-      {/* 필터 */}
-      <SearchFilter
-        mode={mode}
-        selectedFilters={selectedFilters}
-        onFilterToggle={handleFilterToggle}
-      />
+      {/* ✅ 수정됨: 아동 급식카드 모드일 때만 카테고리 필터(SearchFilter) 표시 
+        노인 무료급식소는 카테고리 필터가 없음
+      */}
+      {mode === 'child' && (
+        <SearchFilter
+          mode={mode}
+          selectedFilters={selectedFilters}
+          onFilterToggle={handleFilterToggle}
+        />
+      )}
 
       {/* 결과 리스트 */}
       <PlaceList mode={mode} selectedFilters={selectedFilters} searchQuery={searchQuery} />

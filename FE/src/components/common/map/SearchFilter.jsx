@@ -1,9 +1,13 @@
 'use client';
 
-import { CHILD_FILTERS, SENIOR_FILTERS } from '../../../constants/filters';
+// ❌ 기존: import { CHILD_FILTERS, SENIOR_FILTERS } from ...
+// ✅ 수정: SENIOR_FILTERS 삭제 (파일에 없으니까 가져오면 에러남)
+import { CHILD_FILTERS } from '../../../constants/filters';
 
 export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) {
-  const filters = mode === 'child' ? CHILD_FILTERS : SENIOR_FILTERS;
+  // Sidebar에서 mode === 'child'일 때만 이 컴포넌트를 부르도록 했으므로,
+  // 여기서는 무조건 CHILD_FILTERS만 쓰면 됩니다.
+  const filters = CHILD_FILTERS;
 
   return (
     <div className="p-4 border-b border-gray-stroke05">
