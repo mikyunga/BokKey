@@ -34,8 +34,7 @@ export default function MapPage() {
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
 
-  // ⭐ [최적화] 함수가 재생성되지 않도록 useCallback 사용
-  // 필터를 눌러도 이 함수는 변하지 않으므로, MapContainer가 리렌더링되지 않습니다.
+  // ⭐ 지도 객체 초기화 함수 (최적화)
   const handleMapReady = useCallback((mapInstance) => {
     mapRef.current = mapInstance;
   }, []);
@@ -47,7 +46,6 @@ export default function MapPage() {
         selectedPlace.latitude,
         selectedPlace.longitude
       );
-      // 약간의 지연을 주어 지도 로딩 후 이동하도록 함
       setTimeout(() => {
         mapRef.current.setCenter(kakaoLatLng);
         mapRef.current.setLevel(3);
@@ -114,7 +112,7 @@ export default function MapPage() {
     );
   };
 
-  // ⭐ 필터링 로직 (AND 조건 적용됨)
+  // ⭐ 필터링 로직
   const filteredPlaces = useMemo(() => {
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
@@ -159,12 +157,12 @@ export default function MapPage() {
         });
       }
 
-      // (2) 요일 (AND - 모든 요일을 만족해야 함)
+      // (2) 요일 (AND)
       if (days.length > 0) {
         places = places.filter((place) => days.every((d) => place.meal_days?.includes(d)));
       }
 
-      // (3) 시간 (AND - 모든 시간을 만족해야 함)
+      // (3) 시간 (AND)
       if (times.length > 0) {
         places = places.filter((place) => times.every((t) => place.meal_time?.includes(t)));
       }
@@ -211,7 +209,6 @@ export default function MapPage() {
     setPanelFilters(filters);
     setIsFilterOpen(false);
   };
-
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col">
       <CategoryToggle mode={mode} onModeChange={handleModeChange} />
@@ -255,9 +252,12 @@ export default function MapPage() {
             onMapReady={handleMapReady}
           />
 
+          {/* ⭐ [수정됨] 상세조건 패널 위치 */}
           {isFilterOpen && (
-            <div className="absolute top-0 left-0 h-full z-50 p-4 pointer-events-none">
-              <div className="pointer-events-auto h-full" style={{ marginLeft: '380px' }}>
+            // left-0: 사이드바 바로 옆 (지도 영역의 시작점)
+            // p-2: 사이드바와 아주 살짝 띄워서 '떠 있는 카드' 느낌 (사진과 유사)
+            <div className="absolute top-0 left-0 z-50 h-full p-2 pointer-events-none flex flex-col justify-start">
+              <div className="pointer-events-auto h-full">
                 <FilterPanel
                   initialFilters={panelFilters}
                   onApply={handlePanelApply}

@@ -28,7 +28,7 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
   return (
     <div
       style={{ backgroundColor: 'white' }}
-      className="w-[330px] h-full p-5 shadow rounded-lg flex flex-col gap-6 z-[999]"
+      className="w-[330px] h-fit p-5 shadow rounded-lg flex flex-col gap-6 z-[999]"
     >
       <div className="flex justify-between items-center">
         <h2 className="text-[16px] font-semibold">상세 조건</h2>
