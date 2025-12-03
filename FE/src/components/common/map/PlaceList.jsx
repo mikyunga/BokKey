@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
 
@@ -15,16 +15,19 @@ export default function PlaceList({
   setShowDeliveryOnly,
   onOpenFilter,
 }) {
-  // 1. 버튼의 위치를 측정하기 위한 Ref 생성
+  const [isDetailFilterActive, setIsDetailFilterActive] = useState(false);
   const filterButtonRef = useRef(null);
 
-  // 2. 버튼 클릭 핸들러: 위치 정보를 담아서 부모에게 전달
   const handleFilterClick = () => {
     if (filterButtonRef.current && onOpenFilter) {
-      // 버튼의 화면상 좌표(Rect)를 가져옴
       const rect = filterButtonRef.current.getBoundingClientRect();
-      // rect.top: 화면 상단에서 버튼 상단까지의 거리
-      onOpenFilter({ top: rect.top });
+
+      setIsDetailFilterActive(true);
+
+      onOpenFilter({
+        top: rect.top,
+        resetActive: () => setIsDetailFilterActive(false),
+      });
     }
   };
 
@@ -37,6 +40,7 @@ export default function PlaceList({
             <h3 className="font-medium text-base">검색 결과</h3>
 
             <div className="flex items-center gap-2 text-sm">
+              {/* 영업중 버튼 */}
               <button
                 onClick={() => setShowOpenOnly((prev) => !prev)}
                 className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
@@ -49,12 +53,13 @@ export default function PlaceList({
                 <span>영업중</span>
               </button>
 
+              {/* 배달가능 / 상세조건 */}
               {mode === 'child' ? (
                 <button
                   onClick={() => setShowDeliveryOnly((prev) => !prev)}
                   className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
                     showDeliveryOnly
-                      ? 'bg-white-_100 border-[rgba(120,195,71,0.2)] text-[#78C347]'
+                      ? 'bg-white-_100 border-[rgba(120,195,71,0.3)] text-[#78C347]'
                       : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke05 hover:text-gray-stroke70'
                   }`}
                 >
@@ -63,9 +68,13 @@ export default function PlaceList({
                 </button>
               ) : (
                 <button
-                  ref={filterButtonRef} // ⭐ 버튼에 Ref 연결
-                  onClick={handleFilterClick} // ⭐ 클릭 시 위치 계산 실행
-                  className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.15)] bg-white text-black transition-all hover:border-[rgba(120,195,71,0.3)]"
+                  ref={filterButtonRef}
+                  onClick={handleFilterClick}
+                  className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
+                    isDetailFilterActive
+                      ? 'bg-white-_100 border-[rgba(120,195,71,0.3)] text-[#78C347]'
+                      : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke05 hover:text-gray-stroke70'
+                  }`}
                 >
                   <SlidersHorizontal size={14} />
                   <span>상세조건</span>
@@ -86,6 +95,7 @@ export default function PlaceList({
               onSelect={onSelectPlace}
             />
           ))}
+
           {places.length === 0 && (
             <div className="text-center text-gray-400 py-10 text-sm">
               조건에 맞는 장소가 없습니다.

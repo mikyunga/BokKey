@@ -18,31 +18,32 @@ export default function MapPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
+
   const [showOpenOnly, setShowOpenOnly] = useState(false);
   const [showDeliveryOnly, setShowDeliveryOnly] = useState(false);
 
-  // 위치 관련 상태
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState(null);
   const [isLocationFocused, setIsLocationFocused] = useState(false);
-  const [isRegionSelectOpen, setIsRegionSelectOpen] = useState(false);
 
-  // 상세조건 패널 제어
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [panelFilters, setPanelFilters] = useState(null);
+  const [panelFilters, setPanelFilters] = useState({
+    targets: [],
+    days: [],
+    times: [],
+    region: null,
+  });
 
-  // ⭐ [추가] 패널의 Y축 위치(높이)를 저장할 state
   const [panelTop, setPanelTop] = useState(0);
 
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
 
-  // 지도 객체 초기화 함수 (최적화: 재생성 방지)
   const handleMapReady = useCallback((mapInstance) => {
     mapRef.current = mapInstance;
   }, []);
 
-  // 장소 선택 시 지도 중심 이동
+  // 지도 중심 이동
   useEffect(() => {
     if (selectedPlace && mapRef.current && !isLocationFocused) {
       const kakaoLatLng = new window.kakao.maps.LatLng(
@@ -56,13 +57,14 @@ export default function MapPage() {
     }
   }, [selectedPlace, isLocationFocused]);
 
-  // 내 위치 기능
+  // 내 위치 버튼
   const handleMyLocation = () => {
     if (isLocationFocused) {
       setIsLocationFocused(false);
       mapRef.current.setLevel(10);
       return;
     }
+
     if (!navigator.geolocation) {
       setLocationError('이 브라우저는 위치 기능을 지원하지 않습니다.');
       return;
@@ -71,31 +73,35 @@ export default function MapPage() {
       setLocationError('지도가 로드되지 않았습니다.');
       return;
     }
-    setIsLoadingLocation(true);
-    setLocationError(null);
 
+    setIsLoadingLocation(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         const kakaoLatLng = new window.kakao.maps.LatLng(latitude, longitude);
+
         setTimeout(() => {
           mapRef.current.setCenter(kakaoLatLng);
           mapRef.current.setLevel(3);
         }, 100);
+
         if (currentLocationMarkerRef.current) {
           currentLocationMarkerRef.current.setMap(null);
         }
+
         const markerImage = new window.kakao.maps.MarkerImage(
           'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="%234A90E2" stroke="white" stroke-width="2"/><circle cx="20" cy="20" r="6" fill="white"/></svg>',
           new window.kakao.maps.Size(40, 40),
           { offset: new window.kakao.maps.Point(20, 20) }
         );
+
         const marker = new window.kakao.maps.Marker({
           position: kakaoLatLng,
           map: mapRef.current,
           image: markerImage,
           title: '현재 위치',
         });
+
         currentLocationMarkerRef.current = marker;
         setIsLoadingLocation(false);
         setIsLocationFocused(true);
@@ -107,70 +113,56 @@ export default function MapPage() {
     );
   };
 
-  // ⭐ 필터링 로직 (모두 AND 조건 적용)
+  /** -------------------------------
+   * ⭐ 필터링 전체 로직
+   * ------------------------------ */
   const filteredPlaces = useMemo(() => {
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
-    // 1. 지역 필터
     if (sido) {
-      const targetRegionCodes = REGIONS.filter(
+      const validCodes = REGIONS.filter(
         (r) => r.province === sido && (!sigungu || r.district === sigungu)
       ).map((r) => r.region_code);
 
-      places = places.filter((place) => {
-        if (!place.region_code) return true;
-        return targetRegionCodes.includes(Number(place.region_code));
-      });
+      places = places.filter((p) =>
+        p.region_code ? validCodes.includes(Number(p.region_code)) : true
+      );
     }
 
-    // 2. 검색어 필터
     if (searchQuery) {
-      places = places.filter((place) => place.name.includes(searchQuery));
+      places = places.filter((p) => p.name.includes(searchQuery));
     }
 
-    // 3. 아동 카테고리
     if (mode === 'child' && selectedFilters.length > 0) {
-      places = places.filter((place) => selectedFilters.includes(place.category));
+      places = places.filter((p) => selectedFilters.includes(p.category));
     }
 
-    // 4. 영업/배달
-    if (showOpenOnly) places = places.filter((place) => place.isOpen);
-    if (mode === 'child' && showDeliveryOnly) places = places.filter((place) => place.delivery);
+    if (showOpenOnly) places = places.filter((p) => p.isOpen);
+    if (mode === 'child' && showDeliveryOnly) places = places.filter((p) => p.delivery);
 
-    // 5. 상세조건 패널
+    /** 상세조건 패널 필터 */
     if (panelFilters) {
       const { targets, days, times, region } = panelFilters;
 
-      // (1) 대상 (AND: 모두 포함)
       if (targets.length > 0) {
         places = places.filter((place) => {
           const rawTarget = place.targets || place.target_name;
-          const placeTargets = Array.isArray(rawTarget) ? rawTarget : rawTarget ? [rawTarget] : [];
-          return targets.every((filterTarget) =>
-            placeTargets.some((t) => t.includes(filterTarget))
-          );
+          const arr = Array.isArray(rawTarget) ? rawTarget : rawTarget ? [rawTarget] : [];
+          return targets.every((t) => arr.some((pt) => pt.includes(t)));
         });
       }
 
-      // (2) 요일 (AND: 모든 요일 만족)
       if (days.length > 0) {
-        places = places.filter((place) => days.every((d) => place.meal_days?.includes(d)));
+        places = places.filter((p) => days.every((d) => p.meal_days?.includes(d)));
       }
 
-      // (3) 시간 (AND: 모든 시간 만족)
       if (times.length > 0) {
-        places = places.filter((place) => times.every((t) => place.meal_time?.includes(t)));
+        places = places.filter((p) => times.every((t) => p.meal_time?.includes(t)));
       }
 
-      // (4) 지역 범위
       if (region) {
-        const targetValue = region === 'nationwide' ? '전국' : '지역한정';
-        places = places.filter((place) => {
-          if (place.target) {
-            return place.target === targetValue;
-          }
-          return true;
-        });
+        const value = region === 'nationwide' ? '전국' : '지역한정';
+        places = places.filter((p) => p.target === value);
       }
     }
 
@@ -186,6 +178,41 @@ export default function MapPage() {
     panelFilters,
   ]);
 
+  /** -------------------------------
+   * 상세조건 패널 제어
+   * ------------------------------ */
+  const handlePanelApply = (filters) => {
+    setPanelFilters(filters);
+
+    const nothingSelected =
+      filters.targets.length === 0 &&
+      filters.days.length === 0 &&
+      filters.times.length === 0 &&
+      (filters.region === null || filters.region === 'nationwide');
+
+    // 상세조건 버튼 inactive
+    if (nothingSelected && panelFilters.resetActive) {
+      panelFilters.resetActive();
+    }
+
+    setIsFilterOpen(false);
+  };
+
+  // PlaceList → MapPage로 전달되는 정보
+  const handleOpenFilter = (pos) => {
+    if (pos?.top) setPanelTop(pos.top);
+    if (pos?.resetActive) {
+      setPanelFilters((prev) => ({
+        ...prev,
+        resetActive: pos.resetActive,
+      }));
+    }
+    setIsFilterOpen(true);
+  };
+
+  /** -------------------------------
+   * RESET 전용 로직
+   * ------------------------------ */
   const handleModeChange = (newMode) => {
     setMode(newMode);
     setSelectedFilters([]);
@@ -195,22 +222,14 @@ export default function MapPage() {
     setSelectedPlace(null);
     setShowOpenOnly(false);
     setShowDeliveryOnly(false);
-    setPanelFilters(null);
+    setPanelFilters({
+      targets: [],
+      days: [],
+      times: [],
+      region: null,
+    });
     setIsFilterOpen(false);
     setIsLocationFocused(false);
-  };
-
-  const handlePanelApply = (filters) => {
-    setPanelFilters(filters);
-    setIsFilterOpen(false);
-  };
-
-  // ⭐ [수정] 패널 열기 핸들러: 위치값(pos)을 받아 top state에 저장
-  const handleOpenFilter = (pos) => {
-    if (pos && typeof pos.top === 'number') {
-      setPanelTop(pos.top);
-    }
-    setIsFilterOpen(true);
   };
 
   return (
@@ -235,8 +254,7 @@ export default function MapPage() {
           setShowOpenOnly={setShowOpenOnly}
           showDeliveryOnly={showDeliveryOnly}
           setShowDeliveryOnly={setShowDeliveryOnly}
-          onOpenFilter={handleOpenFilter} // ⭐ 핸들러 연결
-          onOpenRegionSelect={() => setIsRegionSelectOpen(true)}
+          onOpenFilter={handleOpenFilter}
         />
 
         <div className="relative w-full h-full">
@@ -257,15 +275,10 @@ export default function MapPage() {
           />
 
           {isFilterOpen && (
-            // ⭐ [수정] top 계산식에서 값을 빼서 위로 올림
             <div
               className="absolute left-0 z-50 p-2 pointer-events-none flex flex-col justify-start"
               style={{
-                // panelTop에서 30px만큼 뺍니다. (숫자를 키우면 더 위로 올라갑니다)
-                // Math.max(0, ...)은 화면 위로 뚫고 나가는 것을 방지합니다.
                 top: `${Math.max(0, panelTop - 24)}px`,
-
-                // 높이도 그만큼 늘려주어야 화면 아래까지 꽉 찹니다.
                 height: `calc(100% - ${Math.max(0, panelTop - 30)}px)`,
               }}
             >
