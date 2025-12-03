@@ -25,8 +25,8 @@ export default function PlaceList({
               onClick={() => setShowOpenOnly((prev) => !prev)}
               className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
                 showOpenOnly
-                  ? 'bg-white-_100 border-[rgba(120,195,71,0.1)] text-[#78C347]'
-                  : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke15 hover:text-gray-stroke70'
+                  ? 'bg-white-_100 border-[rgba(120,195,71,0.3)] text-[#78C347]'
+                  : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke07 hover:text-gray-stroke70'
               }`}
             >
               <Clock className={`w-4 h-4 ${showOpenOnly ? 'text-[#78C347]' : ''}`} />
@@ -39,15 +39,15 @@ export default function PlaceList({
                 onClick={() => setShowDeliveryOnly((prev) => !prev)}
                 className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
                   showDeliveryOnly
-                    ? 'bg-white-_100 border-[rgba(120,195,71,0.1)] text-[#78C347]'
-                    : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke15 hover:text-gray-stroke70'
+                    ? 'bg-white-_100 border-[rgba(120,195,71,0.2)] text-[#78C347]'
+                    : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke05 hover:text-gray-stroke70'
                 }`}
               >
                 <ShoppingBag className={`w-4 h-4 ${showDeliveryOnly ? 'text-[#78C347]' : ''}`} />
                 <span>배달가능</span>
               </button>
             ) : (
-              <button className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.1)] text-gray-stroke60 bg-gray-stroke03 cursor-default">
+              <button className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.2)] text-gray-stroke60 bg-gray-stroke03 cursor-default">
                 <SlidersHorizontal className="w-4 h-4" />
                 <span>상세조건</span>
               </button>
