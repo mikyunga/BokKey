@@ -30,6 +30,7 @@ import IconForward from '../assets/icon-forward.svg';
 import IconHome from '../assets/icon-home.svg';
 import IconLocationBlack from '../assets/icon-location-black.svg';
 import IconLocationWhite from '../assets/icon-location-white.svg';
+import IconLocationMain from '../assets/icon-location-main.svg';
 import IconLogo from '../assets/icon-logo.svg';
 import IconLogout from '../assets/icon-logout.svg';
 import IconLunch from '../assets/icon-lunch.svg';
@@ -87,6 +88,7 @@ export {
   IconHome,
   IconLocationBlack,
   IconLocationWhite,
+  IconLocationMain,
   IconLogo,
   IconLogout,
   IconLunch,
