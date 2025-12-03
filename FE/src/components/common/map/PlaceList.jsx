@@ -3,7 +3,6 @@
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
 
-// ✅ 퀵 필터 상태를 props로 받습니다.
 export default function PlaceList({
   mode,
   places,
@@ -16,43 +15,39 @@ export default function PlaceList({
 }) {
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="p-4">
+      <div className="py-4 px-6">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-bold text-base">검색 결과</h3>
 
           <div className="flex items-center gap-2 text-sm">
-            {/* ✅ 1. 영업중 버튼 (공통) */}
+            {/* 영업중 필터 */}
             <button
               onClick={() => setShowOpenOnly((prev) => !prev)}
-              className={`flex items-center gap-1 px-2 py-1 rounded-full font-medium transition-colors 
-                ${
-                  showOpenOnly
-                    ? 'bg-main text-white'
-                    : 'bg-gray-stroke03 text-gray-stroke60 hover:bg-gray-stroke05'
-                }`}
+              className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
+                showOpenOnly
+                  ? 'bg-white-_100 border-[rgba(120,195,71,0.1)] text-[#78C347]'
+                  : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke15 hover:text-gray-stroke70'
+              }`}
             >
-              <Clock className="w-4 h-4" />
+              <Clock className={`w-4 h-4 ${showOpenOnly ? 'text-[#78C347]' : ''}`} />
               <span>영업중</span>
             </button>
 
-            {/* ✅ 2. 배달가능 / 상세조건 버튼 (모드별 분기) */}
+            {/* 배달가능 / 상세조건 */}
             {mode === 'child' ? (
-              // 아동 모드: 배달가능 필터
               <button
                 onClick={() => setShowDeliveryOnly((prev) => !prev)}
-                className={`flex items-center gap-1 px-2 py-1 rounded-full font-medium transition-colors 
-                  ${
-                    showDeliveryOnly
-                      ? 'bg-main text-white'
-                      : 'bg-gray-stroke03 text-gray-stroke60 hover:bg-gray-stroke05'
-                  }`}
+                className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
+                  showDeliveryOnly
+                    ? 'bg-white-_100 border-[rgba(120,195,71,0.1)] text-[#78C347]'
+                    : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke15 hover:text-gray-stroke70'
+                }`}
               >
-                <ShoppingBag className="w-4 h-4" />
+                <ShoppingBag className={`w-4 h-4 ${showDeliveryOnly ? 'text-[#78C347]' : ''}`} />
                 <span>배달가능</span>
               </button>
             ) : (
-              // 노인 모드: 상세조건 (필터링 로직은 없지만 UI는 유지)
-              <button className="flex items-center gap-1 px-2 py-1 rounded-full font-medium bg-gray-stroke03 text-gray-stroke60 hover:bg-gray-stroke05 cursor-default">
+              <button className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.1)] text-gray-stroke60 bg-gray-stroke03 cursor-default">
                 <SlidersHorizontal className="w-4 h-4" />
                 <span>상세조건</span>
               </button>
