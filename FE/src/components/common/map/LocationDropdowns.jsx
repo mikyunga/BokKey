@@ -62,11 +62,10 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
           <ul className="absolute z-50 bg-[#ffffff] border border-black-_07 rounded-[5px] shadow-dropDown mt-1 w-full max-h-[calc(7*32px)] overflow-auto  dropdown-scrollbar">
             <li
               ref={sido === '' ? selectedSidoRef : null}
-              className="px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item border-b border-gray-200"
+              className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sido === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
               onClick={() => handleSelect('sido', '')}
               style={{
                 borderBottomWidth: '1px',
-                color: sido === '' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.3)',
                 backgroundColor: sido === '' ? 'rgba(0,0,0,0.0)' : undefined,
               }}
             >
@@ -76,11 +75,10 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
               <li
                 key={p}
                 ref={sido === p ? selectedSidoRef : null}
-                className="px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item border-b border-gray-200"
+                className={`px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item ${sido === p ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
                 onClick={() => handleSelect('sido', p)}
                 style={{
                   borderBottomWidth: '1px',
-                  color: sido === p ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.3)',
                   backgroundColor: sido === p ? 'rgba(0,0,0,0.0)' : undefined,
                 }}
               >
@@ -109,14 +107,13 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
         </button>
 
         {open === 'sigungu' && (
-          <ul className="text-[14px] absolute z-50 bg-[#ffffff] border border-black-_07 rounded-[5px] shadow-dropDown mt-1 w-full max-h-[calc(7*32px)] overflow-auto  dropdown-scrollbar">
+          <ul className="text-[14px] absolute z-50 bg-[#ffffff] border border-black-_07 rounded-[5px] shadow-dropDown mt-1 w-full max-h-[calc(7*32px)] overflow-auto  dropdown-scrollbar font-normal">
             <li
               ref={sigungu === '' ? selectedSigunguRef : null}
-              className="px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item border-b border-gray-200"
+              className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sigungu === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
               onClick={() => handleSelect('sigungu', '')}
               style={{
                 borderBottomWidth: '1px',
-                color: sigungu === '' ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.3)',
                 backgroundColor: sigungu === '' ? 'rgba(0,0,0,0.0)' : undefined,
               }}
             >
@@ -126,11 +123,10 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
               <li
                 key={d}
                 ref={sigungu === d ? selectedSigunguRef : null}
-                className="px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item border-b border-gray-200"
+                className={`px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item ${sigungu === d ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
                 onClick={() => handleSelect('sigungu', d)}
                 style={{
                   borderBottomWidth: '1px',
-                  color: sigungu === d ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.3)',
                   backgroundColor: sigungu === d ? 'rgba(0,0,0,0.0)' : undefined,
                 }}
               >
