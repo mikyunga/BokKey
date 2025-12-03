@@ -16,7 +16,7 @@ export default function PlaceList({
   return (
     <div className="flex-1 min-h-0 h-full">
       <div className="relative h-full flex flex-col">
-        <div className="sticky top-0 z-10 bg-white py-4 px-6">
+        <div className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-stroke02">
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-base">검색 결과</h3>
 

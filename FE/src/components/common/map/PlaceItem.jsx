@@ -1,6 +1,7 @@
 'use client';
 
-import { MapPin, Phone, Star } from 'lucide-react';
+import { MapPin, Phone } from 'lucide-react';
+import { IconStarWhite, IconStarYellow } from '../../../utils/icons';
 import { CHILD_FILTERS } from '../../../constants/filters';
 
 export default function PlaceItem({ place, mode, isSelected, onSelect }) {
@@ -19,7 +20,7 @@ export default function PlaceItem({ place, mode, isSelected, onSelect }) {
       onClick={handleClick}
       style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}
       className={`
-        bg-white px-6 py-4 
+        bg-white pl-6 pr-[18px] py-4 
         cursor-pointer 
         flex flex-col gap-[6px]
         max-h-48
@@ -32,7 +33,7 @@ export default function PlaceItem({ place, mode, isSelected, onSelect }) {
           <span className="text-[14px] opacity-30 font-medium">{categoryLabel}</span>
         </div>
         <button className="text-gray-stroke30 hover:text-star">
-          <Star className="w-4 h-4" />
+          <img src={IconStarWhite} className="" />
         </button>
       </div>
 
@@ -78,7 +79,7 @@ export default function PlaceItem({ place, mode, isSelected, onSelect }) {
         {isChildMode && place.delivery && (
           <span
             className="text-orange rounded px-[2px] py-[0px]"
-            style={{ backgroundColor: 'rgba(255, 146, 56, 0.08)' }}
+            style={{ backgroundColor: 'rgba(255, 146, 56, 0.)' }}
           >
             배달 가능
           </span>
