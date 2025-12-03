@@ -59,7 +59,10 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
         </button>
 
         {open === 'sido' && (
-          <ul className="absolute z-50 bg-[#ffffff] border border-black-_07 rounded-[5px] shadow-dropDown mt-1 w-full max-h-[calc(7*32px)] overflow-auto  dropdown-scrollbar">
+          <ul
+            className="absolute z-50 bg-[#ffffff] border border-black-_07 rounded-[5px] shadow-dropDown mt-1 w-full max-h-[calc(7*32px)] overflow-y-auto scrollbar-none"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             <li
               ref={sido === '' ? selectedSidoRef : null}
               className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sido === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
@@ -107,7 +110,10 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
         </button>
 
         {open === 'sigungu' && (
-          <ul className="text-[14px] absolute z-50 bg-[#ffffff] border border-black-_07 rounded-[5px] shadow-dropDown mt-1 w-full max-h-[calc(7*32px)] overflow-auto  dropdown-scrollbar font-normal">
+          <ul
+            className="text-[14px] absolute z-50 bg-[#ffffff] border border-black-_07 rounded-[5px] shadow-dropDown mt-1 w-full max-h-[calc(7*32px)] overflow-y-auto scrollbar-none font-normal"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
             <li
               ref={sigungu === '' ? selectedSigunguRef : null}
               className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sigungu === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
