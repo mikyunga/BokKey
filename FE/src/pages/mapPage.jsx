@@ -29,6 +29,7 @@ export default function MapPage() {
 
   // 상세조건 패널 제어
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // ⭐ 상세조건 패널의 선택값을 기억하는 상태
   const [panelFilters, setPanelFilters] = useState(null);
 
   const mapRef = useRef(null);
@@ -111,17 +112,18 @@ export default function MapPage() {
     );
   };
 
-  // ⭐ 필터링 로직 (AND 조건 적용)
+  // ⭐ 필터링 로직 (완전판)
   const filteredPlaces = useMemo(() => {
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
-    // 1. 지역 필터
+    // 1. 지역 필터 (시도/시군구)
     if (sido) {
       const targetRegionCodes = REGIONS.filter(
         (r) => r.province === sido && (!sigungu || r.district === sigungu)
       ).map((r) => r.region_code);
 
       places = places.filter((place) => {
+        // region_code 없는 데이터도 일단 보여줌 (엄격 적용 시 return false)
         if (!place.region_code) return true;
         return targetRegionCodes.includes(Number(place.region_code));
       });
@@ -138,39 +140,47 @@ export default function MapPage() {
     }
 
     // 4. 영업중 / 배달가능
-    if (showOpenOnly) {
-      places = places.filter((place) => place.isOpen);
-    }
-    if (mode === 'child' && showDeliveryOnly) {
-      places = places.filter((place) => place.delivery);
-    }
+    if (showOpenOnly) places = places.filter((place) => place.isOpen);
+    if (mode === 'child' && showDeliveryOnly) places = places.filter((place) => place.delivery);
 
-    // 5. 상세조건 패널 필터
+    // 5. ⭐ 상세조건 패널 필터
     if (panelFilters) {
-      const { targets, days, times } = panelFilters;
+      const { targets, days, times, region } = panelFilters;
 
-      // (1) 급식 대상 (AND 로직: 모든 선택 조건을 만족해야 함)
+      // (1) 급식 대상 (AND 조건: 선택한 모든 대상을 포함해야 함)
       if (targets.length > 0) {
         places = places.filter((place) => {
           const rawTarget = place.targets || place.target_name;
           const placeTargets = Array.isArray(rawTarget) ? rawTarget : rawTarget ? [rawTarget] : [];
 
-          // ⭐ .every() 사용: 선택된 targets가 모두 placeTargets에 포함되어야 함
           return targets.every((filterTarget) =>
             placeTargets.some((t) => t.includes(filterTarget))
           );
         });
       }
 
-      // (2) 요일
+      // (2) 요일 (OR 조건)
       if (days.length > 0) {
-        // child 모드 등 meal_days가 없는 경우 안전하게 처리 (?.)
-        places = places.filter((place) => days.some((d) => place.meal_days?.includes(d)));
+        places = places.filter((place) => days.every((d) => place.meal_days?.includes(d)));
       }
 
-      // (3) 시간
+      // (3) 시간 (OR 조건)
       if (times.length > 0) {
-        places = places.filter((place) => times.some((t) => place.meal_time?.includes(t)));
+        places = places.filter((place) => times.every((t) => place.meal_time?.includes(t)));
+      }
+
+      // (4) ⭐ 지역 범위 (전국 / 지역한정)
+      // region이 null이면 필터링하지 않음 (전체 보기)
+      if (region) {
+        const targetValue = region === 'nationwide' ? '전국' : '지역한정';
+
+        places = places.filter((place) => {
+          // target 데이터가 있는 경우에만 비교 (노인 급식소 등)
+          if (place.target) {
+            return place.target === targetValue;
+          }
+          return true; // target 정보가 없으면 통과
+        });
       }
     }
 
@@ -196,7 +206,7 @@ export default function MapPage() {
     setSelectedPlace(null);
     setShowOpenOnly(false);
     setShowDeliveryOnly(false);
-    setPanelFilters(null);
+    setPanelFilters(null); // 필터 초기화
     setIsFilterOpen(false);
     setIsLocationFocused(false);
   };
@@ -253,7 +263,6 @@ export default function MapPage() {
             <div className="absolute top-0 left-0 h-full z-50 p-4 pointer-events-none">
               <div className="pointer-events-auto h-full" style={{ marginLeft: '380px' }}>
                 <FilterPanel
-                  places={mode === 'child' ? CHILD_PLACES : SENIOR_PLACES}
                   initialFilters={panelFilters}
                   onApply={handlePanelApply}
                   onCancel={() => setIsFilterOpen(false)}

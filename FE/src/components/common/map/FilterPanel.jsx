@@ -3,27 +3,26 @@
 import { useState } from 'react';
 import { IconForwardMore } from '../../../utils/icons';
 
-// ⭐ props에서 places, onFiltered가 사라지고 onApply를 받습니다.
 export default function FilterPanel({ onApply, onCancel, initialFilters }) {
-  // 1. 부모가 기억하던 값이 있으면 그걸로 초기화, 없으면 기본값
+  // ⭐ 1. 초기값을 null로 설정 (아무것도 선택 안 된 상태)
   const [filters, setFilters] = useState(
     initialFilters || {
       targets: [],
       days: [],
       times: [],
-      region: '전국',
+      region: null,
     }
   );
 
   const updateFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
 
+  // ⭐ 2. 초기화 버튼 클릭 시에도 region을 null로 리셋
   const resetFilter = () => {
-    setFilters({ targets: [], days: [], times: [], region: '전국' });
+    setFilters({ targets: [], days: [], times: [], region: null });
   };
 
-  // 2. ⭐ 완료 버튼 클릭 시: 필터링 로직 없이 "조건값"만 부모(MapPage)에게 전달
   const handleApply = () => {
-    onApply(filters); // MapPage의 handlePanelApply가 실행됨
+    onApply(filters);
   };
 
   return (
@@ -189,7 +188,10 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
             return (
               <button
                 key={r.id}
-                onClick={() => updateFilter('region', r.id)}
+                onClick={() => {
+                  // ⭐ 3. 토글 기능: 이미 선택된 걸 누르면 해제(null), 아니면 선택
+                  updateFilter('region', isSelected ? null : r.id);
+                }}
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
                 style={{
                   padding: '6px 10px',
@@ -217,7 +219,7 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
           취소
         </button>
         <button
-          onClick={handleApply} // ⭐ 여기서 onApply(filters) 호출
+          onClick={handleApply}
           className="bg-[#78C347] px-4 py-2 rounded-full"
           style={{ fontSize: '14px', color: 'white' }}
         >
