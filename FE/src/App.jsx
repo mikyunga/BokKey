@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Index from './pages/indexPage';
 import LoginPage from './pages/loginPage';
 import SignUpPage from './pages/signUpPage';
+import FavoritesPage from './pages/favoritesPage';
 import MapPage from './pages/mapPage'; // 💡 지도 페이지 추가
 import NotFound from './pages/notFound';
 
@@ -14,6 +15,7 @@ function App() {
 
         {/* 💡 지도 페이지 (이미지의 그 화면) */}
         <Route path="/map" element={<MapPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
 
         {/* 로그인/회원가입 */}
         <Route path="/login" element={<LoginPage />} />
