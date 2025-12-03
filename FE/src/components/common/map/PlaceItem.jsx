@@ -1,7 +1,8 @@
 'use client';
 
 import { CHILD_FILTERS } from '../../../constants/filters';
-import { IconLocationGrey, IconCall } from '../../../utils/icons';
+import { IconLocationGrey, IconCall, IconPerson } from '../../../utils/icons';
+
 import FavoriteButton from './FavoriteButton';
 
 export default function PlaceItem({ place, mode, onSelect }) {
@@ -39,20 +40,25 @@ export default function PlaceItem({ place, mode, onSelect }) {
       <div className="flex flex-col gap-[2px] text-[14px] font-normal">
         <div className="flex items-center gap-2">
           <img src={IconLocationGrey} />
-          <span className="text-[14px] opacity-70">{place.address}</span>
+          <span className="text-[14px] font-normal opacity-70">{place.address}</span>
         </div>
 
         {isChildMode ? (
           <div className="flex items-center gap-2">
             <img src={IconCall} />
             {place.phone ? (
-              <span className="text-[14px] opacity-70">{place.phone}</span>
+              <span className="text-[14px] font-normal opacity-70">{place.phone}</span>
             ) : (
-              <span className="opacity-30">정보 없음</span>
+              <span className="text-[14px] font-normal opacity-30">정보 없음</span>
             )}
           </div>
         ) : (
-          <div className="text-gray-stroke50 pl-4">{place.schedule}</div>
+          <div className="flex items-center gap-2">
+            <img src={IconPerson} />
+            <span className="text-[14px] font-normal opacity-70">
+              {Array.isArray(place.target_name) ? place.target_name.join(', ') : place.target_name}
+            </span>
+          </div>
         )}
       </div>
 

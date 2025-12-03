@@ -1,4 +1,13 @@
 // 📂 uploaded: welfare_store_edit.csv 기반 샘플 데이터 (region_code 포함)
+export const TARGETS = [
+  { target_id: 0, target_name: '아동' },
+  { target_id: 1, target_name: '노인' },
+  { target_id: 2, target_name: '장애인' },
+  { target_id: 3, target_name: '취약계층' },
+  { target_id: 4, target_name: '노숙인' },
+  { target_id: 5, target_name: '국가유공자' },
+];
+
 export const CHILD_PLACES = [
   {
     id: 0,
@@ -12,6 +21,8 @@ export const CHILD_PLACES = [
     latitude: 37.5001511,
     longitude: 129.1259651,
     region_code: 192, // ✅ 동해시 코드
+    target_id: [0],
+    target_name: ['아동'],
   },
   {
     id: 1,
@@ -25,6 +36,8 @@ export const CHILD_PLACES = [
     latitude: 37.49065698,
     longitude: 129.1201568,
     region_code: 192,
+    target_id: [0],
+    target_name: ['아동'],
   },
   {
     id: 2,
@@ -38,6 +51,8 @@ export const CHILD_PLACES = [
     latitude: 37.48267853,
     longitude: 129.1270687,
     region_code: 192,
+    target_id: [0],
+    target_name: ['아동'],
   },
   {
     id: 3,
@@ -51,6 +66,8 @@ export const CHILD_PLACES = [
     latitude: 37.47966201,
     longitude: 129.1124501,
     region_code: 192,
+    target_id: [0],
+    target_name: ['아동'],
   },
   {
     id: 4,
@@ -64,6 +81,8 @@ export const CHILD_PLACES = [
     latitude: 38.1735445,
     longitude: 128.6057053,
     region_code: 42,
+    target_id: [0],
+    target_name: ['아동'],
   },
   {
     id: 5,
@@ -77,6 +96,8 @@ export const CHILD_PLACES = [
     latitude: 37.78411578,
     longitude: 127.0324718,
     region_code: 24,
+    target_id: [0],
+    target_name: ['아동'],
   },
 ];
 
@@ -95,6 +116,8 @@ export const SENIOR_PLACES = [
     longitude: 129.1227562,
     phone: '033-530-9000',
     region_code: 192,
+    target_id: [1, 3],
+    target_name: ['노인', '취약계층'],
   },
   {
     id: 1,
@@ -109,6 +132,8 @@ export const SENIOR_PLACES = [
     longitude: 129.1065188,
     phone: '033-534-6844',
     region_code: 192,
+    target_id: [1],
+    target_name: ['노인'],
   },
   {
     id: 2,
@@ -123,6 +148,8 @@ export const SENIOR_PLACES = [
     longitude: 129.1126711,
     phone: '033-572-0016',
     region_code: 87,
+    target_id: [1],
+    target_name: ['노인'],
   },
   {
     id: 3,
@@ -137,6 +164,8 @@ export const SENIOR_PLACES = [
     longitude: 127.0432194,
     phone: '02-558-9888',
     region_code: 53,
+    target_id: [1, 3],
+    target_name: ['노인', '취약계층'],
   },
   {
     id: 4,
@@ -151,5 +180,7 @@ export const SENIOR_PLACES = [
     longitude: 126.9200551,
     phone: '',
     region_code: 12,
+    target_id: [1],
+    target_name: ['노인'],
   },
 ];
