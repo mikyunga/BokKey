@@ -47,10 +47,10 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
           style={{
             fontSize: '12px',
             color: 'rgba(0,0,0,0.3)',
-            borderBottom: '1px solid rgba(0,0,0,0.1)',
             cursor: 'pointer',
             backgroundColor: 'transparent',
             border: 'none',
+            borderBottom: '1px solid rgba(0,0,0,0.1)', // ⬅️ 여기 추가
           }}
         >
           <img src={IconForwardMore} alt="" className="w-2.5 opacity-30" />
