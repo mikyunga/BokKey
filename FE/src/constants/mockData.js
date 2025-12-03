@@ -59,7 +59,7 @@ export const CHILD_PLACES = [
     categoryText: '일반음식점',
     address: '강원특별자치도 속초시 대포항희망길 55 , 상가17호',
     phone: '02-1111-1111',
-    isOpen: true,
+    isOpen: false,
     delivery: false,
     latitude: 38.1735445,
     longitude: 128.6057053,
@@ -77,19 +77,6 @@ export const CHILD_PLACES = [
     latitude: 37.78411578,
     longitude: 127.0324718,
     region_code: 24,
-  },
-  {
-    id: 6,
-    name: '강남시니어플라자',
-    category: 'welfare',
-    categoryText: '복지관', // 샘플
-    address: '서울특별시 강남구 봉은사로 332',
-    phone: '02-558-9888',
-    isOpen: true,
-    delivery: false,
-    latitude: 37.50978671,
-    longitude: 127.0432194,
-    region_code: 53, // ✅ 서울 강남구 코드
   },
 ];
 

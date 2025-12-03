@@ -36,7 +36,7 @@ export default function PlaceItem({ place, mode, onSelect }) {
       </div>
 
       {/* 주소, 전화번호 */}
-      <div className="flex flex-col gap-[2px] text-[14px]">
+      <div className="flex flex-col gap-[2px] text-[14px] font-normal">
         <div className="flex items-center gap-2">
           <img src={IconLocationGrey} />
           <span className="text-[14px] opacity-70">{place.address}</span>
