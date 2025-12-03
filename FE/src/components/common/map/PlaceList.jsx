@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
+import FilterPanel from './FilterPanel';
 
 export default function PlaceList({
   mode,
@@ -13,9 +15,12 @@ export default function PlaceList({
   showDeliveryOnly,
   setShowDeliveryOnly,
 }) {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   return (
     <div className="flex-1 min-h-0 h-full">
       <div className="relative h-full flex flex-col">
+        {/* 상단 헤더 */}
         <div className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-stroke02">
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-base">검색 결과</h3>
@@ -48,15 +53,39 @@ export default function PlaceList({
                   <span>배달가능</span>
                 </button>
               ) : (
-                <button className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.2)] text-gray-stroke60 bg-gray-stroke03 cursor-default">
-                  <SlidersHorizontal className="w-4 h-4" />
+                <button
+                  onClick={() => setIsFilterOpen((prev) => !prev)}
+                  className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.15)] bg-white text-black transition-all"
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.border = '1px solid rgba(120,195,71,0.3)')
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.border = '1px solid rgba(120,195,71,0.15)')
+                  }
+                >
+                  <SlidersHorizontal size={14} />
                   <span>상세조건</span>
                 </button>
               )}
             </div>
+
+            {/* 필터 패널 토글 렌더 */}
+            {isFilterOpen && (
+              <div className="absolute top-0 left-full ml-4 z-20">
+                <FilterPanel
+                  places={places}
+                  onFiltered={(newPlaces) => {
+                    onSelectPlace(null);
+                    setIsFilterOpen(false);
+                  }}
+                  onCancel={() => setIsFilterOpen(false)}
+                />
+              </div>
+            )}
           </div>
         </div>
 
+        {/* 리스트 */}
         <div className="flex-1 overflow-y-auto overlay-scrollbar">
           {places.map((place) => (
             <PlaceItem
