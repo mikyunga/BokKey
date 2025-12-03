@@ -24,7 +24,7 @@ export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) 
 
   return (
     <div className="p-4 border-b border-gray-stroke05">
-      <div className="flex flex-wrap gap-1.5 items-center">
+      <div className="flex flex-wrap gap-1.5 items-center justify-center">
         {filters.map((filter) => {
           const isSelected = selectedFilters.includes(filter.id);
           const category = filter.label || '';
@@ -43,7 +43,7 @@ export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) 
               className={`px-[10px] py-[6px] text-[14px] flex items-center gap-1 rounded-[5px] ${!isSelected ? 'text-black-_70' : ''}`}
               style={{ backgroundColor: 'transparent', border: borderStyle, ...textColorStyle }}
             >
-              <span>{filter.icon}</span>
+              <filter.icon size={16} />
               <span>{filter.label}</span>
             </button>
           );
