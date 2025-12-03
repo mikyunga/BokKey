@@ -14,48 +14,50 @@ export default function PlaceList({
   setShowDeliveryOnly,
 }) {
   return (
-    <div className="flex-1 overflow-y-auto">
-      <div className="py-4 px-6">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-bold text-base">검색 결과</h3>
+    <div className="flex-1 min-h-0 h-full">
+      <div className="relative h-full flex flex-col">
+        <div className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-200">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-bold text-base">검색 결과</h3>
 
-          <div className="flex items-center gap-2 text-sm">
-            {/* 영업중 필터 */}
-            <button
-              onClick={() => setShowOpenOnly((prev) => !prev)}
-              className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
-                showOpenOnly
-                  ? 'bg-white-_100 border-[rgba(120,195,71,0.3)] text-[#78C347]'
-                  : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke07 hover:text-gray-stroke70'
-              }`}
-            >
-              <Clock className={`w-4 h-4 ${showOpenOnly ? 'text-[#78C347]' : ''}`} />
-              <span>영업중</span>
-            </button>
-
-            {/* 배달가능 / 상세조건 */}
-            {mode === 'child' ? (
+            <div className="flex items-center gap-2 text-sm">
+              {/* 영업중 필터 */}
               <button
-                onClick={() => setShowDeliveryOnly((prev) => !prev)}
+                onClick={() => setShowOpenOnly((prev) => !prev)}
                 className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
-                  showDeliveryOnly
-                    ? 'bg-white-_100 border-[rgba(120,195,71,0.2)] text-[#78C347]'
-                    : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke05 hover:text-gray-stroke70'
+                  showOpenOnly
+                    ? 'bg-white-_100 border-[rgba(120,195,71,0.3)] text-[#78C347]'
+                    : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke07 hover:text-gray-stroke70'
                 }`}
               >
-                <ShoppingBag className={`w-4 h-4 ${showDeliveryOnly ? 'text-[#78C347]' : ''}`} />
-                <span>배달가능</span>
+                <Clock className={`w-4 h-4 ${showOpenOnly ? 'text-[#78C347]' : ''}`} />
+                <span>영업중</span>
               </button>
-            ) : (
-              <button className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.2)] text-gray-stroke60 bg-gray-stroke03 cursor-default">
-                <SlidersHorizontal className="w-4 h-4" />
-                <span>상세조건</span>
-              </button>
-            )}
+
+              {/* 배달가능 / 상세조건 */}
+              {mode === 'child' ? (
+                <button
+                  onClick={() => setShowDeliveryOnly((prev) => !prev)}
+                  className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
+                    showDeliveryOnly
+                      ? 'bg-white-_100 border-[rgba(120,195,71,0.2)] text-[#78C347]'
+                      : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke05 hover:text-gray-stroke70'
+                  }`}
+                >
+                  <ShoppingBag className={`w-4 h-4 ${showDeliveryOnly ? 'text-[#78C347]' : ''}`} />
+                  <span>배달가능</span>
+                </button>
+              ) : (
+                <button className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.2)] text-gray-stroke60 bg-gray-stroke03 cursor-default">
+                  <SlidersHorizontal className="w-4 h-4" />
+                  <span>상세조건</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="flex-1 overflow-y-auto overlay-scrollbar py-4 space-y-3">
           {places.map((place) => (
             <PlaceItem
               key={place.id}
