@@ -137,20 +137,39 @@ body {
   }
 }
 
-/* ===== Scrollbar Custom ===== */
-::-webkit-scrollbar {
-  width: 3px;
+/* ===== Transparent Dropdown Custom - Ultra Soft + Inner Offset ===== */
+.dropdown-scrollbar {
+  overflow-y: overlay; /* 스크롤바가 content를 침범하지 않게 */
 }
 
-::-webkit-scrollbar-track {
+.dropdown-scrollbar::-webkit-scrollbar {
+  width: 0px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.22);
+.dropdown-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0); /* ultra soft */
   border-radius: 999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.32);
+.dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* 리스트 아이템 */
+.dropdown-item {
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dropdown-item.selected {
+  background: rgba(149, 215, 105, 0.08);
+  font-weight: 600;
 }

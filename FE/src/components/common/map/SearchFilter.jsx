@@ -7,7 +7,7 @@ export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) 
   const filters = CHILD_FILTERS;
 
   return (
-    <div className="p-4 border-b border-gray-stroke05">
+    <div className="p-6 border-b border-gray-stroke05">
       <div className="flex flex-wrap gap-2">
         {filters.map((filter) => (
           <button
