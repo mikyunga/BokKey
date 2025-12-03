@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+/Users/jangseohyeon/Documents/projects/BokKey/FE/tailwind.config.js/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
@@ -11,6 +11,8 @@ export default {
           DEFAULT: 'rgb(var(--color-main) / <alpha-value>)',
           _10: 'rgba(149, 215, 105, 0.1)',
           _30: 'rgba(149, 215, 105, 0.3)',
+          selectedText: 'rgba(149, 215, 105, 0.7)',
+          unselectedText: 'rgba(149, 215, 105, 0.3)',
         },
         filter: {
           DEFAULT: 'rgb(var(--color-filter) / <alpha-value>)',
@@ -51,6 +53,9 @@ export default {
           stroke50: 'rgba(0, 0, 0, 0.5)',
           stroke60: 'rgba(0, 0, 0, 0.6)',
           stroke70: 'rgba(0, 0, 0, 0.7)',
+          dropdownBottomBorder: 'rgba(221, 221, 221, 1)',
+          selectedText: 'rgba(0, 0, 0, 0.7)',
+          unselectedText: 'rgba(0, 0, 0, 0.3)',
         },
         white: {
           DEFAULT: 'rgb(var(--color-white) / <alpha-value>)',
