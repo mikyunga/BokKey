@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import MapContainer from '../components/common/map/MapContainer';
 import CategoryToggle from '../components/common/map/CategoryToggle';
@@ -12,8 +11,6 @@ import { CHILD_PLACES, SENIOR_PLACES } from '../constants/mockData';
 import { REGIONS } from '../constants/region';
 
 export default function MapPage() {
-  const navigate = useNavigate();
-
   const [mode, setMode] = useState('child');
   const [sido, setSido] = useState('');
   const [sigungu, setSigungu] = useState('');
@@ -117,10 +114,6 @@ export default function MapPage() {
         setIsLoadingLocation(false);
       }
     );
-  };
-
-  const handleFavoritePage = () => {
-    navigate('/favorites');
   };
 
   const filteredPlaces = useMemo(() => {

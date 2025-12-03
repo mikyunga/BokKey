@@ -1,10 +1,10 @@
 'use client';
 
-import { MapPin, Phone } from 'lucide-react';
 import { CHILD_FILTERS } from '../../../constants/filters';
+import { IconLocationGrey, IconCall } from '../../../utils/icons';
 import FavoriteButton from './FavoriteButton';
 
-export default function PlaceItem({ place, mode, isSelected, onSelect }) {
+export default function PlaceItem({ place, mode, onSelect }) {
   const isChildMode = mode === 'child';
 
   const handleClick = () => {
@@ -37,14 +37,14 @@ export default function PlaceItem({ place, mode, isSelected, onSelect }) {
 
       {/* 주소, 전화번호 */}
       <div className="flex flex-col gap-[2px] text-[14px]">
-        <div className="flex items-center gap-1">
-          <MapPin className="w-3 h-3" />
+        <div className="flex items-center gap-2">
+          <img src={IconLocationGrey} />
           <span className="text-[14px] opacity-70">{place.address}</span>
         </div>
 
         {isChildMode ? (
-          <div className="flex items-center gap-1">
-            <Phone className="w-3 h-3" />
+          <div className="flex items-center gap-2">
+            <img src={IconCall} />
             {place.phone ? (
               <span className="text-[14px] opacity-70">{place.phone}</span>
             ) : (

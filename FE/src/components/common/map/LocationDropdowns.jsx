@@ -74,7 +74,7 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
             >
               전체
             </li>
-            {provs.map((p, index) => (
+            {provs.map((p) => (
               <li
                 key={p}
                 ref={sido === p ? selectedSidoRef : null}
@@ -125,7 +125,7 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
             >
               전체
             </li>
-            {dists.map((d, index) => (
+            {dists.map((d) => (
               <li
                 key={d}
                 ref={sigungu === d ? selectedSigunguRef : null}

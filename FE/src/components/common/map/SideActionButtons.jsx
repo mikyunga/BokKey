@@ -33,7 +33,7 @@ export default function SideActionButtons({
           style={{
             backgroundColor: isLocationFocused ? '#FFFFFF' : '#FFFFFF',
             boxShadow: isLocationFocused
-              ? `inset 0 2px 4px rgba(0,0,0,0), 0 4px 8px rgba(0,0,0,0.2)`
+              ? `inset 0 2px 4px rgba(0,0,0,0), 0 1px 5px rgba(0,0,0,0.2)`
               : `0 1px 5px 0 rgba(0,0,0,${isLocationFocused ? (isHoveringLocation ? '0.5' : '0.4') : isHoveringLocation ? '0.3' : '0.15'})`,
           }}
           className={`
