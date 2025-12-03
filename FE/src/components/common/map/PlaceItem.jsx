@@ -63,7 +63,7 @@ export default function PlaceItem({ place, mode, onSelect }) {
       </div>
 
       {/* 영업 상태, 배달 가능 라벨 */}
-      <div className="flex gap-3 text-xs font-medium flex-shrink-0 sticky bottom-0 bg-white">
+      <div className="flex gap-3 text-xs font-medium">
         {place.isOpen ? (
           <span
             className="text-orange rounded px-[2px] py-[0px]"
