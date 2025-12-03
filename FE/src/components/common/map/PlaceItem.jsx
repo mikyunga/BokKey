@@ -1,8 +1,8 @@
 'use client';
 
 import { MapPin, Phone } from 'lucide-react';
-import { IconStarWhite, IconStarYellow } from '../../../utils/icons';
 import { CHILD_FILTERS } from '../../../constants/filters';
+import FavoriteButton from './FavoriteButton';
 
 export default function PlaceItem({ place, mode, isSelected, onSelect }) {
   const isChildMode = mode === 'child';
@@ -32,9 +32,7 @@ export default function PlaceItem({ place, mode, isSelected, onSelect }) {
           <h4 className="font-semibold text-[16px]">{place.name}</h4>
           <span className="text-[14px] opacity-30 font-medium">{categoryLabel}</span>
         </div>
-        <button className="text-gray-stroke30 hover:text-star">
-          <img src={IconStarWhite} className="" />
-        </button>
+        <FavoriteButton place={place} mode={mode} />
       </div>
 
       {/* 주소, 전화번호 */}
@@ -79,7 +77,7 @@ export default function PlaceItem({ place, mode, isSelected, onSelect }) {
         {isChildMode && place.delivery && (
           <span
             className="text-orange rounded px-[2px] py-[0px]"
-            style={{ backgroundColor: 'rgba(255, 146, 56, 0.)' }}
+            style={{ backgroundColor: 'rgba(255, 146, 56, 0.08)' }}
           >
             배달 가능
           </span>

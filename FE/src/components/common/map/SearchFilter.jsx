@@ -19,7 +19,7 @@ function hexToRgba(hex, opacity) {
   return `rgba(${r},${g},${b},${opacity})`;
 }
 
-export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) {
+export default function SearchFilter({ selectedFilters, onFilterToggle }) {
   const filters = CHILD_FILTERS;
 
   return (

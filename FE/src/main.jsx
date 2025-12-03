@@ -3,8 +3,7 @@ import './index.css';
 import App from './App.jsx';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-// import { BookmarkProvider } from './contexts/BookMarkContext.jsx';
-// import { CartProvider } from './contexts/CartContext'; // 추가
+import { FavoriteProvider } from './contexts/FavoriteContext'; // 추가
 
 async function prepare() {
   if (import.meta.env.MODE === 'development') {
@@ -16,11 +15,9 @@ async function prepare() {
   root.render(
     <BrowserRouter>
       <AuthProvider>
-        {/* <BookmarkProvider> */}
-        {/* <CartProvider> */}
-        <App />
-        {/* </CartProvider> */}
-        {/* </BookmarkProvider> */}
+        <FavoriteProvider>
+          <App />
+        </FavoriteProvider>
       </AuthProvider>
     </BrowserRouter>
   );

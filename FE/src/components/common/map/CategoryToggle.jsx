@@ -10,7 +10,7 @@ export default function CategoryToggle({ mode, onModeChange }) {
   const isActive = (type) => mode === type;
 
   return (
-    <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+    <div className="absolute top-6 right-6 z-50 flex items-center gap-2">
       {/* 1. 급식카드 버튼 */}
       <button
         style={{ backgroundColor: '#FFFFFF' }}
