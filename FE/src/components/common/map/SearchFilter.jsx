@@ -35,13 +35,17 @@ export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) 
           const textColorStyle =
             isSelected && categoryColors[category] ? { color: categoryColors[category] } : null;
           const borderStyle = `1px solid ${borderColor}`;
+          const bgColor =
+            isSelected && categoryColors[category]
+              ? hexToRgba(categoryColors[category], 0.03)
+              : 'transparent';
 
           return (
             <button
               key={filter.id}
               onClick={() => onFilterToggle(filter.id)}
               className={`px-[10px] py-[6px] text-[14px] flex items-center gap-1 rounded-[5px] ${!isSelected ? 'text-black-_70' : ''}`}
-              style={{ backgroundColor: 'transparent', border: borderStyle, ...textColorStyle }}
+              style={{ backgroundColor: bgColor, border: borderStyle, ...textColorStyle }}
             >
               <filter.icon size={16} />
               <span>{filter.label}</span>
