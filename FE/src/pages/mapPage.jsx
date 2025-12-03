@@ -31,10 +31,13 @@ export default function MapPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [panelFilters, setPanelFilters] = useState(null);
 
+  // ⭐ [추가] 패널의 Y축 위치(높이)를 저장할 state
+  const [panelTop, setPanelTop] = useState(0);
+
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
 
-  // ⭐ 지도 객체 초기화 함수 (최적화)
+  // 지도 객체 초기화 함수 (최적화: 재생성 방지)
   const handleMapReady = useCallback((mapInstance) => {
     mapRef.current = mapInstance;
   }, []);
@@ -60,17 +63,14 @@ export default function MapPage() {
       mapRef.current.setLevel(10);
       return;
     }
-
     if (!navigator.geolocation) {
       setLocationError('이 브라우저는 위치 기능을 지원하지 않습니다.');
       return;
     }
-
     if (!mapRef.current) {
       setLocationError('지도가 로드되지 않았습니다.');
       return;
     }
-
     setIsLoadingLocation(true);
     setLocationError(null);
 
@@ -78,29 +78,24 @@ export default function MapPage() {
       (position) => {
         const { latitude, longitude } = position.coords;
         const kakaoLatLng = new window.kakao.maps.LatLng(latitude, longitude);
-
         setTimeout(() => {
           mapRef.current.setCenter(kakaoLatLng);
           mapRef.current.setLevel(3);
         }, 100);
-
         if (currentLocationMarkerRef.current) {
           currentLocationMarkerRef.current.setMap(null);
         }
-
         const markerImage = new window.kakao.maps.MarkerImage(
           'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="%234A90E2" stroke="white" stroke-width="2"/><circle cx="20" cy="20" r="6" fill="white"/></svg>',
           new window.kakao.maps.Size(40, 40),
           { offset: new window.kakao.maps.Point(20, 20) }
         );
-
         const marker = new window.kakao.maps.Marker({
           position: kakaoLatLng,
           map: mapRef.current,
           image: markerImage,
           title: '현재 위치',
         });
-
         currentLocationMarkerRef.current = marker;
         setIsLoadingLocation(false);
         setIsLocationFocused(true);
@@ -112,7 +107,7 @@ export default function MapPage() {
     );
   };
 
-  // ⭐ 필터링 로직
+  // ⭐ 필터링 로직 (모두 AND 조건 적용)
   const filteredPlaces = useMemo(() => {
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
@@ -146,7 +141,7 @@ export default function MapPage() {
     if (panelFilters) {
       const { targets, days, times, region } = panelFilters;
 
-      // (1) 대상 (AND)
+      // (1) 대상 (AND: 모두 포함)
       if (targets.length > 0) {
         places = places.filter((place) => {
           const rawTarget = place.targets || place.target_name;
@@ -157,12 +152,12 @@ export default function MapPage() {
         });
       }
 
-      // (2) 요일 (AND)
+      // (2) 요일 (AND: 모든 요일 만족)
       if (days.length > 0) {
         places = places.filter((place) => days.every((d) => place.meal_days?.includes(d)));
       }
 
-      // (3) 시간 (AND)
+      // (3) 시간 (AND: 모든 시간 만족)
       if (times.length > 0) {
         places = places.filter((place) => times.every((t) => place.meal_time?.includes(t)));
       }
@@ -209,6 +204,15 @@ export default function MapPage() {
     setPanelFilters(filters);
     setIsFilterOpen(false);
   };
+
+  // ⭐ [수정] 패널 열기 핸들러: 위치값(pos)을 받아 top state에 저장
+  const handleOpenFilter = (pos) => {
+    if (pos && typeof pos.top === 'number') {
+      setPanelTop(pos.top);
+    }
+    setIsFilterOpen(true);
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden flex flex-col">
       <CategoryToggle mode={mode} onModeChange={handleModeChange} />
@@ -231,7 +235,7 @@ export default function MapPage() {
           setShowOpenOnly={setShowOpenOnly}
           showDeliveryOnly={showDeliveryOnly}
           setShowDeliveryOnly={setShowDeliveryOnly}
-          onOpenFilter={() => setIsFilterOpen(true)}
+          onOpenFilter={handleOpenFilter} // ⭐ 핸들러 연결
           onOpenRegionSelect={() => setIsRegionSelectOpen(true)}
         />
 
@@ -252,11 +256,19 @@ export default function MapPage() {
             onMapReady={handleMapReady}
           />
 
-          {/* ⭐ [수정됨] 상세조건 패널 위치 */}
           {isFilterOpen && (
-            // left-0: 사이드바 바로 옆 (지도 영역의 시작점)
-            // p-2: 사이드바와 아주 살짝 띄워서 '떠 있는 카드' 느낌 (사진과 유사)
-            <div className="absolute top-0 left-0 z-50 h-full p-2 pointer-events-none flex flex-col justify-start">
+            // ⭐ [수정] top 계산식에서 값을 빼서 위로 올림
+            <div
+              className="absolute left-0 z-50 p-2 pointer-events-none flex flex-col justify-start"
+              style={{
+                // panelTop에서 30px만큼 뺍니다. (숫자를 키우면 더 위로 올라갑니다)
+                // Math.max(0, ...)은 화면 위로 뚫고 나가는 것을 방지합니다.
+                top: `${Math.max(0, panelTop - 24)}px`,
+
+                // 높이도 그만큼 늘려주어야 화면 아래까지 꽉 찹니다.
+                height: `calc(100% - ${Math.max(0, panelTop - 30)}px)`,
+              }}
+            >
               <div className="pointer-events-auto h-full">
                 <FilterPanel
                   initialFilters={panelFilters}

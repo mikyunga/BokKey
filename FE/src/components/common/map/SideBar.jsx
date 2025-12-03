@@ -6,7 +6,6 @@ import SearchBar from './SearchBar';
 import LocationDropdowns from './LocationDropdowns';
 import SearchFilter from './SearchFilter';
 import PlaceList from './PlaceList';
-import FilterPanel from './FilterPanel';
 
 export default function Sidebar({
   mode,
@@ -26,20 +25,17 @@ export default function Sidebar({
   showDeliveryOnly,
   setShowDeliveryOnly,
   onOpenFilter,
-  onOpenRegionSelect, // ⭐ 지역 선택 버튼 클릭 핸들러 추가
+  onOpenRegionSelect,
 }) {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // ⭐ 위치 정보(pos)를 받아서 상위 컴포넌트(MapPage)로 전달
+  const handleOpenFilter = (pos) => {
+    if (onOpenFilter) {
+      onOpenFilter(pos);
+    }
+  };
 
   const handleFilterToggle = (filterId) => {
     setSelectedFilters((prev) => (prev.includes(filterId) ? [] : [filterId]));
-  };
-
-  const handleOpenFilter = () => {
-    if (onOpenFilter) {
-      onOpenFilter();
-    } else {
-      setIsFilterOpen(prev => !prev);
-    }
   };
 
   return (
@@ -48,8 +44,6 @@ export default function Sidebar({
       <div className="px-6 pt-6 pb-4 p-4 border-b border-gray-stroke05">
         <div className="flex items-center justify-between mb-4">
           <img src={IconLogo} alt="복키 로고" className="h-[24px] object-contain flex-shrink-0" />
-
-          {/* 기존 시도/시군구 UI도 유지 (검색창 자동 필터용) */}
           <div className="flex-shrink-0">
             <LocationDropdowns
               sido={sido}
@@ -62,13 +56,8 @@ export default function Sidebar({
 
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-        {/* 아동 모드에서만 음식 카테고리 필터 */}
         {mode === 'child' && (
-          <SearchFilter
-            mode={mode}
-            selectedFilters={selectedFilters}
-            onFilterToggle={handleFilterToggle}
-          />
+          <SearchFilter selectedFilters={selectedFilters} onFilterToggle={handleFilterToggle} />
         )}
       </div>
 
@@ -82,23 +71,11 @@ export default function Sidebar({
         setShowOpenOnly={setShowOpenOnly}
         showDeliveryOnly={showDeliveryOnly}
         setShowDeliveryOnly={setShowDeliveryOnly}
-        onOpenFilter={handleOpenFilter} // 상세조건
-        sido={sido} // ⭐ 지역 상태 전달
-        sigungu={sigungu} // ⭐ 지역 상태 전달
-        onOpenRegionSelect={onOpenRegionSelect} // ⭐ 지역 선택 버튼 눌렀을 때 실행
+        onOpenFilter={handleOpenFilter} // ⭐ 수정된 핸들러 전달
+        sido={sido}
+        sigungu={sigungu}
+        onOpenRegionSelect={onOpenRegionSelect}
       />
-
-      {isFilterOpen && (
-        <FilterPanel
-          places={filteredPlaces}
-          onFiltered={(newPlaces) => {
-            setSelectedPlace(null);
-            setIsFilterOpen(false);
-            // optionally update filteredPlaces if needed
-          }}
-          onCancel={() => setIsFilterOpen(false)}
-        />
-      )}
     </div>
   );
 }
