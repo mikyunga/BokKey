@@ -16,9 +16,9 @@ export default function PlaceList({
   return (
     <div className="flex-1 min-h-0 h-full">
       <div className="relative h-full flex flex-col">
-        <div className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-200">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-bold text-base">검색 결과</h3>
+        <div className="sticky top-0 z-10 bg-white py-4 px-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium text-base">검색 결과</h3>
 
             <div className="flex items-center gap-2 text-sm">
               {/* 영업중 필터 */}
@@ -57,7 +57,7 @@ export default function PlaceList({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto overlay-scrollbar py-4 space-y-3">
+        <div className="flex-1 overflow-y-auto overlay-scrollbar">
           {places.map((place) => (
             <PlaceItem
               key={place.id}
