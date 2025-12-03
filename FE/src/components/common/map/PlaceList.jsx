@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
-import FilterPanel from './FilterPanel';
 
 export default function PlaceList({
   mode,
@@ -14,8 +12,9 @@ export default function PlaceList({
   setShowOpenOnly,
   showDeliveryOnly,
   setShowDeliveryOnly,
+  onOpenFilter, // ⭐ 부모(Sidebar -> MapPage)로부터 전달받은 핸들러
 }) {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // ❌ 내부 상태(isFilterOpen) 삭제됨
 
   return (
     <div className="flex-1 min-h-0 h-full">
@@ -54,14 +53,8 @@ export default function PlaceList({
                 </button>
               ) : (
                 <button
-                  onClick={() => setIsFilterOpen((prev) => !prev)}
-                  className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.15)] bg-white text-black transition-all"
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.border = '1px solid rgba(120,195,71,0.3)')
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.border = '1px solid rgba(120,195,71,0.15)')
-                  }
+                  onClick={onOpenFilter} // ⭐ 직접 호출
+                  className="flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm border border-[rgba(120,195,71,0.15)] bg-white text-black transition-all hover:border-[rgba(120,195,71,0.3)]"
                 >
                   <SlidersHorizontal size={14} />
                   <span>상세조건</span>
@@ -69,19 +62,7 @@ export default function PlaceList({
               )}
             </div>
 
-            {/* 필터 패널 토글 렌더 */}
-            {isFilterOpen && (
-              <div className="absolute top-0 left-full ml-4 z-20">
-                <FilterPanel
-                  places={places}
-                  onFiltered={(newPlaces) => {
-                    onSelectPlace(null);
-                    setIsFilterOpen(false);
-                  }}
-                  onCancel={() => setIsFilterOpen(false)}
-                />
-              </div>
-            )}
+            {/* ❌ 기존 FilterPanel 렌더링 코드 삭제됨 */}
           </div>
         </div>
 

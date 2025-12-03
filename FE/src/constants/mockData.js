@@ -8,6 +8,7 @@ export const TARGETS = [
   { target_id: 5, target_name: '국가유공자' },
 ];
 
+// ⚠️ CHILD_PLACES는 원본 그대로 유지합니다.
 export const CHILD_PLACES = [
   {
     id: 0,
@@ -20,7 +21,7 @@ export const CHILD_PLACES = [
     delivery: true,
     latitude: 37.5001511,
     longitude: 129.1259651,
-    region_code: 192, // ✅ 동해시 코드
+    region_code: 192,
     target_id: [0],
     target_name: ['아동'],
   },
@@ -101,7 +102,7 @@ export const CHILD_PLACES = [
   },
 ];
 
-// 📂 uploaded: meal_center.csv 기반 샘플 데이터
+// ⭐ SENIOR_PLACES만 수정: meal_days 추가
 export const SENIOR_PLACES = [
   {
     id: 0,
@@ -112,6 +113,8 @@ export const SENIOR_PLACES = [
     target: '전국',
     isOpen: true,
     schedule: '월, 화, 수, 목, 금',
+    meal_days: ['월', '화', '수', '목', '금'], // ⭐ 추가
+    meal_time: ['중식'],
     latitude: 37.5150722,
     longitude: 129.1227562,
     phone: '033-530-9000',
@@ -128,6 +131,8 @@ export const SENIOR_PLACES = [
     target: '전국',
     isOpen: true,
     schedule: '월, 화, 수, 목, 금',
+    meal_days: ['월', '화', '수', '목', '금'], // ⭐ 추가
+    meal_time: ['중식'],
     latitude: 37.54536936,
     longitude: 129.1065188,
     phone: '033-534-6844',
@@ -144,6 +149,8 @@ export const SENIOR_PLACES = [
     target: '지역한정',
     isOpen: true,
     schedule: '주1회(별도 공지)',
+    meal_days: [], // ⭐ 별도 공지는 빈 배열 처리
+    meal_time: ['중식'],
     latitude: 37.41814966,
     longitude: 129.1126711,
     phone: '033-572-0016',
@@ -160,6 +167,8 @@ export const SENIOR_PLACES = [
     target: '전국',
     isOpen: true,
     schedule: '월, 화, 수, 목, 금',
+    meal_days: ['월', '화', '수', '목', '금'], // ⭐ 추가
+    meal_time: ['중식'],
     latitude: 37.50978671,
     longitude: 127.0432194,
     phone: '02-558-9888',
@@ -176,6 +185,8 @@ export const SENIOR_PLACES = [
     target: '전국',
     isOpen: true,
     schedule: '경로식당(월~토)',
+    meal_days: ['월', '화', '수', '목', '금', '토'], // ⭐ 추가
+    meal_time: ['중식'],
     latitude: 37.5714004,
     longitude: 126.9200551,
     phone: '',

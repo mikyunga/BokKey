@@ -20,13 +20,16 @@ export default function MapPage() {
   const [selectedPlace, setSelectedPlace] = useState(null);
   const [showOpenOnly, setShowOpenOnly] = useState(false);
   const [showDeliveryOnly, setShowDeliveryOnly] = useState(false);
+
+  // 위치 관련 상태
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState(null);
   const [isLocationFocused, setIsLocationFocused] = useState(false);
   const [isRegionSelectOpen, setIsRegionSelectOpen] = useState(false);
 
+  // 상세조건 패널 제어
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filteredFromPanel, setFilteredFromPanel] = useState(null);
+  const [panelFilters, setPanelFilters] = useState(null);
 
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
@@ -108,41 +111,79 @@ export default function MapPage() {
     );
   };
 
-  // 필터링 로직
+  // ⭐ 필터링 로직 (AND 조건 적용)
   const filteredPlaces = useMemo(() => {
-    const places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
+    let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
-    // 상세조건 팝업에서 필터가 적용된 경우 우선
-    if (filteredFromPanel) return filteredFromPanel;
+    // 1. 지역 필터
+    if (sido) {
+      const targetRegionCodes = REGIONS.filter(
+        (r) => r.province === sido && (!sigungu || r.district === sigungu)
+      ).map((r) => r.region_code);
 
-    return places.filter((place) => {
-      if (searchQuery && !place.name.includes(searchQuery)) return false;
-      if (
-        mode === 'child' &&
-        selectedFilters.length > 0 &&
-        !selectedFilters.includes(place.category)
-      )
-        return false;
-      if (sido) {
-        const targetRegionCodes = REGIONS.filter(
-          (r) => r.province === sido && (!sigungu || r.district === sigungu)
-        ).map((r) => r.region_code);
-        if (!place.region_code || !targetRegionCodes.includes(Number(place.region_code)))
-          return false;
+      places = places.filter((place) => {
+        if (!place.region_code) return true;
+        return targetRegionCodes.includes(Number(place.region_code));
+      });
+    }
+
+    // 2. 검색어 필터
+    if (searchQuery) {
+      places = places.filter((place) => place.name.includes(searchQuery));
+    }
+
+    // 3. 아동 급식카드 카테고리
+    if (mode === 'child' && selectedFilters.length > 0) {
+      places = places.filter((place) => selectedFilters.includes(place.category));
+    }
+
+    // 4. 영업중 / 배달가능
+    if (showOpenOnly) {
+      places = places.filter((place) => place.isOpen);
+    }
+    if (mode === 'child' && showDeliveryOnly) {
+      places = places.filter((place) => place.delivery);
+    }
+
+    // 5. 상세조건 패널 필터
+    if (panelFilters) {
+      const { targets, days, times } = panelFilters;
+
+      // (1) 급식 대상 (AND 로직: 모든 선택 조건을 만족해야 함)
+      if (targets.length > 0) {
+        places = places.filter((place) => {
+          const rawTarget = place.targets || place.target_name;
+          const placeTargets = Array.isArray(rawTarget) ? rawTarget : rawTarget ? [rawTarget] : [];
+
+          // ⭐ .every() 사용: 선택된 targets가 모두 placeTargets에 포함되어야 함
+          return targets.every((filterTarget) =>
+            placeTargets.some((t) => t.includes(filterTarget))
+          );
+        });
       }
-      if (showOpenOnly && !place.isOpen) return false;
-      if (mode === 'child' && showDeliveryOnly && !place.delivery) return false;
-      return true;
-    });
+
+      // (2) 요일
+      if (days.length > 0) {
+        // child 모드 등 meal_days가 없는 경우 안전하게 처리 (?.)
+        places = places.filter((place) => days.some((d) => place.meal_days?.includes(d)));
+      }
+
+      // (3) 시간
+      if (times.length > 0) {
+        places = places.filter((place) => times.some((t) => place.meal_time?.includes(t)));
+      }
+    }
+
+    return places;
   }, [
     mode,
-    searchQuery,
-    selectedFilters,
     sido,
     sigungu,
+    searchQuery,
+    selectedFilters,
     showOpenOnly,
     showDeliveryOnly,
-    filteredFromPanel,
+    panelFilters,
   ]);
 
   // 모드 변경 시 초기화
@@ -155,8 +196,14 @@ export default function MapPage() {
     setSelectedPlace(null);
     setShowOpenOnly(false);
     setShowDeliveryOnly(false);
-    setFilteredFromPanel(null);
+    setPanelFilters(null);
+    setIsFilterOpen(false);
     setIsLocationFocused(false);
+  };
+
+  const handlePanelApply = (filters) => {
+    setPanelFilters(filters);
+    setIsFilterOpen(false);
   };
 
   return (
@@ -201,20 +248,21 @@ export default function MapPage() {
             selectedPlace={selectedPlace}
             onMapReady={handleMapReady}
           />
+
+          {isFilterOpen && (
+            <div className="absolute top-0 left-0 h-full z-50 p-4 pointer-events-none">
+              <div className="pointer-events-auto h-full" style={{ marginLeft: '380px' }}>
+                <FilterPanel
+                  places={mode === 'child' ? CHILD_PLACES : SENIOR_PLACES}
+                  initialFilters={panelFilters}
+                  onApply={handlePanelApply}
+                  onCancel={() => setIsFilterOpen(false)}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* 상세조건 패널 */}
-      {isFilterOpen && (
-        <FilterPanel
-          places={mode === 'child' ? CHILD_PLACES : SENIOR_PLACES}
-          onFiltered={(result) => {
-            setFilteredFromPanel(result);
-            setIsFilterOpen(false);
-          }}
-          onCancel={() => setIsFilterOpen(false)}
-        />
-      )}
     </div>
   );
 }

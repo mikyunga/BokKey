@@ -1,38 +1,29 @@
+'use client';
+
 import { useState } from 'react';
 import { IconForwardMore } from '../../../utils/icons';
 
-export default function FilterPanel({ places, onFiltered, onCancel }) {
-  const [filters, setFilters] = useState({
-    targets: [],
-    days: [],
-    times: [],
-    region: '전국',
-  });
+// ⭐ props에서 places, onFiltered가 사라지고 onApply를 받습니다.
+export default function FilterPanel({ onApply, onCancel, initialFilters }) {
+  // 1. 부모가 기억하던 값이 있으면 그걸로 초기화, 없으면 기본값
+  const [filters, setFilters] = useState(
+    initialFilters || {
+      targets: [],
+      days: [],
+      times: [],
+      region: '전국',
+    }
+  );
 
   const updateFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
 
-  // 조건 체크 함수들 ----------------
-  const checkTarget = (p) =>
-    filters.targets.length === 0 || p.targets?.some((t) => filters.targets.includes(t));
-
-  const checkRegion = (p) => filters.region === '전국' || p.region_code === filters.region;
-
-  const checkDay = (p) =>
-    filters.days.length === 0 || filters.days.some((d) => p.meal_days?.includes(d));
-
-  const checkTime = (p) =>
-    filters.times.length === 0 || filters.times.some((t) => p.meal_time?.includes(t));
-
-  const applyFilter = () => {
-    const result = places.filter(
-      (p) => checkTarget(p) && checkRegion(p) && checkDay(p) && checkTime(p)
-    );
-    // Do NOT reset filters; just call onFiltered
-    onFiltered(result);
-  };
-
   const resetFilter = () => {
     setFilters({ targets: [], days: [], times: [], region: '전국' });
+  };
+
+  // 2. ⭐ 완료 버튼 클릭 시: 필터링 로직 없이 "조건값"만 부모(MapPage)에게 전달
+  const handleApply = () => {
+    onApply(filters); // MapPage의 handlePanelApply가 실행됨
   };
 
   return (
@@ -49,7 +40,6 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
             fontSize: '12px',
             color: 'rgba(0, 0, 0, 0.3)',
             borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
-
             cursor: 'pointer',
             backgroundColor: 'transparent',
             border: 'none',
@@ -72,32 +62,19 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
                 onClick={() =>
                   updateFilter(
                     'targets',
-                    filters.targets.includes(label)
+                    isSelected
                       ? filters.targets.filter((l) => l !== label)
                       : [...filters.targets, label]
                   )
                 }
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
                 style={{
-                  paddingLeft: '10px',
-                  paddingRight: '10px',
-                  paddingTop: '6px',
-                  paddingBottom: '6px',
-                  backgroundColor: isSelected ? '#FFFFFF' : '#FFFFFF',
+                  padding: '6px 10px',
+                  backgroundColor: '#FFFFFF',
                   border: isSelected
                     ? '1px solid rgba(149,215,105,0.7)'
                     : '1px solid rgba(0,0,0,0.08)',
                   color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.20)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.08)';
-                  }
                 }}
               >
                 {label}
@@ -114,32 +91,19 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
                 onClick={() =>
                   updateFilter(
                     'targets',
-                    filters.targets.includes(label)
+                    isSelected
                       ? filters.targets.filter((l) => l !== label)
                       : [...filters.targets, label]
                   )
                 }
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
                 style={{
-                  paddingLeft: '10px',
-                  paddingRight: '10px',
-                  paddingTop: '6px',
-                  paddingBottom: '6px',
-                  backgroundColor: isSelected ? '#FFFFFF' : '#FFFFFF',
+                  padding: '6px 10px',
+                  backgroundColor: '#FFFFFF',
                   border: isSelected
                     ? '1px solid rgba(149,215,105,0.7)'
                     : '1px solid rgba(0,0,0,0.08)',
                   color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.20)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.08)';
-                  }
                 }}
               >
                 {label}
@@ -161,32 +125,17 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
                 onClick={() =>
                   updateFilter(
                     'days',
-                    filters.days.includes(d)
-                      ? filters.days.filter((x) => x !== d)
-                      : [...filters.days, d]
+                    isSelected ? filters.days.filter((x) => x !== d) : [...filters.days, d]
                   )
                 }
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
                 style={{
-                  paddingLeft: '10px',
-                  paddingRight: '10px',
-                  paddingTop: '6px',
-                  paddingBottom: '6px',
-                  backgroundColor: isSelected ? '#FFFFFF' : '#FFFFFF',
+                  padding: '6px 10px',
+                  backgroundColor: '#FFFFFF',
                   border: isSelected
                     ? '1px solid rgba(149,215,105,0.7)'
                     : '1px solid rgba(0,0,0,0.08)',
                   color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.20)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.08)';
-                  }
                 }}
               >
                 {d}
@@ -208,32 +157,17 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
                 onClick={() =>
                   updateFilter(
                     'times',
-                    filters.times.includes(t)
-                      ? filters.times.filter((x) => x !== t)
-                      : [...filters.times, t]
+                    isSelected ? filters.times.filter((x) => x !== t) : [...filters.times, t]
                   )
                 }
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
                 style={{
-                  paddingLeft: '10px',
-                  paddingRight: '10px',
-                  paddingTop: '6px',
-                  paddingBottom: '6px',
-                  backgroundColor: isSelected ? '#FFFFFF' : '#FFFFFF',
+                  padding: '6px 10px',
+                  backgroundColor: '#FFFFFF',
                   border: isSelected
                     ? '1px solid rgba(149,215,105,0.7)'
                     : '1px solid rgba(0,0,0,0.08)',
                   color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.20)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.08)';
-                  }
                 }}
               >
                 {t}
@@ -252,32 +186,18 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
             { id: 'regional', label: '지역 한정' },
           ].map((r) => {
             const isSelected = filters.region === r.id;
-
             return (
               <button
                 key={r.id}
                 onClick={() => updateFilter('region', r.id)}
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
                 style={{
-                  paddingLeft: '10px',
-                  paddingRight: '10px',
-                  paddingTop: '6px',
-                  paddingBottom: '6px',
-                  backgroundColor: isSelected ? '#FFFFFF' : '#FFFFFF',
+                  padding: '6px 10px',
+                  backgroundColor: '#FFFFFF',
                   border: isSelected
                     ? '1px solid rgba(149,215,105,0.7)'
                     : '1px solid rgba(0,0,0,0.08)',
                   color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.20)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isSelected) {
-                    e.currentTarget.style.border = '1px solid rgba(0,0,0,0.08)';
-                  }
                 }}
               >
                 {r.label}
@@ -288,7 +208,7 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
       </div>
 
       {/* 버튼 */}
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 mt-auto">
         <button
           onClick={onCancel}
           className="rounded-full px-4 py-2"
@@ -297,7 +217,7 @@ export default function FilterPanel({ places, onFiltered, onCancel }) {
           취소
         </button>
         <button
-          onClick={applyFilter}
+          onClick={handleApply} // ⭐ 여기서 onApply(filters) 호출
           className="bg-[#78C347] px-4 py-2 rounded-full"
           style={{ fontSize: '14px', color: 'white' }}
         >
