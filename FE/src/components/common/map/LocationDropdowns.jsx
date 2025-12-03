@@ -65,7 +65,7 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
           >
             <li
               ref={sido === '' ? selectedSidoRef : null}
-              className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sido === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
+              className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sido === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.05)] hover:text-[rgba(0,0,0,0.9)]`}
               onClick={() => handleSelect('sido', '')}
               style={{
                 borderBottomWidth: '1px',
@@ -78,7 +78,7 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
               <li
                 key={p}
                 ref={sido === p ? selectedSidoRef : null}
-                className={`px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item ${sido === p ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
+                className={`px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item ${sido === p ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.05)] hover:text-[rgba(0,0,0,0.9)]`}
                 onClick={() => handleSelect('sido', p)}
                 style={{
                   borderBottomWidth: '1px',
@@ -116,7 +116,7 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
           >
             <li
               ref={sigungu === '' ? selectedSigunguRef : null}
-              className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sigungu === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
+              className={`px-[10px] pt-[6px] pb-[5px] text-[14px] cursor-pointer dropdown-item ${sigungu === '' ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.05)] hover:text-[rgba(0,0,0,0.9)]`}
               onClick={() => handleSelect('sigungu', '')}
               style={{
                 borderBottomWidth: '1px',
@@ -129,7 +129,7 @@ export default function LocationDropdowns({ sido, setSido, sigungu, setSigungu }
               <li
                 key={d}
                 ref={sigungu === d ? selectedSigunguRef : null}
-                className={`px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item ${sigungu === d ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.02)] hover:text-[rgba(0,0,0,0.9)]`}
+                className={`px-[10px] py-[5px] text-[14px] cursor-pointer dropdown-item ${sigungu === d ? 'font-normal text-[rgba(0,0,0,0.7)]' : 'font-thin text-[rgba(0,0,0,0.6)]'} hover:bg-[rgba(0,0,0,0.05)] hover:text-[rgba(0,0,0,0.9)]`}
                 onClick={() => handleSelect('sigungu', d)}
                 style={{
                   borderBottomWidth: '1px',

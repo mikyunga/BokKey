@@ -23,7 +23,7 @@ export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) 
   const filters = CHILD_FILTERS;
 
   return (
-    <div className="p-4 ">
+    <div className="p-4 pb-0">
       <div className="flex flex-wrap gap-1.5 items-center justify-center">
         {filters.map((filter) => {
           const isSelected = selectedFilters.includes(filter.id);
@@ -32,6 +32,10 @@ export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) 
             isSelected && categoryColors[category]
               ? hexToRgba(categoryColors[category], 0.15)
               : 'rgba(0,0,0,0.05)';
+          const hoverBorderColor =
+            isSelected && categoryColors[category]
+              ? hexToRgba(categoryColors[category], 0.3)
+              : 'rgba(0,0,0,0.1)'; // 0.2에서 0.1로 변경
           const textColorStyle =
             isSelected && categoryColors[category] ? { color: categoryColors[category] } : null;
           const borderStyle = `1px solid ${borderColor}`;
@@ -44,8 +48,18 @@ export default function SearchFilter({ mode, selectedFilters, onFilterToggle }) 
             <button
               key={filter.id}
               onClick={() => onFilterToggle(filter.id)}
-              className={`px-[10px] py-[6px] text-[14px] flex items-center gap-1 rounded-[5px] ${!isSelected ? 'text-black-_70' : ''}`}
-              style={{ backgroundColor: bgColor, border: borderStyle, ...textColorStyle }}
+              className={`px-[10px] py-[6px] text-[14px] flex items-center gap-1 rounded-[5px] transition-all ${!isSelected ? 'text-black-_70' : ''}`}
+              style={{
+                backgroundColor: bgColor,
+                border: borderStyle,
+                ...textColorStyle,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = hoverBorderColor;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = borderColor;
+              }}
             >
               <filter.icon size={14} />
               <span>{filter.label}</span>
