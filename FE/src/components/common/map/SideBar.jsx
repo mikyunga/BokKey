@@ -32,7 +32,7 @@ export default function Sidebar({
     // 사이드바 너비는 이제 내용물에 맞춰 유동적입니다.
     <div className="w-[380px] h-full bg-[#ffffff] shadow-custom-drop flex flex-col z-30 flex-shrink-0">
       {/* 헤더 */}
-      <div className="p-6 border-b border-gray-stroke05">
+      <div className="p-6">
         {/* ✅ 수정: justify-between 적용하여 좌우 끝에 배치 */}
         <div className="flex items-center justify-between mb-4">
           {/* Logo (좌측) */}
@@ -48,18 +48,17 @@ export default function Sidebar({
             />
           </div>
         </div>
-
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-      </div>
 
-      {/* 필터 */}
-      {mode === 'child' && (
-        <SearchFilter
-          mode={mode}
-          selectedFilters={selectedFilters}
-          onFilterToggle={handleFilterToggle}
-        />
-      )}
+        {/* 필터 */}
+        {mode === 'child' && (
+          <SearchFilter
+            mode={mode}
+            selectedFilters={selectedFilters}
+            onFilterToggle={handleFilterToggle}
+          />
+        )}
+      </div>
 
       {/* 결과 리스트 */}
       <PlaceList
