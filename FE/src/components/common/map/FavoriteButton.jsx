@@ -13,7 +13,7 @@ export default function FavoriteButton({ place, mode }) {
 
   return (
     <button onClick={handleClick}>
-      <img src={fav ? IconStarYellow : IconStarWhite} alt="favorite" />
+      <img src={fav ? IconStarYellow : IconStarWhite} alt="favorite" style={{ height: '100%' }} />
     </button>
   );
 }

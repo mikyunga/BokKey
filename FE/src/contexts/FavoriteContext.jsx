@@ -21,8 +21,24 @@ export const FavoriteProvider = ({ children }) => {
     setFavorites((prev) => {
       const list = prev[mode] || [];
       const exists = list.find((p) => p.id === place.id);
-      const updatedList = exists ? list.filter((p) => p.id !== place.id) : [...list, place];
-      return { ...prev, [mode]: updatedList };
+      if (exists) {
+        const updatedList = list.filter((p) => p.id !== place.id);
+        return { ...prev, [mode]: updatedList };
+      } else {
+        const minimalPlace = {
+          id: place.id,
+          name: place.name,
+          address: place.address,
+          phone: place.phone,
+          category: place.category,
+          type: place.type,
+          isOpen: place.isOpen,
+          delivery: place.delivery,
+          schedule: place.schedule,
+        };
+        const updatedList = [...list, minimalPlace];
+        return { ...prev, [mode]: updatedList };
+      }
     });
   };
 

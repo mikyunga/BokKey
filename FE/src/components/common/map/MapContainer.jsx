@@ -20,10 +20,24 @@ const CATEGORY_MARKERS = {
   welfare: { url: '/images/markers/grey_pin.png' },
 };
 
-export default function MapContainer({ mode, places, selectedPlace }) {
+export default function MapContainer({ mode, places, selectedPlace, onMapReady }) {
   const mapRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const markersRef = useRef([]);
+  useEffect(() => {
+    if (!mapInstance || !selectedPlace?.latitude || !selectedPlace?.longitude) {
+      console.log('selectedPlace:', selectedPlace);
+      return;
+    }
+
+    const pos = new window.kakao.maps.LatLng(selectedPlace.latitude, selectedPlace.longitude);
+    console.log('Moving to:', selectedPlace.name, pos);
+
+    setTimeout(() => {
+      mapInstance.panTo(pos);
+      mapInstance.setLevel(3);
+    }, 50);
+  }, [mapInstance, selectedPlace]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.kakao && window.kakao.maps) {
@@ -34,8 +48,11 @@ export default function MapContainer({ mode, places, selectedPlace }) {
       };
       const map = new window.kakao.maps.Map(container, options);
       setMapInstance(map);
+      if (onMapReady) {
+        onMapReady(map);
+      }
     }
-  }, []);
+  }, [onMapReady]);
 
   useEffect(() => {
     if (!mapInstance || !places || typeof window.kakao === 'undefined') return;
@@ -51,7 +68,7 @@ export default function MapContainer({ mode, places, selectedPlace }) {
       if (mode === 'child') {
         const category = CATEGORY_MARKERS[place.category] || CATEGORY_MARKERS.restaurant;
         const imageSize = new window.kakao.maps.Size(34, 34);
-        const imageOption = { offset: new window.kakao.maps.Point(20, 34) };
+        const imageOption = { offset: new window.kakao.maps.Point(17, 34) };
         markerImage = new window.kakao.maps.MarkerImage(category.url, imageSize, imageOption);
       }
 
@@ -72,9 +89,14 @@ export default function MapContainer({ mode, places, selectedPlace }) {
 
   useEffect(() => {
     if (!mapInstance || !selectedPlace?.latitude || !selectedPlace?.longitude) return;
+
     const pos = new window.kakao.maps.LatLng(selectedPlace.latitude, selectedPlace.longitude);
-    mapInstance.setCenter(pos);
-    mapInstance.setLevel(2);
+
+    // panTo로 부드럽게 이동하고 약간의 딜레이 후 레벨 설정
+    setTimeout(() => {
+      mapInstance.panTo(pos);
+      mapInstance.setLevel(3);
+    }, 50);
   }, [mapInstance, selectedPlace]);
 
   return (
