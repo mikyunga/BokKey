@@ -4,25 +4,34 @@ import { useState } from 'react';
 import { IconForwardMore } from '../../../utils/icons';
 
 export default function FilterPanel({ onApply, onCancel, initialFilters }) {
-  // ⭐ 1. 초기값을 null로 설정 (아무것도 선택 안 된 상태)
   const [filters, setFilters] = useState(
-    initialFilters || {
-      targets: [],
-      days: [],
-      times: [],
-      region: null,
-    }
+    initialFilters || { targets: [], days: [], times: [], region: null }
   );
 
   const updateFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
+  const resetFilter = () => setFilters({ targets: [], days: [], times: [], region: null });
+  const handleApply = () => onApply(filters);
 
-  // ⭐ 2. 초기화 버튼 클릭 시에도 region을 null로 리셋
-  const resetFilter = () => {
-    setFilters({ targets: [], days: [], times: [], region: null });
+  const buttonStyle = (isSelected) => ({
+    padding: '6px 10px',
+    backgroundColor: '#FFFFFF',
+    border: isSelected ? '1px solid rgba(149,215,105,0.7)' : '1px solid rgba(0,0,0,0.08)',
+    color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
+    transition: 'all 0.2s',
+  });
+
+  const handleMouseEnter = (e, isSelected) => {
+    if (!isSelected) {
+      e.currentTarget.style.border = '1px solid rgba(0,0,0,0.15)';
+      e.currentTarget.style.color = 'rgba(0,0,0,0.65)';
+    }
   };
 
-  const handleApply = () => {
-    onApply(filters);
+  const handleMouseLeave = (e, isSelected) => {
+    if (!isSelected) {
+      e.currentTarget.style.border = '1px solid rgba(0,0,0,0.08)';
+      e.currentTarget.style.color = 'rgba(0,0,0,0.5)';
+    }
   };
 
   return (
@@ -37,8 +46,8 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
           className="flex items-center gap-1"
           style={{
             fontSize: '12px',
-            color: 'rgba(0, 0, 0, 0.3)',
-            borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+            color: 'rgba(0,0,0,0.3)',
+            borderBottom: '1px solid rgba(0,0,0,0.1)',
             cursor: 'pointer',
             backgroundColor: 'transparent',
             border: 'none',
@@ -50,7 +59,7 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
       </div>
 
       {/* 구역 1: 급식 대상 */}
-      <div className="">
+      <div>
         <h3 className="font-medium mb-2 text-[14px]">급식 대상</h3>
         <div className="flex flex-wrap gap-2">
           {['아동', '노인', '장애인'].map((label) => {
@@ -66,15 +75,10 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
                       : [...filters.targets, label]
                   )
                 }
+                style={buttonStyle(isSelected)}
+                onMouseEnter={(e) => handleMouseEnter(e, isSelected)}
+                onMouseLeave={(e) => handleMouseLeave(e, isSelected)}
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
-                style={{
-                  padding: '6px 10px',
-                  backgroundColor: '#FFFFFF',
-                  border: isSelected
-                    ? '1px solid rgba(149,215,105,0.7)'
-                    : '1px solid rgba(0,0,0,0.08)',
-                  color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
               >
                 {label}
               </button>
@@ -95,15 +99,10 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
                       : [...filters.targets, label]
                   )
                 }
+                style={buttonStyle(isSelected)}
+                onMouseEnter={(e) => handleMouseEnter(e, isSelected)}
+                onMouseLeave={(e) => handleMouseLeave(e, isSelected)}
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
-                style={{
-                  padding: '6px 10px',
-                  backgroundColor: '#FFFFFF',
-                  border: isSelected
-                    ? '1px solid rgba(149,215,105,0.7)'
-                    : '1px solid rgba(0,0,0,0.08)',
-                  color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
               >
                 {label}
               </button>
@@ -112,8 +111,8 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
         </div>
       </div>
 
-      {/* 구역 2: 요일 */}
-      <div className="">
+      {/* 구역 2,3,4 요일, 시간, 지역도 동일하게 hover 적용 */}
+      <div>
         <h3 className="font-medium mb-2 text-[14px]">요일</h3>
         <div className="inline-flex flex-wrap gap-2 max-w-max">
           {['월', '화', '수', '목', '금', '토', '일'].map((d) => {
@@ -127,15 +126,10 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
                     isSelected ? filters.days.filter((x) => x !== d) : [...filters.days, d]
                   )
                 }
+                style={buttonStyle(isSelected)}
+                onMouseEnter={(e) => handleMouseEnter(e, isSelected)}
+                onMouseLeave={(e) => handleMouseLeave(e, isSelected)}
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
-                style={{
-                  padding: '6px 10px',
-                  backgroundColor: '#FFFFFF',
-                  border: isSelected
-                    ? '1px solid rgba(149,215,105,0.7)'
-                    : '1px solid rgba(0,0,0,0.08)',
-                  color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
               >
                 {d}
               </button>
@@ -144,8 +138,7 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
         </div>
       </div>
 
-      {/* 구역 3: 시간 */}
-      <div className="">
+      <div>
         <h3 className="font-medium mb-2 text-[14px]">시간</h3>
         <div className="flex gap-2 flex-wrap">
           {['조식', '중식', '석식'].map((t) => {
@@ -159,15 +152,10 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
                     isSelected ? filters.times.filter((x) => x !== t) : [...filters.times, t]
                   )
                 }
+                style={buttonStyle(isSelected)}
+                onMouseEnter={(e) => handleMouseEnter(e, isSelected)}
+                onMouseLeave={(e) => handleMouseLeave(e, isSelected)}
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
-                style={{
-                  padding: '6px 10px',
-                  backgroundColor: '#FFFFFF',
-                  border: isSelected
-                    ? '1px solid rgba(149,215,105,0.7)'
-                    : '1px solid rgba(0,0,0,0.08)',
-                  color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
               >
                 {t}
               </button>
@@ -176,8 +164,7 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
         </div>
       </div>
 
-      {/* 구역 4: 지역 */}
-      <div className="">
+      <div>
         <h3 className="font-medium mb-2 text-[14px]">지역</h3>
         <div className="flex gap-2">
           {[
@@ -188,19 +175,11 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
             return (
               <button
                 key={r.id}
-                onClick={() => {
-                  // ⭐ 3. 토글 기능: 이미 선택된 걸 누르면 해제(null), 아니면 선택
-                  updateFilter('region', isSelected ? null : r.id);
-                }}
+                onClick={() => updateFilter('region', isSelected ? null : r.id)}
+                style={buttonStyle(isSelected)}
+                onMouseEnter={(e) => handleMouseEnter(e, isSelected)}
+                onMouseLeave={(e) => handleMouseLeave(e, isSelected)}
                 className="rounded-[6px] text-[14px] transition-all flex items-center gap-1"
-                style={{
-                  padding: '6px 10px',
-                  backgroundColor: '#FFFFFF',
-                  border: isSelected
-                    ? '1px solid rgba(149,215,105,0.7)'
-                    : '1px solid rgba(0,0,0,0.08)',
-                  color: isSelected ? '#000000' : 'rgba(0,0,0,0.5)',
-                }}
               >
                 {r.label}
               </button>
@@ -209,7 +188,6 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
         </div>
       </div>
 
-      {/* 버튼 */}
       <div className="flex justify-end gap-2 mt-auto">
         <button
           onClick={onCancel}
