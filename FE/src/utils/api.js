@@ -1,12 +1,13 @@
-// utils/api.js
 import axios from 'axios';
 
+const isMock = import.meta.env.VITE_USE_MSW === 'true';
+
 const api = axios.create({
-  baseURL: '', // 백엔드 포트에 맞게 설정할 것
+  baseURL: isMock ? '' : import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false, // JWT 쿠키 안 쓸 거면 false, 쓸 거면 true
 });
 
 export default api;

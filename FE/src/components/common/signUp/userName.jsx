@@ -21,11 +21,13 @@ const UserName = ({ value, onChange }) => {
           value={value}
           onChange={handleUserNameChange}
           className={`w-full outline-none h-[51px]
-              px-[16px] py-[14px]
+              px-[16px] py-[14px] 
               border ${isUserNameValid ? 'border-gray-stroke08' : 'border-rederror'}
               rounded-[8px]
               ${isUserNameValid ? 'focus-within:border-main' : 'focus-within:border-rederror'}
-              placeholder-gray-stroke30 tracking-[-0.025em]`}
+              placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main 
+          transition-all duration-300 ease-in-out
+          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300`}
         />
         {!isUserNameValid && (
           <div className="text-rederror text-[14px] font-medium leading-[1.4]">
