@@ -21,41 +21,40 @@ export default function Sidebar({
   filteredPlaces,
   selectedPlace,
   setSelectedPlace,
+
   showOpenOnly,
   setShowOpenOnly,
   showDeliveryOnly,
   setShowDeliveryOnly,
+
   onOpenFilter,
   onOpenRegionSelect,
   onHeaderHeightChange,
+
+  /** ⭐⭐ 이 두 개를 반드시 받아야 함 */
+  detailFilterActive,
+  setDetailFilterActive,
 }) {
   const headerRef = useRef(null);
+
   useEffect(() => {
     if (onHeaderHeightChange) {
       onHeaderHeightChange(headerRef.current?.offsetHeight || 0);
     }
   }, []);
 
-  // ⭐ 위치 정보(pos)를 받아서 상위 컴포넌트(MapPage)로 전달
+  // 필터 위치 계산
   const handleOpenFilter = (pos) => {
-    if (onOpenFilter) {
-      onOpenFilter(pos);
-    }
-  };
-
-  const handleFilterToggle = (filterId) => {
-    setSelectedFilters((prev) => (prev.includes(filterId) ? [] : [filterId]));
+    if (onOpenFilter) onOpenFilter(pos);
   };
 
   return (
-    <div
-      ref={headerRef}
-      className="w-[380px] h-full bg-[#ffffff] shadow-custom-drop flex flex-col z-30 flex-shrink-0"
-    >
+    <div className="w-[380px] h-full bg-[#ffffff] shadow-custom-drop flex flex-col z-30 flex-shrink-0">
       {/* 헤더 */}
       <div ref={headerRef} className="px-6 pt-6 pb-4 p-4 border-b border-gray-stroke05">
         <div className="flex items-center justify-between mb-4">
           <img src={IconLogo} alt="복키 로고" className="h-[24px] object-contain flex-shrink-0" />
+
           <div className="flex-shrink-0">
             <LocationDropdowns
               sido={sido}
@@ -69,11 +68,16 @@ export default function Sidebar({
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
         {mode === 'child' && (
-          <SearchFilter selectedFilters={selectedFilters} onFilterToggle={handleFilterToggle} />
+          <SearchFilter
+            selectedFilters={selectedFilters}
+            onFilterToggle={(id) => {
+              setSelectedFilters((prev) => (prev.includes(id) ? [] : [id]));
+            }}
+          />
         )}
       </div>
 
-      {/* 결과 리스트 */}
+      {/* ⭐ PlaceList에 detailFilterActive 전달해야 함 */}
       <PlaceList
         mode={mode}
         places={filteredPlaces}
@@ -83,10 +87,13 @@ export default function Sidebar({
         setShowOpenOnly={setShowOpenOnly}
         showDeliveryOnly={showDeliveryOnly}
         setShowDeliveryOnly={setShowDeliveryOnly}
-        onOpenFilter={handleOpenFilter} // ⭐ 수정된 핸들러 전달
+        onOpenFilter={handleOpenFilter}
         sido={sido}
         sigungu={sigungu}
         onOpenRegionSelect={onOpenRegionSelect}
+        /** ⭐⭐ 핵심: 이걸 전달해야 버튼 활성화 로직이 작동함 */
+        detailFilterActive={detailFilterActive}
+        setDetailFilterActive={setDetailFilterActive}
       />
     </div>
   );

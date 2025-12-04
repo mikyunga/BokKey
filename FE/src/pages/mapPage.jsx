@@ -28,6 +28,8 @@ export default function MapPage() {
   const [isLocationFocused, setIsLocationFocused] = useState(false);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [detailFilterActive, setDetailFilterActive] = useState(false);
+
   const [isDetailCollapsed, setIsDetailCollapsed] = useState(false);
 
   const toggleDetailCollapse = () => setIsDetailCollapsed((prev) => !prev);
@@ -176,8 +178,9 @@ export default function MapPage() {
   ]);
 
   /** ⭐ 상세조건 패널 */
-  const handlePanelApply = (filters) => {
+  const handlePanelApply = (filters, hasActive) => {
     setPanelFilters(filters);
+    setDetailFilterActive(hasActive);
     setIsFilterOpen(false);
   };
 
@@ -233,6 +236,9 @@ export default function MapPage() {
           showDeliveryOnly={showDeliveryOnly}
           setShowDeliveryOnly={setShowDeliveryOnly}
           onOpenFilter={handleOpenFilter}
+          detailFilterActive={detailFilterActive}
+          setDetailFilterActive={setDetailFilterActive}
+          panelFilters={panelFilters}
         />
 
         {/* ⭐ DetailPanel — PlaceList 오른쪽에 딱 붙는 패널 */}
@@ -276,17 +282,21 @@ export default function MapPage() {
 
           {isFilterOpen && (
             <div
-              className="absolute left-[380px] z-50 p-2 pointer-events-none flex flex-col justify-start"
+              className="absolute left-[px] z-50 p-2 pointer-events-none flex flex-col justify-start"
               style={{
                 top: `${Math.max(0, panelTop - 24)}px`,
-                height: `calc(100% - ${Math.max(0, panelTop - 30)}px)`,
               }}
             >
               <div className="pointer-events-auto h-full">
                 <FilterPanel
                   initialFilters={panelFilters}
                   onApply={handlePanelApply}
-                  onCancel={() => setIsFilterOpen(false)}
+                  onCancel={() => {
+                    setIsFilterOpen(false);
+                    // ⭐ 취소 시 버튼을 비활성화 상태로 되돌림
+                    setDetailFilterActive(false);
+                    setPanelFilters({ targets: [], days: [], times: [], region: null });
+                  }}
                 />
               </div>
             </div>

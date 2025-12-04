@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
 
@@ -15,10 +15,12 @@ export default function PlaceList({
   setShowDeliveryOnly,
   onOpenFilter,
   onHeaderHeightChange,
+  detailFilterActive,
+  setDetailFilterActive,
 }) {
-  const [isDetailFilterActive, setIsDetailFilterActive] = useState(false);
   const filterButtonRef = useRef(null);
   const headerRef = useRef(null);
+
   useEffect(() => {
     if (onHeaderHeightChange) {
       onHeaderHeightChange(headerRef.current?.offsetHeight || 0);
@@ -29,11 +31,9 @@ export default function PlaceList({
     if (filterButtonRef.current && onOpenFilter) {
       const rect = filterButtonRef.current.getBoundingClientRect();
 
-      setIsDetailFilterActive(true);
-
       onOpenFilter({
         top: rect.top,
-        resetActive: () => setIsDetailFilterActive(false),
+        resetActive: () => setDetailFilterActive(false),
       });
     }
   };
@@ -41,7 +41,7 @@ export default function PlaceList({
   return (
     <div className="flex-1 min-h-0 h-full">
       <div className="relative h-full flex flex-col">
-        {/* 상단 헤더 */}
+        {/* ìƒë‹¨ í—¤ë" */}
         <div
           ref={headerRef}
           className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-stroke02"
@@ -50,7 +50,7 @@ export default function PlaceList({
             <h3 className="font-medium text-base">검색 결과</h3>
 
             <div className="flex items-center gap-2 text-sm">
-              {/* 영업중 버튼 */}
+              {/* 영업중 */}
               <button
                 onClick={() => setShowOpenOnly((prev) => !prev)}
                 className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
@@ -63,7 +63,7 @@ export default function PlaceList({
                 <span>영업중</span>
               </button>
 
-              {/* 배달가능 / 상세조건 */}
+              {/* 배달 가능 */}
               {mode === 'child' ? (
                 <button
                   onClick={() => setShowDeliveryOnly((prev) => !prev)}
@@ -81,7 +81,7 @@ export default function PlaceList({
                   ref={filterButtonRef}
                   onClick={handleFilterClick}
                   className={`flex items-center gap-1 px-[10px] py-[6px] rounded-full font-medium text-sm transition-all border ${
-                    isDetailFilterActive
+                    detailFilterActive
                       ? 'bg-white-_100 border-[rgba(120,195,71,0.3)] text-[#78C347]'
                       : 'bg-gray-stroke03 border-transparent text-gray-stroke60 hover:bg-white-_100 hover:border-gray-stroke05 hover:text-gray-stroke70'
                   }`}
@@ -94,7 +94,7 @@ export default function PlaceList({
           </div>
         </div>
 
-        {/* 리스트 */}
+        {/* ë¦¬ìŠ¤íŠ¸ */}
         <div className="flex-1 overflow-y-auto overlay-scrollbar">
           {places.map((place) => (
             <PlaceItem

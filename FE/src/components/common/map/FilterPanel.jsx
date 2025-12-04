@@ -10,10 +10,20 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
 
   const updateFilter = (key, value) => setFilters((prev) => ({ ...prev, [key]: value }));
 
-  const resetFilter = () => setFilters({ targets: [], days: [], times: [], region: null });
+  const resetFilter = () => {
+    const cleared = { targets: [], days: [], times: [], region: null };
+    setFilters(cleared);
+    onApply(cleared, false);
+  };
 
   const handleApply = () => {
-    onApply(filters);
+    const hasActiveFilters =
+      filters.targets.length > 0 ||
+      filters.days.length > 0 ||
+      filters.times.length > 0 ||
+      filters.region !== null;
+
+    onApply(filters, hasActiveFilters);
   };
 
   const buttonStyle = (selected) => ({
@@ -202,7 +212,7 @@ export default function FilterPanel({ onApply, onCancel, initialFilters }) {
 
       <div className="flex justify-end gap-2 mt-auto">
         <button
-          onClick={onCancel}
+          onClick={() => onCancel(false)}
           className="rounded-full px-4 py-2"
           style={{
             fontSize: '14px',
