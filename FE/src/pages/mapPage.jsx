@@ -240,8 +240,9 @@ export default function MapPage() {
           <div
             className="absolute z-30"
             style={{
-              top: '96px',
-              left: '380px',
+              top: '50%',
+              left: '388px',
+              transform: 'translateY(-50%)',
               width: isDetailCollapsed ? '42px' : '360px',
             }}
           >
