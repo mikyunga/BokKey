@@ -7,7 +7,7 @@ export default function DetailPanel(props) {
   if (!place) return null;
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-visible">
       {mode === 'child' ? <ChildDetailPanel {...props} /> : <SeniorDetailPanel {...props} />}
     </div>
   );

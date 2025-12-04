@@ -209,7 +209,7 @@ export default function MapPage() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden flex flex-col">
+    <div className="relative w-full h-screen overflow-visible flex flex-col">
       <CategoryToggle mode={mode} onModeChange={handleModeChange} />
 
       {/* ========== 전체 레이아웃 ========== */}
@@ -241,9 +241,9 @@ export default function MapPage() {
             className="absolute z-30"
             style={{
               top: '50%',
-              left: '388px',
+              left: '396px',
               transform: 'translateY(-50%)',
-              width: isDetailCollapsed ? '42px' : '360px',
+              width: isDetailCollapsed ? '42px' : '380px',
             }}
           >
             <DetailPanel

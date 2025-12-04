@@ -16,33 +16,54 @@ export default function ChildDetailPanel({ place, isCollapsed, onToggleCollapse,
     <div
       className="
         bg-[#FFFFFF]
-        pl-6 pr-[18px] py-4
+        p-6
         cursor-default
         flex flex-col gap-[8px]
         text-[14px] leading-[1.35]
+        rounded-[10px]
+        shadow-[0_2px_8px_rgba(0,0,0,0.08)]
+        relative
+        z-50
       "
     >
-      {/* 접기/닫기 */}
-      <div className="flex justify-between items-center">
-        <button onClick={onToggleCollapse} className="p-1 hover:bg-black/5 rounded-full">
-          {isCollapsed ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+      {/* 제목 + 카테고리 + 닫기 */}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-[8px]">
+          <h2 className="font-semibold text-[20px]">{place.name}</h2>
+          <span className="text-[14px] text-black-_30 font-medium">{place.categoryText}</span>
+        </div>
+        <button onClick={onClose} className="group p-1 rounded-full transition-all duration-150">
+          <div
+            className="
+              rounded-full
+              p-1
+              transition-all
+              duration-150
+              group-hover:bg-[rgba(0,0,0,0.02)]
+            "
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4 opacity group-hover:opacity-100"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              fill="none"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </div>
         </button>
-        <button onClick={onClose} className="p-1 hover:bg-black/5 rounded-full">
-          ✕
-        </button>
-      </div>
-
-      {/* 가게 이름과 카테고리 */}
-      <div className="flex items-center gap-2">
-        <h2 className="font-semibold text-[20px]">{place.name}</h2>
-        <span className="text-[14px] text-gray-400">{place.categoryText}</span>
       </div>
 
       {/* 상태 라벨 */}
-      <div className="flex gap-1 mb-2">
+      <div className="flex gap-[8px] mb-2">
         {statusLabels.length > 0 && (
           <span
-            className="px-[3px] py-[2px] rounded-[4px] text-[14px] font-semibold"
+            className="px-[3px] py-[1px] rounded-[4px] text-[13px] font-medium"
             style={{ backgroundColor: 'rgba(255,146,56,0.08)', color: '#FF9238' }}
           >
             {statusLabels.join(' · ')}
@@ -51,56 +72,85 @@ export default function ChildDetailPanel({ place, isCollapsed, onToggleCollapse,
       </div>
 
       {/* 주소 */}
-      <div
-        className="flex flex-col gap-[2px] cursor-pointer"
-        onClick={() => setShowAddressDetail((v) => !v)}
-      >
-        <div className="flex items-center gap-2">
-          <MapPin size={16} />
-          <span className="opacity-70">{place.address}</span>
+      <div className="mb-1">
+        <div className="flex flex-col gap-[8px]">
+          <div
+            className="flex items-center gap-[6px] leading-none cursor-pointer w-fit"
+            onClick={() => setShowAddressDetail((v) => !v)}
+          >
+            <MapPin size={14} />
+            <span className="opacity-70 leading-none">{place.address}</span>
+            {showAddressDetail ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </div>
+
+          {showAddressDetail && (
+            <div className="ml-5 flex items-center gap-[8px]">
+              <span
+                className="text-[12px] px-[3px] py-[1px] rounded-[3px] text-black-_30 font-medium"
+                style={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+              >
+                지번
+              </span>
+              <span className="text-[14px] opacity-30 leading-none">{place.lotAddress}</span>
+            </div>
+          )}
         </div>
-        {showAddressDetail && (
-          <span className="text-[12px] opacity-70 px-2 py-2 bg-black/[0.03] rounded ml-6">
-            {place.lotAddress}
-          </span>
-        )}
       </div>
 
       {/* 전화 */}
-      <div className="flex items-center gap-2">
-        <Phone size={16} />
-        {place.phone ? (
-          <span className="opacity-70">{place.phone}</span>
-        ) : (
-          <span className="opacity-30">정보 없음</span>
-        )}
+      <div className="mb-1">
+        <div className="flex items-center gap-[6px] leading-none">
+          <Phone size={14} />
+          {place.phone ? (
+            <span className="opacity-70 leading-none">{place.phone}</span>
+          ) : (
+            <span className="opacity-30 leading-none">정보 없음</span>
+          )}
+        </div>
       </div>
 
       {/* 시간 */}
-      <div
-        className="flex flex-col gap-[2px] cursor-pointer"
-        onClick={() => setShowTimeDetail((v) => !v)}
-      >
-        <div className="flex items-center gap-2">
-          <Clock size={16} />
-          <span className="opacity-70">{place.time}</span>
-        </div>
-        {showTimeDetail && (
-          <div className="ml-6 space-y-1">
-            <span className="text-[12px] opacity-70 px-2 py-2 bg-black/[0.03] rounded block">
-              공휴일: {place.holidayTime}
-            </span>
-            {place.breakTime && (
-              <span className="text-[12px] opacity-70 px-2 py-2 bg-black/[0.03] rounded block">
-                브레이크타임: {place.breakTime}
-              </span>
-            )}
+      <div className="mb-1">
+        <div className="flex flex-col gap-[8px]">
+          <div
+            className="flex items-center gap-[6px] leading-none cursor-pointer w-fit"
+            onClick={() => setShowTimeDetail((v) => !v)}
+          >
+            <Clock size={14} />
+            <span className="opacity-70 leading-none">{place.time}</span>
+            {showTimeDetail ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </div>
-        )}
+
+          {showTimeDetail && (
+            <div className="ml-5 space-y-1">
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-[12px] px-[3px] py-[1px] rounded-[3px] text-black-_30 font-medium"
+                  style={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                >
+                  공휴일
+                </span>
+                <span className="text-[14px] opacity-30 leading-none">{place.holidayTime}</span>
+              </div>
+
+              {place.breakTime && (
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-[12px] px-[3px] py-[1px] rounded-[3px] text-black-_30 font-medium"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                  >
+                    브레이크
+                  </span>
+                  <span className="text-[14px] opacity-30 leading-none">{place.breakTime}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 버튼 */}
-      <div className="flex gap-3 pt-2">
+      <div className="flex justify-end gap-3 pt-2">
         <button className="px-4 py-2 bg-white border rounded-full hover:bg-gray-50">
           ⭐ 즐겨찾기
         </button>
