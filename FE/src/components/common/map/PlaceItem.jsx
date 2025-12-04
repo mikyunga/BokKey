@@ -8,8 +8,9 @@ import FavoriteButton from './FavoriteButton';
 export default function PlaceItem({ place, mode, onSelect }) {
   const isChildMode = mode === 'child';
 
-  const handleClick = () => {
-    onSelect(place);
+  const handleClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    onSelect(place, rect.top);
   };
 
   const categoryLabel =
@@ -18,13 +19,16 @@ export default function PlaceItem({ place, mode, onSelect }) {
 
   return (
     <div
-      onClick={handleClick}
+      onClick={(e) => handleClick(e)}
       style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}
       className={`
-        bg-white pl-6 pr-[18px] py-4 
+        bg-white 
+        pl-6 pr-[18px] py-4 
         cursor-pointer 
         flex flex-col gap-[6px]
         max-h-48
+        transition-colors duration-150
+        hover:bg-black/[0.02]
       `}
     >
       {/* 상단: 가게 이름 + 업종, 오른쪽 star */}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Clock, ShoppingBag, SlidersHorizontal } from 'lucide-react';
 import PlaceItem from './PlaceItem';
 
@@ -14,9 +14,16 @@ export default function PlaceList({
   showDeliveryOnly,
   setShowDeliveryOnly,
   onOpenFilter,
+  onHeaderHeightChange,
 }) {
   const [isDetailFilterActive, setIsDetailFilterActive] = useState(false);
   const filterButtonRef = useRef(null);
+  const headerRef = useRef(null);
+  useEffect(() => {
+    if (onHeaderHeightChange) {
+      onHeaderHeightChange(headerRef.current?.offsetHeight || 0);
+    }
+  }, []);
 
   const handleFilterClick = () => {
     if (filterButtonRef.current && onOpenFilter) {
@@ -35,7 +42,10 @@ export default function PlaceList({
     <div className="flex-1 min-h-0 h-full">
       <div className="relative h-full flex flex-col">
         {/* 상단 헤더 */}
-        <div className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-stroke02">
+        <div
+          ref={headerRef}
+          className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-stroke02"
+        >
           <div className="flex items-center justify-between">
             <h3 className="font-medium text-base">검색 결과</h3>
 
@@ -92,7 +102,7 @@ export default function PlaceList({
               place={place}
               mode={mode}
               isSelected={selectedPlace && selectedPlace.id === place.id}
-              onSelect={onSelectPlace}
+              onSelect={(place, top) => onSelectPlace(place, top)}
             />
           ))}
 
