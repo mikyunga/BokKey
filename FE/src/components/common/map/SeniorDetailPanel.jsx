@@ -163,7 +163,7 @@ export default function SeniorDetailPanel({ place, onClose }) {
           target="_blank"
           rel="noopener noreferrer"
           className="
-            flex items-center gap-[6px] mt-[8px]
+            flex items-center gap-[4px] mt-[8px]
             px-[14px] py-2 rounded-full font-medium text-[14px]
             bg-[#78C347]
             hover:bg-[#6bb03f]

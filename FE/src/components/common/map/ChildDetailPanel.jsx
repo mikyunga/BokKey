@@ -173,8 +173,8 @@ export default function ChildDetailPanel({ place, isCollapsed, onToggleCollapse,
         <button
           onClick={() => toggleFavorite(place, 'child')}
           className="
-            flex items-center gap-[6px] mt-[8px]
-            pl-3 pr-[14px] py-2 rounded-full
+            flex items-center gap-[4px] mt-[8px]
+            pl-2 pr-[14px] py-2 rounded-full
             font-medium text-[14px]
             transition-all duration-150
           "
@@ -193,7 +193,7 @@ export default function ChildDetailPanel({ place, isCollapsed, onToggleCollapse,
           target="_blank"
           rel="noopener noreferrer"
           className="
-            flex items-center gap-[6px] mt-[8px]
+            flex items-center gap-[4px] mt-[8px]
             px-[14px] py-2 rounded-full font-medium text-[14px]
             bg-[#78C347]
             hover:bg-[#6bb03f]
