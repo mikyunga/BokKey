@@ -32,10 +32,23 @@ export default function PlaceItem({ place, mode, onSelect }) {
       `}
     >
       {/* 상단: 가게 이름 + 업종, 오른쪽 star */}
-      <div className="flex items-center">
+      <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-[6px] flex-1">
-          <h4 className="font-semibold text-[16px]">{place.name}</h4>
-          <span className="text-[14px] opacity-30 font-medium">{categoryLabel}</span>
+          <h4
+            className="
+              font-semibold text-[16px]
+              truncate
+              cursor-default
+              inline-block
+              max-w-[75%]
+            "
+            onClick={() => navigator.clipboard.writeText(place.name)}
+          >
+            {place.name}
+          </h4>
+          <span className="text-[14px] opacity-30 font-medium" style={{ flexShrink: 0 }}>
+            {categoryLabel}
+          </span>
         </div>
         <FavoriteButton place={place} mode={mode} />
       </div>
