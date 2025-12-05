@@ -1,7 +1,7 @@
 'use client';
 
+import { MapPin, Phone, User } from 'lucide-react';
 import { CHILD_FILTERS } from '../../../constants/filters';
-import { IconLocationGrey, IconCall, IconPerson } from '../../../utils/icons';
 
 import FavoriteButton from './FavoriteButton';
 
@@ -54,25 +54,29 @@ export default function PlaceItem({ place, mode, onSelect }) {
       </div>
 
       {/* 주소, 전화번호 */}
-      <div className="flex flex-col gap-[2px] text-[14px] font-normal">
-        <div className="flex items-center gap-2">
-          <img src={IconLocationGrey} />
-          <span className="text-[14px] font-normal opacity-70">{place.address}</span>
+      <div className="flex flex-col gap-[4px] text-[14px] font-normal">
+        {/* 주소 */}
+        <div className="flex gap-[4px] items-start">
+          <MapPin size={14} className="flex-shrink-0 text-black/70 opacity-30 mt-[2px]" />
+          <span className="text-[14px] font-normal opacity-70 leading-[1.35] break-words">
+            {place.address}
+          </span>
         </div>
 
+        {/* 전화/대상 */}
         {isChildMode ? (
-          <div className="flex items-center gap-2">
-            <img src={IconCall} />
+          <div className="flex gap-[4px] items-center">
+            <Phone size={14} className="flex-shrink-0 text-black/70 opacity-30 p-[0.5px]" />
             {place.phone ? (
-              <span className="text-[14px] font-normal opacity-70">{place.phone}</span>
+              <span className="text-[14px] font-normal opacity-70 truncate">{place.phone}</span>
             ) : (
               <span className="text-[14px] font-normal opacity-30">정보 없음</span>
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <img src={IconPerson} />
-            <span className="text-[14px] font-normal opacity-70">
+          <div className="flex gap-[6px] items-center">
+            <User size={14} className="flex-shrink-0 text-black/70 opacity-30" />
+            <span className="text-[14px] font-normal opacity-70 truncate">
               {Array.isArray(place.target_name) ? place.target_name.join(', ') : place.target_name}
             </span>
           </div>

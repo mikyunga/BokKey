@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, MapPin, Phone, Clock, Star, Route } from 'lucid
 import { useState, useRef, useEffect } from 'react';
 import { useFavorites } from '../../../contexts/FavoriteContext';
 
+// ... SmartTooltip 컴포넌트는 그대로 유지 ...
 function SmartTooltip({ text, children, targetRef }) {
   const [show, setShow] = useState(false);
   const [isOverflow, setIsOverflow] = useState(false);
@@ -50,11 +51,16 @@ export default function ChildDetailPanel({
 }) {
   const [showAddressDetail, setShowAddressDetail] = useState(false);
   const [showTimeDetail, setShowTimeDetail] = useState(false);
+  const [animReady, setAnimReady] = useState(false);
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setAnimReady(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
 
   const panelRef = useRef(null);
   const nameRef = useRef(null);
-  const addressRef = useRef(null);
 
+  // 닫기 로직
   useEffect(() => {
     function handleClickOutside(e) {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -67,10 +73,16 @@ export default function ChildDetailPanel({
     };
   }, [onClose]);
 
+  // ⭐ 헬퍼 함수: 텍스트가 유효한 정보인지 확인 (정보 없음이 아니고, 비어있지 않아야 함)
+  const isValidInfo = (text) => {
+    return text && text !== '정보 없음' && text.trim() !== '';
+  };
+
   const copyToClipboard = (text, e) => {
-    if (e) {
-      e.stopPropagation();
-    }
+    if (e) e.stopPropagation();
+    // 정보가 유효하지 않으면 복사 실행 안 함
+    if (!isValidInfo(text)) return;
+
     navigator.clipboard.writeText(text);
     if (onCopySuccess) {
       onCopySuccess();
@@ -96,6 +108,7 @@ export default function ChildDetailPanel({
       .animate-fadeIn {
         animation: fadeIn 0.15s ease-out;
       }
+      /* copy-link 클래스는 이제 유효한 정보일 때만 붙으므로 그대로 둠 */
       .copy-link:hover {
         text-decoration: underline;
       }
@@ -113,8 +126,14 @@ export default function ChildDetailPanel({
           rounded-[12px]
           shadow-[0_4px_14px_rgba(0,0,0,0.12)]
           relative z-50
-          transition-all duration-300 transform
-          ${isCollapsed ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}
+          transform transition-all
+          ${
+            !animReady
+              ? 'opacity-0 -translate-x-2 scale-[0.995]'
+              : isCollapsed
+                ? 'opacity-0 -translate-x-2 scale-[0.995] duration-180 ease-in'
+                : 'opacity-100 translate-x-0 scale-100 duration-300 ease-out'
+          }  
         `}
       >
         {/* 제목 + 카테고리 */}
@@ -126,7 +145,7 @@ export default function ChildDetailPanel({
               truncate
               cursor-default
             "
-            onClick={() => navigator.clipboard.writeText(place?.name || '')}
+            onClick={(e) => copyToClipboard(place?.name, e)}
           >
             {place?.name}
           </h2>
@@ -145,7 +164,7 @@ export default function ChildDetailPanel({
           </span>
         )}
 
-        {/* 주소, 전화, 시간 섹션을 하나의 wrapper로 묶음 */}
+        {/* 주소, 전화, 시간 섹션 */}
         <div className="flex flex-col gap-[10px]">
           {/* 주소 */}
           <div>
@@ -153,21 +172,24 @@ export default function ChildDetailPanel({
               className="flex gap-[6px] cursor-pointer w-full items-start"
               onClick={() => setShowAddressDetail((v) => !v)}
             >
-              <MapPin size={16} className="flex-shrink-0 text-black/70 mt-[1px]" />
+              <MapPin size={14} className="flex-shrink-0 text-black/70 mt-[2px] opacity-30" />
 
               <div className="min-w-0 flex-1">
                 <div className="flex gap-0 items-start">
                   <span
-                    className="opacity-70 text-[14px] leading-[1.35] break-words cursor-pointer copy-link"
-                    onClick={(e) => copyToClipboard(place?.address || '', e)}
+                    className={
+                      `opacity-70 text-[14px] leading-[1.35] break-words ` +
+                      `${isValidInfo(place?.address) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                    }
+                    onClick={(e) => copyToClipboard(place?.address, e)}
                   >
-                    {place?.address}
+                    {place?.address || '정보 없음'}
                   </span>
 
                   {showAddressDetail ? (
-                    <ChevronUp size={16} className="flex-shrink-0 opacity-70 ml-[2px] mt-[1px]" />
+                    <ChevronUp size={16} className="flex-shrink-0 opacity-70 ml-[4px] mt-[1px]" />
                   ) : (
-                    <ChevronDown size={16} className="flex-shrink-0 opacity-70 ml-[2px] mt-[1px]" />
+                    <ChevronDown size={16} className="flex-shrink-0 opacity-70 ml-[4px] mt-[1px]" />
                   )}
                 </div>
               </div>
@@ -184,11 +206,15 @@ export default function ChildDetailPanel({
                   </span>
 
                   <div className="flex-1 min-w-0">
+                    {/* ⭐ 지번 주소 수정 부분 ⭐ */}
                     <span
-                      className="text-[14px] opacity-30 leading-[1.35] break-words cursor-pointer block copy-link"
-                      onClick={() => copyToClipboard(place?.lotAddress || '')}
+                      className={
+                        `text-[14px] opacity-30 leading-[1.35] break-words block ` +
+                        `${isValidInfo(place?.lotAddress) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                      }
+                      onClick={(e) => copyToClipboard(place?.lotAddress, e)}
                     >
-                      {place?.lotAddress}
+                      {place?.lotAddress || '정보 없음'}
                     </span>
                   </div>
                 </div>
@@ -199,19 +225,17 @@ export default function ChildDetailPanel({
           {/* 전화 */}
           <div>
             <div className="flex items-center gap-[6px] leading-none">
-              <Phone size={16} className="opacity-70 flex-shrink-0 leading-none" />
-              {place?.phone ? (
-                <span
-                  className="opacity-70 text-[14px] leading-none truncate cursor-pointer inline-block copy-link"
-                  onClick={() => copyToClipboard(place?.phone || '')}
-                >
-                  {place?.phone}
-                </span>
-              ) : (
-                <span className="opacity-30 text-[14px] leading-none flex items-center">
-                  정보 없음
-                </span>
-              )}
+              <Phone size={14} className="opacity-30 flex-shrink-0 leading-none " />
+              {/* ⭐ 전화번호 수정 부분 ⭐ */}
+              <span
+                className={
+                  `opacity-70 text-[14px] leading-none truncate inline-block ` +
+                  `${isValidInfo(place?.phone) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                }
+                onClick={(e) => copyToClipboard(place?.phone, e)}
+              >
+                {place?.phone || '정보 없음'}
+              </span>
             </div>
           </div>
 
@@ -221,21 +245,24 @@ export default function ChildDetailPanel({
               className="flex gap-[6px] cursor-pointer w-full items-center"
               onClick={() => setShowTimeDetail((v) => !v)}
             >
-              <Clock size={16} className="flex-shrink-0 text-black/70 mt-[1px]" />
+              <Clock size={14} className="flex-shrink-0 text-black/70 opacity-30" />
 
               <div className="min-w-0 flex-1">
                 <div className="flex gap-0 items-center">
                   <span
-                    className="opacity-70 leading-none truncate cursor-pointer copy-link"
-                    onClick={() => copyToClipboard(place?.time || '')}
+                    className={
+                      `opacity-70 leading-none truncate ` +
+                      `${isValidInfo(place?.time) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                    }
+                    onClick={(e) => copyToClipboard(place?.time, e)}
                   >
-                    {place?.time}
+                    {place?.time || '정보 없음'}
                   </span>
 
                   {showTimeDetail ? (
-                    <ChevronUp size={16} className="flex-shrink-0 opacity-70 ml-[2px] mt-[1px]" />
+                    <ChevronUp size={16} className="flex-shrink-0 opacity-70 ml-[4px]" />
                   ) : (
-                    <ChevronDown size={16} className="flex-shrink-0 opacity-70 ml-[2px] mt-[1px]" />
+                    <ChevronDown size={16} className="flex-shrink-0 opacity-70 ml-[4px]" />
                   )}
                 </div>
               </div>
@@ -253,10 +280,13 @@ export default function ChildDetailPanel({
 
                   <div className="flex-1 min-w-0">
                     <span
-                      className="text-[14px] opacity-30 leading-none truncate cursor-pointer flex items-center w-full copy-link"
-                      onClick={() => copyToClipboard(place?.holidayTime || '')}
+                      className={
+                        `text-[14px] opacity-30 leading-none truncate flex items-center w-full ` +
+                        `${isValidInfo(place?.holidayTime) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                      }
+                      onClick={(e) => copyToClipboard(place?.holidayTime, e)}
                     >
-                      {place?.holidayTime}
+                      {place?.holidayTime || '정보 없음'}
                     </span>
                   </div>
                 </div>
@@ -272,11 +302,14 @@ export default function ChildDetailPanel({
 
                     <div className="flex-1 min-w-0">
                       <span
-                        className="text-[14px] opacity-30 leading-none truncate cursor-pointer flex items-center w-full copy-link"
+                        className={
+                          `text-[14px] opacity-30 leading-none truncate flex items-center w-full ` +
+                          `${isValidInfo(place?.breakTime) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                        }
                         style={{ color: 'rgba(0,0,0,0.4)' }}
-                        onClick={() => copyToClipboard(place?.breakTime || '')}
+                        onClick={(e) => copyToClipboard(place?.breakTime, e)}
                       >
-                        {place?.breakTime}
+                        {place?.breakTime || '정보 없음'}
                       </span>
                     </div>
                   </div>
@@ -310,7 +343,7 @@ export default function ChildDetailPanel({
             즐겨찾기
           </button>
 
-          {/* 🧭 길찾기 버튼 (카카오맵 링크) */}
+          {/* 🧭 길찾기 버튼 */}
           <a
             href={`https://map.kakao.com/link/to/${encodeURIComponent(place?.name || '')},${place?.latitude},${place?.longitude}`}
             target="_blank"
