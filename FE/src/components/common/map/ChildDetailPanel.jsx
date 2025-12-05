@@ -1,11 +1,11 @@
 'use client';
 
-import { ChevronDown, ChevronUp, MapPin, Phone, Clock, Star, Route } from 'lucide-react';
+import { ChevronDown, ChevronUp, MapPin, Phone, Clock, Star, CarFront } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useFavorites } from '../../../contexts/FavoriteContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ... SmartTooltip 컴포넌트는 그대로 유지 ...
+// ... SmartTooltip 컴포넌트는 보내주신 디자인(픽스된 버전) 그대로 유지 ...
 function SmartTooltip({ text, children, targetRef, className = '' }) {
   const [show, setShow] = useState(false);
   const [isOverflow, setIsOverflow] = useState(false);
@@ -31,7 +31,7 @@ function SmartTooltip({ text, children, targetRef, className = '' }) {
             absolute top-full left-0 mt-1
             px-2 py-1 rounded-md text-black-_80
             border border-black-_07
-            bg-white-_100 text-white text-[12px]
+            bg-white-_100 text-black text-[12px]
             shadow-[0_1px_4px_rgb(0,0,0,0.1)] whitespace-normal z-50
             animate-fadeIn
           "
@@ -152,8 +152,9 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
           <SmartTooltip
             text={place?.name}
             targetRef={nameRef}
-            // ❗ 수정됨: bg-white-_100 -> bg-white (또는 bg-[#FFFFFF])
-            className="min-w-0 shrink flex-1"
+            // ❗ 수정: 'flex-1' 제거 -> 제목이 짧을 때 카테고리가 바로 옆에 붙음
+            // 'shrink' 유지 -> 제목이 길면 줄어들면서 말줄임표(...) 작동
+            className="min-w-0 shrink"
           >
             <h2
               ref={nameRef}
@@ -409,7 +410,7 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
               transition-all duration-150
             "
           >
-            <Route size={16} color="white" />
+            <CarFront size={16} color="white" />
             <span className="text-white" style={{ color: 'rgba(255,255,255,0.98)' }}>
               길찾기
             </span>

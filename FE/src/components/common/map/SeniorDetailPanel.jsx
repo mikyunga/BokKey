@@ -8,7 +8,7 @@ import {
   User,
   Clock,
   Star,
-  Route,
+  CarFront,
   Calendar,
   Utensils,
 } from 'lucide-react';
@@ -391,7 +391,7 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
               transition-all duration-150
             "
           >
-            <Route size={16} color="white" />
+            <CarFront size={16} color="white" />
             <span className="text-white" style={{ color: 'rgba(255,255,255,0.98)' }}>
               길찾기
             </span>
