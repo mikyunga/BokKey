@@ -27,8 +27,8 @@ export default function PlaceItem({ place, mode, onSelect }) {
         cursor-pointer 
         flex flex-col gap-[6px]
         max-h-48
-        transition-colors duration-150
-        hover:bg-black/[0.02]
+        transition-colors duration-100
+        hover:bg-black-_02
       `}
     >
       {/* 상단: 가게 이름 + 업종, 오른쪽 star */}

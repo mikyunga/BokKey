@@ -1,23 +1,12 @@
 'use client';
 
-import {
-  ChevronDown,
-  ChevronUp,
-  MapPin,
-  Phone,
-  User,
-  Clock,
-  Star,
-  Route,
-  Calendar,
-  Utensils,
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, MapPin, Phone, Clock, Star, Route } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useFavorites } from '../../../contexts/FavoriteContext';
 // ⭐ Framer Motion 추가
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ... SmartTooltip은 동일하게 유지 ...
+// ... SmartTooltip 컴포넌트는 그대로 유지 ...
 function SmartTooltip({ text, children, targetRef }) {
   const [show, setShow] = useState(false);
   const [isOverflow, setIsOverflow] = useState(false);
@@ -55,9 +44,10 @@ function SmartTooltip({ text, children, targetRef }) {
   );
 }
 
-export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopySuccess }) {
-  const [animReady, setAnimReady] = useState(false);
+export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySuccess }) {
   const [showAddressDetail, setShowAddressDetail] = useState(false);
+  const [showTimeDetail, setShowTimeDetail] = useState(false);
+  const [animReady, setAnimReady] = useState(false);
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setAnimReady(true));
@@ -67,6 +57,7 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
   const panelRef = useRef(null);
   const nameRef = useRef(null);
 
+  // 닫기 로직
   useEffect(() => {
     function handleClickOutside(e) {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -94,26 +85,14 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
   };
 
   const { toggleFavorite, isFavorite } = useFavorites();
-  const favorite = isFavorite(place?.id, 'senior');
+  const favorite = isFavorite(place?.id, 'child');
 
-  const getCategoryText = () => {
-    if (place?.categoryText) return place.categoryText;
-    return '무료급식소';
-  };
+  const statusLabels = [];
+  if (place?.isOpen) statusLabels.push('영업 중');
+  if (place?.delivery) statusLabels.push('배달 가능');
+  if (place?.holidayOpen) statusLabels.push('공휴일 영업');
 
-  // 상세정보 라벨 스타일 (지번, 급식장소 등 - 회색 유지)
-  const labelClass =
-    'text-[12px] px-[4px] py-[1px] rounded-[3px] text-black-_30 font-medium flex-shrink-0 h-fit items-center';
-  const labelStyle = { backgroundColor: 'rgba(0,0,0,0.04)' };
-
-  // ⭐ 섹션 라벨 스타일 (오렌지색 적용)
-  const sectionLabelClass = 'px-[4px] py-[1px] mb-3 rounded-[4px] text-[13px] font-medium w-fit';
-  const sectionLabelStyle = {
-    backgroundColor: 'rgba(255,146,56,0.08)',
-    color: '#FF9238',
-  };
-
-  // ⭐ 드롭다운 애니메이션 설정 (Child와 동일)
+  // ⭐ 드롭다운 애니메이션 설정
   const dropdownVariants = {
     hidden: { height: 0, opacity: 0, marginTop: 0, overflow: 'hidden' },
     visible: {
@@ -168,187 +147,206 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
           }  
         `}
       >
-        {/* 제목 */}
-        <div className="flex items-start justify-between gap-2 w-full">
-          <div className="flex-1 min-w-0">
-            <h2
-              ref={nameRef}
-              className="
-                font-semibold text-[18px]
-                truncate
-                cursor-default
-                mb-3
-              "
-              onClick={(e) => copyToClipboard(place?.name, e)}
-            >
-              {place?.name}
-            </h2>
-          </div>
+        {/* 제목 + 카테고리 */}
+        <div className="flex items-center gap-[6px] w-full">
+          <h2
+            ref={nameRef}
+            className="
+              font-semibold text-[18px]
+              truncate
+              cursor-default
+            "
+            onClick={(e) => copyToClipboard(place?.name, e)}
+          >
+            {place?.name}
+          </h2>
+          <span className="text-[14px] text-black/40 font-medium opacity-30 whitespace-nowrap flex-shrink-0">
+            {place?.categoryText}
+          </span>
         </div>
 
-        {/* -------------------- 📌 급식소 안내 -------------------- */}
-        <div>
-          {/* ⭐ 섹션 라벨: 오렌지색 적용 */}
-          <div className={sectionLabelClass} style={sectionLabelStyle}>
-            급식소 안내
-          </div>
+        {/* 상태 라벨 */}
+        {statusLabels.length > 0 && (
+          <span
+            className="px-[6px] py-[3px] mb-2 rounded-[4px] text-[13px] font-medium w-fit"
+            style={{ backgroundColor: 'rgba(255,146,56,0.08)', color: '#FF9238' }}
+          >
+            {statusLabels.join(' · ')}
+          </span>
+        )}
 
+        {/* 주소, 전화, 시간 섹션 */}
+        <div className="flex flex-col gap-[10px]">
           {/* 주소 */}
-          <div className="flex flex-col mb-[10px]">
+          <div>
             <div
-              className="flex items-start gap-[6px] cursor-pointer"
+              className="flex gap-[6px] cursor-pointer w-full items-start"
               onClick={() => setShowAddressDetail((v) => !v)}
             >
-              <MapPin size={14} className="opacity-30 flex-shrink-0 mt-[2px]" />
+              <MapPin size={14} className="flex-shrink-0 text-black/70 mt-[2px] opacity-30" />
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start gap-[4px]">
+              <div className="min-w-0 flex-1">
+                <div className="flex gap-0 items-start">
                   <span
-                    className={`text-[14px] break-words ${
-                      isValidInfo(place?.address)
-                        ? 'opacity-70 cursor-pointer copy-link'
-                        : 'opacity-30 cursor-default'
-                    }`}
+                    className={
+                      `opacity-70 text-[14px] leading-[1.35] break-words ` +
+                      `${isValidInfo(place?.address) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                    }
                     onClick={(e) => copyToClipboard(place?.address, e)}
                   >
                     {place?.address || '정보 없음'}
                   </span>
 
                   {showAddressDetail ? (
-                    <ChevronUp size={16} className="opacity-70 mt-[2px]" />
+                    <ChevronUp size={16} className="flex-shrink-0 opacity-70 ml-[4px] mt-[1px]" />
                   ) : (
-                    <ChevronDown size={16} className="opacity-70 mt-[2px]" />
+                    <ChevronDown size={16} className="flex-shrink-0 opacity-70 ml-[4px] mt-[1px]" />
                   )}
                 </div>
+              </div>
+            </div>
 
-                {/* ⭐ 주소 상세 애니메이션 적용 */}
-                <AnimatePresence>
-                  {showAddressDetail && (
-                    <motion.div
-                      className="mt-[8px] pl-[2px] flex items-start gap-[6px]"
-                      variants={dropdownVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
+            {/* ⭐ 주소 상세정보 애니메이션 적용 */}
+            <AnimatePresence>
+              {showAddressDetail && (
+                <motion.div
+                  className="ml-5 flex flex-col gap-[12px]"
+                  variants={dropdownVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  <div className="flex gap-[6px] items-start">
+                    <span
+                      className="text-[12px] px-[4px] py-[1px] rounded-[3px] text-black-_30 font-medium flex-shrink-0 h-fit"
+                      style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}
                     >
-                      <span className={labelClass} style={labelStyle}>
-                        지번
-                      </span>
+                      지번
+                    </span>
 
+                    <div className="flex-1 min-w-0">
                       <span
-                        className={`text-[14px] break-words opacity-30 ${
-                          isValidInfo(place?.lotAddress)
-                            ? 'cursor-pointer copy-link'
-                            : 'cursor-default'
-                        }`}
+                        className={
+                          `text-[14px] opacity-30 leading-[1.35] break-words block ` +
+                          `${isValidInfo(place?.lotAddress) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                        }
                         onClick={(e) => copyToClipboard(place?.lotAddress, e)}
                       >
                         {place?.lotAddress || '정보 없음'}
                       </span>
-                    </motion.div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* 전화 */}
+          <div>
+            <div className="flex items-center gap-[6px] leading-none">
+              <Phone size={14} className="opacity-30 flex-shrink-0 leading-none " />
+              <span
+                className={
+                  `text-[14px] leading-none truncate inline-block ` +
+                  `${
+                    isValidInfo(place?.phone)
+                      ? 'opacity-70 cursor-pointer copy-link'
+                      : 'opacity-30 cursor-default'
+                  }`
+                }
+                onClick={(e) => copyToClipboard(place?.phone, e)}
+              >
+                {place?.phone || '정보 없음'}
+              </span>
+            </div>
+          </div>
+
+          {/* 시간 */}
+          <div>
+            <div
+              className="flex gap-[6px] cursor-pointer w-full items-center"
+              onClick={() => setShowTimeDetail((v) => !v)}
+            >
+              <Clock size={14} className="flex-shrink-0 text-black/70 opacity-30" />
+
+              <div className="min-w-0 flex-1">
+                <div className="flex gap-0 items-center">
+                  <span
+                    className={
+                      `opacity-70 leading-none truncate ` +
+                      `${isValidInfo(place?.time) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                    }
+                    onClick={(e) => copyToClipboard(place?.time, e)}
+                  >
+                    {place?.time || '정보 없음'}
+                  </span>
+
+                  {showTimeDetail ? (
+                    <ChevronUp size={16} className="flex-shrink-0 opacity-70 ml-[4px]" />
+                  ) : (
+                    <ChevronDown size={16} className="flex-shrink-0 opacity-70 ml-[4px]" />
                   )}
-                </AnimatePresence>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* 급식 장소 */}
-          <div className="flex items-center gap-[6px] mb-[10px]">
-            <Utensils size={14} className="opacity-30 flex-shrink-0" />
-            <div className="flex items-center gap-[6px]">
-              <span className={labelClass} style={labelStyle}>
-                급식 장소
-              </span>
-              <span
-                className={`text-[14px] leading-[1.35] break-words pt-[1px] ${
-                  isValidInfo(place?.place) ? 'opacity-70' : 'opacity-30'
-                }`}
-              >
-                {place?.place || '정보 없음'}
-              </span>
-            </div>
-          </div>
+            {/* ⭐ 시간 상세정보 애니메이션 적용 */}
+            <AnimatePresence>
+              {showTimeDetail && (
+                <motion.div
+                  className="ml-5 flex flex-col gap-[12px]"
+                  variants={dropdownVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  <div className="flex items-center gap-[6px]">
+                    <span
+                      className="text-[12px] px-[4px] py-[1px] rounded-[3px] text-black-_30 font-medium flex-shrink-0 h-fit"
+                      style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}
+                    >
+                      공휴일
+                    </span>
 
-          {/* 전화번호 */}
-          <div className="flex items-start gap-[6px] mb-[10px]">
-            <Phone size={14} className="opacity-30 flex-shrink-0 mt-[2px]" />
-            <span
-              className={`text-[14px] leading-[1.35] break-words ${
-                isValidInfo(place?.phone)
-                  ? 'opacity-70 cursor-pointer copy-link'
-                  : 'opacity-30 cursor-default'
-              }`}
-              onClick={(e) => copyToClipboard(place?.phone, e)}
-            >
-              {place?.phone || '정보 없음'}
-            </span>
-          </div>
+                    <div className="flex-1 min-w-0">
+                      <span
+                        className={
+                          `text-[14px] opacity-30 leading-none truncate flex items-center w-full ` +
+                          `${isValidInfo(place?.holidayTime) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                        }
+                        onClick={(e) => copyToClipboard(place?.holidayTime, e)}
+                      >
+                        {place?.holidayTime || '정보 없음'}
+                      </span>
+                    </div>
+                  </div>
 
-          <div className="border-b opacity-50 my-4"></div>
+                  {place?.breakTime && (
+                    <div className="flex items-center gap-[6px]">
+                      <span
+                        className="text-[12px] px-[4px] py-[1px] rounded-[3px] text-black-_30 font-medium flex-shrink-0 h-fit"
+                        style={{ backgroundColor: 'rgba(0,0,0,0.04)' }}
+                      >
+                        브레이크
+                      </span>
 
-          {/* -------------------- 📌 이용 조건 -------------------- */}
-          {/* ⭐ 섹션 라벨: 오렌지색 적용 */}
-          <div className={sectionLabelClass} style={sectionLabelStyle}>
-            이용 조건
-          </div>
-
-          {/* 대상 */}
-          <div className="flex items-start gap-[6px] mb-[10px]">
-            <User size={14} className="opacity-30 flex-shrink-0 mt-[2px]" />
-            <span
-              className={`text-[14px] break-words ${
-                (
-                  Array.isArray(place?.target_name)
-                    ? place.target_name.length > 0
-                    : isValidInfo(place?.target_name)
-                )
-                  ? 'opacity-70'
-                  : 'opacity-30'
-              }`}
-            >
-              {Array.isArray(place?.target_name)
-                ? place.target_name.join(', ')
-                : place?.target_name || '정보 없음'}
-            </span>
-          </div>
-
-          {/* 요일 */}
-          <div className="flex items-start gap-[6px] mb-[10px]">
-            <Calendar size={14} className="opacity-30 flex-shrink-0 mt-[2px]" />
-            <span
-              className={`text-[14px] break-words ${
-                isValidInfo(place?.meal_days?.join(', '))
-                  ? 'opacity-70 cursor-pointer copy-link'
-                  : 'opacity-30 cursor-default'
-              }`}
-              onClick={(e) => copyToClipboard(place?.meal_days?.join(', ') || '', e)}
-            >
-              {place?.meal_days?.join(', ') || '정보 없음'}
-            </span>
-          </div>
-
-          {/* 급식 시간 */}
-          <div className="flex items-center gap-[6px] mb-[10px]">
-            <Clock size={14} className="opacity-30 flex-shrink-0" />
-            <div className="flex-1 flex items-center gap-[6px]">
-              {/* 중식/석식 라벨 (회색) */}
-              {place?.meal_time && place.meal_time.length > 0 && (
-                <span className={labelClass} style={labelStyle}>
-                  {place.meal_time.join(', ')}
-                </span>
+                      <div className="flex-1 min-w-0">
+                        <span
+                          className={
+                            `text-[14px] opacity-30 leading-none truncate flex items-center w-full ` +
+                            `${isValidInfo(place?.breakTime) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                          }
+                          style={{ color: 'rgba(0,0,0,0.4)' }}
+                          onClick={(e) => copyToClipboard(place?.breakTime, e)}
+                        >
+                          {place?.breakTime || '정보 없음'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
               )}
-
-              <span
-                className={`text-[14px] leading-[1.35] break-words pt-[1px] ${
-                  isValidInfo(place?.time)
-                    ? 'opacity-70 cursor-pointer copy-link'
-                    : 'opacity-30 cursor-default'
-                }`}
-                onClick={(e) => copyToClipboard(place?.time || '', e)}
-              >
-                {place?.time || '정보 없음'}
-              </span>
-            </div>
+            </AnimatePresence>
           </div>
         </div>
 
@@ -356,7 +354,7 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
         <div className="flex justify-end gap-3 pt-2">
           {/* ⭐ 즐겨찾기 버튼 */}
           <button
-            onClick={() => toggleFavorite(place, 'senior')}
+            onClick={() => toggleFavorite(place, 'child')}
             className="
               flex items-center gap-[4px] mt-[8px]
               pl-3 pr-[14px] py-2 rounded-full
