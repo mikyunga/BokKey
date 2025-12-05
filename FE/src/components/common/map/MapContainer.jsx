@@ -21,7 +21,6 @@ const CATEGORY_MARKERS = {
   mart: { url: IconPurple },
 };
 
-// ⭐ isLocationFocused prop을 받도록 추가
 export default function MapContainer({
   mode,
   places,
@@ -33,14 +32,14 @@ export default function MapContainer({
   const [mapInstance, setMapInstance] = useState(null);
   const markersMapRef = useRef(new Map());
 
-  // 상태 변화 감지용 Ref들
   const prevPlaceIdsRef = useRef('');
-  const prevSelectedPlaceRef = useRef(null); // ⭐ 이전 선택 장소 기억
-  const prevLocationFocusedRef = useRef(false); // ⭐ 이전 내 위치 상태 기억
+  // prevSelectedPlaceRef는 더 이상 트리거로 쓰지 않지만 로직 유지를 위해 남겨둘 수 있습니다.
+  const prevSelectedPlaceRef = useRef(null);
+  const prevLocationFocusedRef = useRef(false);
 
   const { isFavorite } = useFavorites();
 
-  // 1. 지도 생성 (기존 유지)
+  // 1. 지도 생성
   useEffect(() => {
     if (mapInstance) return;
 
@@ -69,7 +68,7 @@ export default function MapContainer({
     const bounds = new window.kakao.maps.LatLngBounds();
     const currentPlaceIds = [];
 
-    // --- (A) 마커 그리기 로직 (기존과 동일) ---
+    // --- (A) 마커 그리기 로직 ---
     places.forEach((place) => {
       if (!place.latitude || !place.longitude) return;
       const lat = parseFloat(place.latitude);
@@ -115,34 +114,35 @@ export default function MapContainer({
       }
     });
 
-    // --- (B) ⭐ 핵심: 언제 지도를 전체 뷰로 맞출 것인가? ---
+    // --- (B) ⭐ 핵심 수정: 언제 지도를 전체 뷰로 맞출 것인가? ---
 
     const currentIdsString = currentPlaceIds.sort().join(',');
 
-    // 1. 리스트 구성이 바뀌었을 때 (필터, 검색 등)
+    // 1. 리스트 구성이 바뀌었을 때 (필터, 검색 등) -> 전체 보기 O
     const isListChanged = prevPlaceIdsRef.current !== currentIdsString;
 
-    // 2. 방금 선택을 취소했을 때 (SelectedPlace: 있음 -> 없음)
-    const isJustDeselected = prevSelectedPlaceRef.current !== null && selectedPlace === null;
+    // 2. [삭제됨] 방금 선택을 취소했을 때 -> 전체 보기 X (그대로 유지)
+    // const isJustDeselected = prevSelectedPlaceRef.current !== null && selectedPlace === null;
 
-    // 3. 방금 내 위치를 껐을 때 (LocationFocused: 켜짐 -> 꺼짐)
+    // 3. 방금 내 위치를 껐을 때 -> 전체 보기 O
     const isLocationJustTurnedOff =
       prevLocationFocusedRef.current === true && isLocationFocused === false;
 
-    // 조건: 마커가 있고 + (현재 특정 장소 선택 중이 아님) + (위 3가지 트리거 중 하나 발생)
+    // 조건: 마커가 있고 + (현재 특정 장소 선택 중이 아님) + (리스트가 바뀌었거나 OR 내 위치가 꺼졌을 때만!)
+    // ❌ isJustDeselected 조건은 뺐습니다!
     if (
       currentPlaceIds.length > 0 &&
       !selectedPlace &&
-      (isListChanged || isJustDeselected || isLocationJustTurnedOff)
+      (isListChanged || isLocationJustTurnedOff)
     ) {
       mapInstance.setBounds(bounds);
     }
 
-    // --- (C) 상태 업데이트 (다음 비교를 위해) ---
+    // --- (C) 상태 업데이트 ---
     prevPlaceIdsRef.current = currentIdsString;
     prevSelectedPlaceRef.current = selectedPlace;
     prevLocationFocusedRef.current = isLocationFocused;
-  }, [mapInstance, places, mode, isFavorite, selectedPlace, isLocationFocused]); // ⭐ 의존성 추가됨
+  }, [mapInstance, places, mode, isFavorite, selectedPlace, isLocationFocused]);
 
   // 3. 선택된 장소로 이동 (기존 유지)
   useEffect(() => {
@@ -151,14 +151,10 @@ export default function MapContainer({
     const lat = parseFloat(selectedPlace.latitude);
     const lng = parseFloat(selectedPlace.longitude);
 
-    if (isNaN(lat) || isNaN(lng)) {
-      console.error('❌ 잘못된 좌표:', selectedPlace);
-      return;
-    }
+    if (isNaN(lat) || isNaN(lng)) return;
 
     const pos = new window.kakao.maps.LatLng(lat, lng);
 
-    // 드래그 중이거나 다른 동작과 겹치지 않게 딜레이
     const timer = setTimeout(() => {
       mapInstance.setCenter(pos);
       if (mapInstance.getLevel() > 3) {

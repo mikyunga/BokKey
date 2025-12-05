@@ -15,7 +15,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { useFavorites } from '../../../contexts/FavoriteContext';
 // ⭐ Framer Motion 추가
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ... SmartTooltip은 동일하게 유지 ...
 function SmartTooltip({ text, children, targetRef }) {
