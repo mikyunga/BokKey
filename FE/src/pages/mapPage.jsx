@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 
+// ... (나머지 import 동일) ...
 import MapContainer from '../components/common/map/MapContainer';
 import CategoryToggle from '../components/common/map/CategoryToggle';
 import Sidebar from '../components/common/map/SideBar';
@@ -13,6 +14,7 @@ import { CHILD_PLACES, SENIOR_PLACES } from '../constants/mockData';
 import { REGIONS } from '../constants/region';
 
 export default function MapPage() {
+  // ... (기존 state들 동일) ...
   const [mode, setMode] = useState('child');
   const [sido, setSido] = useState('');
   const [sigungu, setSigungu] = useState('');
@@ -34,12 +36,16 @@ export default function MapPage() {
 
   const [copyToast, setCopyToast] = useState(false);
 
+  const closeTimerRef = useRef(null);
+
   const toggleDetailCollapse = () => setIsDetailCollapsed((prev) => !prev);
+
   const closeDetailPanel = () => {
-    // Do NOT collapse when closing — collapse shrinks width instantly.
-    setTimeout(() => {
-      setSelectedPlace(null); // unmount after exit motion
-    }, 250); // match exit animation duration
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
+      setSelectedPlace(null);
+      closeTimerRef.current = null;
+    }, 250);
   };
 
   const handleCopySuccess = () => {
@@ -59,16 +65,13 @@ export default function MapPage() {
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
 
-  /** ⭐ 지도 준비 */
   const handleMapReady = useCallback((mapInstance) => {
     mapRef.current = mapInstance;
   }, []);
 
-  /** ⭐ 장소 선택 → 지도 이동 */
   useEffect(() => {
     if (selectedPlace && mapRef.current && !isLocationFocused) {
       const pos = new window.kakao.maps.LatLng(selectedPlace.latitude, selectedPlace.longitude);
-
       setTimeout(() => {
         mapRef.current.setCenter(pos);
         mapRef.current.setLevel(3);
@@ -76,8 +79,8 @@ export default function MapPage() {
     }
   }, [selectedPlace, isLocationFocused]);
 
-  /** ⭐ 내 위치 기능 */
   const handleMyLocation = () => {
+    // ... (내 위치 로직 동일) ...
     if (isLocationFocused) {
       setIsLocationFocused(false);
       mapRef.current.setLevel(10);
@@ -131,15 +134,14 @@ export default function MapPage() {
     );
   };
 
-  /** ⭐ 필터 */
   const filteredPlaces = useMemo(() => {
+    // ... (필터 로직 동일) ...
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
     if (sido) {
       const validCodes = REGIONS.filter(
         (r) => r.province === sido && (!sigungu || r.district === sigungu)
       ).map((r) => r.region_code);
-
       places = places.filter((p) => validCodes.includes(Number(p.region_code)));
     }
 
@@ -189,7 +191,6 @@ export default function MapPage() {
     panelFilters,
   ]);
 
-  /** ⭐ 상세조건 패널 */
   const handlePanelApply = (filters, hasActive) => {
     setPanelFilters(filters);
     setDetailFilterActive(hasActive);
@@ -198,12 +199,11 @@ export default function MapPage() {
 
   const handleOpenFilter = (pos) => {
     if (pos?.top) setPanelTop(pos.top);
-
     setIsFilterOpen(true);
   };
 
-  /** ⭐ 모드 변경 */
   const handleModeChange = (newMode) => {
+    // ... (모드 변경 로직 동일) ...
     setMode(newMode);
     setSelectedFilters([]);
     setSido('');
@@ -217,14 +217,18 @@ export default function MapPage() {
     setIsLocationFocused(false);
   };
 
-  /** ⭐ 카드 선택 */
   const handleSelectPlace = (place) => {
-    setIsDetailCollapsed(false); // ensure panel opens expanded
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+    setIsDetailCollapsed(false);
     setSelectedPlace(place);
   };
 
   return (
     <div className="relative w-full h-screen overflow-visible flex flex-col">
+      {/* ... (스타일 및 토스트 동일) ... */}
       <style>
         {`
           @keyframes fadeInOut {
@@ -256,33 +260,35 @@ export default function MapPage() {
 
       <CategoryToggle mode={mode} onModeChange={handleModeChange} />
 
-      {/* ========== 전체 레이아웃 ========== */}
       <div className="flex w-full h-full">
-        {/* ⭐ Sidebar */}
-        <Sidebar
-          mode={mode}
-          sido={sido}
-          setSido={setSido}
-          sigungu={sigungu}
-          setSigungu={setSigungu}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedFilters={selectedFilters}
-          setSelectedFilters={setSelectedFilters}
-          filteredPlaces={filteredPlaces}
-          selectedPlace={selectedPlace}
-          setSelectedPlace={handleSelectPlace}
-          showOpenOnly={showOpenOnly}
-          setShowOpenOnly={setShowOpenOnly}
-          showDeliveryOnly={showDeliveryOnly}
-          setShowDeliveryOnly={setShowDeliveryOnly}
-          onOpenFilter={handleOpenFilter}
-          detailFilterActive={detailFilterActive}
-          setDetailFilterActive={setDetailFilterActive}
-          panelFilters={panelFilters}
-        />
+        {/* ⭐ [핵심 수정] Sidebar를 div로 감싸고 onMouseDown에서 이벤트 전파를 막습니다(stopPropagation).
+             이렇게 하면 사이드바를 클릭했을 때 '바깥 클릭'으로 인식되어 패널이 닫히는 것을 방지합니다. */}
+        <div className="z-20 h-full flex-shrink-0" onMouseDown={(e) => e.stopPropagation()}>
+          <Sidebar
+            mode={mode}
+            sido={sido}
+            setSido={setSido}
+            sigungu={sigungu}
+            setSigungu={setSigungu}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={setSelectedFilters}
+            filteredPlaces={filteredPlaces}
+            selectedPlace={selectedPlace}
+            setSelectedPlace={handleSelectPlace}
+            showOpenOnly={showOpenOnly}
+            setShowOpenOnly={setShowOpenOnly}
+            showDeliveryOnly={showDeliveryOnly}
+            setShowDeliveryOnly={setShowDeliveryOnly}
+            onOpenFilter={handleOpenFilter}
+            detailFilterActive={detailFilterActive}
+            setDetailFilterActive={setDetailFilterActive}
+            panelFilters={panelFilters}
+          />
+        </div>
 
-        {/* ⭐ DetailPanel — PlaceList 오른쪽에 딱 붙는 패널 */}
+        {/* DetailPanel */}
         {selectedPlace && (
           <div
             className="absolute z-30"
@@ -292,8 +298,12 @@ export default function MapPage() {
               transform: 'translateY(-50%)',
               width: isDetailCollapsed ? '42px' : '380px',
             }}
+            // ⭐ 패널 자체를 눌렀을 때도 닫히지 않도록 여기서도 막아두면 안전합니다.
+            onMouseDown={(e) => e.stopPropagation()}
           >
             <DetailPanel
+              // 키 값을 주어 장소가 바뀌면 아예 새로 렌더링되게 하여 상태 꼬임을 방지합니다.
+              key={selectedPlace.id}
               place={selectedPlace}
               mode={mode}
               isCollapsed={isDetailCollapsed}
@@ -304,7 +314,7 @@ export default function MapPage() {
           </div>
         )}
 
-        {/* ⭐ 지도 */}
+        {/* 지도 영역 */}
         <div className="relative flex-1 h-full">
           <div className="absolute left-6 top-6 z-40">
             <SideActionButtons
@@ -328,6 +338,8 @@ export default function MapPage() {
               style={{
                 top: `${Math.max(0, panelTop - 24)}px`,
               }}
+              // 필터 패널 클릭 시에도 닫히지 않게 처리
+              onMouseDown={(e) => e.stopPropagation()}
             >
               <div className="pointer-events-auto h-full">
                 <FilterPanel
@@ -335,7 +347,6 @@ export default function MapPage() {
                   onApply={handlePanelApply}
                   onCancel={() => {
                     setIsFilterOpen(false);
-                    // ⭐ 취소 시 버튼을 비활성화 상태로 되돌림
                     setDetailFilterActive(false);
                     setPanelFilters({ targets: [], days: [], times: [], region: null });
                   }}
