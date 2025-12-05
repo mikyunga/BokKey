@@ -3,11 +3,10 @@
 import { ChevronDown, ChevronUp, MapPin, Phone, Clock, Star, Route } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useFavorites } from '../../../contexts/FavoriteContext';
-// ⭐ Framer Motion 추가
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ... SmartTooltip 컴포넌트는 그대로 유지 ...
-function SmartTooltip({ text, children, targetRef }) {
+function SmartTooltip({ text, children, targetRef, className = '' }) {
   const [show, setShow] = useState(false);
   const [isOverflow, setIsOverflow] = useState(false);
 
@@ -20,7 +19,7 @@ function SmartTooltip({ text, children, targetRef }) {
 
   return (
     <div
-      className="relative w-full"
+      className={`relative ${className}`}
       onMouseEnter={() => isOverflow && setShow(true)}
       onMouseLeave={() => setShow(false)}
     >
@@ -30,12 +29,13 @@ function SmartTooltip({ text, children, targetRef }) {
         <div
           className="
             absolute top-full left-0 mt-1
-            px-2 py-1 rounded-md
-            bg-black text-white text-[12px]
-            shadow-lg whitespace-normal z-50
+            px-2 py-1 rounded-md text-black-_80
+            border border-black-_07
+            bg-white-_100 text-white text-[12px]
+            shadow-[0_1px_4px_rgb(0,0,0,0.1)] whitespace-normal z-50
             animate-fadeIn
           "
-          style={{ maxWidth: '240px' }}
+          style={{ maxWidth: '240px', width: 'max-content' }}
         >
           {text}
         </div>
@@ -45,6 +45,7 @@ function SmartTooltip({ text, children, targetRef }) {
 }
 
 export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySuccess }) {
+  // ... (나머지 state 및 로직 동일) ...
   const [showAddressDetail, setShowAddressDetail] = useState(false);
   const [showTimeDetail, setShowTimeDetail] = useState(false);
   const [animReady, setAnimReady] = useState(false);
@@ -57,7 +58,6 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
   const panelRef = useRef(null);
   const nameRef = useRef(null);
 
-  // 닫기 로직
   useEffect(() => {
     function handleClickOutside(e) {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -92,7 +92,6 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
   if (place?.delivery) statusLabels.push('배달 가능');
   if (place?.holidayOpen) statusLabels.push('공휴일 영업');
 
-  // ⭐ 드롭다운 애니메이션 설정
   const dropdownVariants = {
     hidden: { height: 0, opacity: 0, marginTop: 0, overflow: 'hidden' },
     visible: {
@@ -147,24 +146,35 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
           }  
         `}
       >
-        {/* 제목 + 카테고리 */}
+        {/* ⭐ 제목 + 카테고리 섹션 */}
         <div className="flex items-center gap-[6px] w-full">
-          <h2
-            ref={nameRef}
-            className="
-              font-semibold text-[18px]
-              truncate
-              cursor-default
-            "
-            onClick={(e) => copyToClipboard(place?.name, e)}
+          {/* SmartTooltip으로 감싸기 */}
+          <SmartTooltip
+            text={place?.name}
+            targetRef={nameRef}
+            // ❗ 수정됨: bg-white-_100 -> bg-white (또는 bg-[#FFFFFF])
+            className="min-w-0 shrink flex-1"
           >
-            {place?.name}
-          </h2>
+            <h2
+              ref={nameRef}
+              className="
+                font-semibold text-[18px]
+                truncate
+                block w-full
+                cursor-pointer
+              "
+              onClick={(e) => copyToClipboard(place?.name, e)}
+            >
+              {place?.name}
+            </h2>
+          </SmartTooltip>
+
           <span className="text-[14px] text-black/40 font-medium opacity-30 whitespace-nowrap flex-shrink-0">
             {place?.categoryText}
           </span>
         </div>
 
+        {/* ... (나머지 코드 동일) ... */}
         {/* 상태 라벨 */}
         {statusLabels.length > 0 && (
           <span
@@ -190,7 +200,9 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
                   <span
                     className={
                       `opacity-70 text-[14px] leading-[1.35] break-words ` +
-                      `${isValidInfo(place?.address) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                      `${
+                        isValidInfo(place?.address) ? 'cursor-pointer copy-link' : 'cursor-default'
+                      }`
                     }
                     onClick={(e) => copyToClipboard(place?.address, e)}
                   >
@@ -206,7 +218,6 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
               </div>
             </div>
 
-            {/* ⭐ 주소 상세정보 애니메이션 적용 */}
             <AnimatePresence>
               {showAddressDetail && (
                 <motion.div
@@ -228,7 +239,11 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
                       <span
                         className={
                           `text-[14px] opacity-30 leading-[1.35] break-words block ` +
-                          `${isValidInfo(place?.lotAddress) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                          `${
+                            isValidInfo(place?.lotAddress)
+                              ? 'cursor-pointer copy-link'
+                              : 'cursor-default'
+                          }`
                         }
                         onClick={(e) => copyToClipboard(place?.lotAddress, e)}
                       >
@@ -290,7 +305,6 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
               </div>
             </div>
 
-            {/* ⭐ 시간 상세정보 애니메이션 적용 */}
             <AnimatePresence>
               {showTimeDetail && (
                 <motion.div
@@ -312,7 +326,11 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
                       <span
                         className={
                           `text-[14px] opacity-30 leading-none truncate flex items-center w-full ` +
-                          `${isValidInfo(place?.holidayTime) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                          `${
+                            isValidInfo(place?.holidayTime)
+                              ? 'cursor-pointer copy-link'
+                              : 'cursor-default'
+                          }`
                         }
                         onClick={(e) => copyToClipboard(place?.holidayTime, e)}
                       >
@@ -334,7 +352,11 @@ export default function ChildDetailPanel({ place, isCollapsed, onClose, onCopySu
                         <span
                           className={
                             `text-[14px] opacity-30 leading-none truncate flex items-center w-full ` +
-                            `${isValidInfo(place?.breakTime) ? 'cursor-pointer copy-link' : 'cursor-default'}`
+                            `${
+                              isValidInfo(place?.breakTime)
+                                ? 'cursor-pointer copy-link'
+                                : 'cursor-default'
+                            }`
                           }
                           style={{ color: 'rgba(0,0,0,0.4)' }}
                           onClick={(e) => copyToClipboard(place?.breakTime, e)}

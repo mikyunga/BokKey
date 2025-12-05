@@ -244,9 +244,9 @@ export default function MapPage() {
         <div
           className={`
           fixed top-6 left-1/2 transform -translate-x-1/2
-          px-4 py-3 rounded-lg
-          bg-black text-white text-[14px]
-          shadow-lg z-[9999]
+          px-6 py-2 rounded-[5px]
+          bg-black-_70 text-white-_100 text-[14px]
+          shadow-[0_2px_5px_rgba(0,0,0,0.25)] z-[9999]
           animate-fadeInOut
         `}
         >
