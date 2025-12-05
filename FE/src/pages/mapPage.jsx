@@ -60,8 +60,11 @@ export default function MapPage() {
     mapRef.current = mapInstance;
   }, []);
 
-  // ❌ [삭제됨] 여기서 지도를 이동시키던 로직 제거!
-  // MapContainer가 알아서 움직입니다. 중복 운전 방지.
+  // ⭐ [추가됨] 필터(카테고리, 지역, 검색 등)가 바뀌면 선택된 장소 해제
+  // -> 그래야 MapContainer가 "선택된 게 없으니 전체 범위를 보여주자"라고 판단합니다.
+  useEffect(() => {
+    setSelectedPlace(null);
+  }, [selectedFilters, searchQuery, sido, sigungu, showOpenOnly, showDeliveryOnly, panelFilters]);
 
   // 내 위치 기능
   const handleMyLocation = () => {
@@ -364,6 +367,7 @@ export default function MapPage() {
             places={displayPlaces}
             selectedPlace={selectedPlace}
             onMapReady={handleMapReady}
+            isLocationFocused={isLocationFocused} // ⭐ [수정됨] 이 prop이 있어야 내 위치 끌 때 전체 뷰로 돌아갑니다.
           />
 
           {isFilterOpen && (

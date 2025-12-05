@@ -21,15 +21,26 @@ const CATEGORY_MARKERS = {
   mart: { url: IconPurple },
 };
 
-export default function MapContainer({ mode, places, selectedPlace, onMapReady }) {
+// ⭐ isLocationFocused prop을 받도록 추가
+export default function MapContainer({
+  mode,
+  places,
+  selectedPlace,
+  onMapReady,
+  isLocationFocused,
+}) {
   const mapRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const markersMapRef = useRef(new Map());
+
+  // 상태 변화 감지용 Ref들
   const prevPlaceIdsRef = useRef('');
+  const prevSelectedPlaceRef = useRef(null); // ⭐ 이전 선택 장소 기억
+  const prevLocationFocusedRef = useRef(false); // ⭐ 이전 내 위치 상태 기억
 
   const { isFavorite } = useFavorites();
 
-  // 1. 지도 생성
+  // 1. 지도 생성 (기존 유지)
   useEffect(() => {
     if (mapInstance) return;
 
@@ -51,28 +62,24 @@ export default function MapContainer({ mode, places, selectedPlace, onMapReady }
     }
   }, [onMapReady, mapInstance]);
 
-  // 2. 마커 표시 및 필터링 로직
+  // 2. 마커 업데이트 및 "자동 범위 조정(SetBounds)" 로직
   useEffect(() => {
     if (!mapInstance || !places || typeof window.kakao === 'undefined') return;
 
     const bounds = new window.kakao.maps.LatLngBounds();
     const currentPlaceIds = [];
 
+    // --- (A) 마커 그리기 로직 (기존과 동일) ---
     places.forEach((place) => {
-      // ⭐ 데이터 방어 코드: 좌표 없으면 아예 무시
       if (!place.latitude || !place.longitude) return;
-
       const lat = parseFloat(place.latitude);
       const lng = parseFloat(place.longitude);
-
-      // ⭐ NaN 체크: 숫자가 아니면 무시
       if (isNaN(lat) || isNaN(lng)) return;
 
       currentPlaceIds.push(place.id);
       const position = new window.kakao.maps.LatLng(lat, lng);
       bounds.extend(position);
 
-      // 마커 이미지 결정
       let markerImage = null;
       if (isFavorite(place.id, mode)) {
         const imageSize = new window.kakao.maps.Size(34, 34);
@@ -85,7 +92,6 @@ export default function MapContainer({ mode, places, selectedPlace, onMapReady }
         markerImage = new window.kakao.maps.MarkerImage(categoryData.url, imageSize, imageOption);
       }
 
-      // 마커 생성/업데이트
       if (markersMapRef.current.has(place.id)) {
         const existingMarker = markersMapRef.current.get(place.id);
         existingMarker.setImage(markerImage);
@@ -101,7 +107,6 @@ export default function MapContainer({ mode, places, selectedPlace, onMapReady }
       }
     });
 
-    // 화면에 없는 마커 제거
     const currentIdSet = new Set(currentPlaceIds);
     markersMapRef.current.forEach((marker, id) => {
       if (!currentIdSet.has(id)) {
@@ -110,43 +115,52 @@ export default function MapContainer({ mode, places, selectedPlace, onMapReady }
       }
     });
 
-    // 지도 범위 자동 조정 (리스트가 바뀌었을 때만)
-    const currentIdsString = currentPlaceIds.sort().join(',');
-    const isListChanged = prevPlaceIdsRef.current !== currentIdsString;
-    const hasMarkers = currentPlaceIds.length > 0;
-    const isNotSelectingSpecificPlace = !selectedPlace;
+    // --- (B) ⭐ 핵심: 언제 지도를 전체 뷰로 맞출 것인가? ---
 
-    if (hasMarkers && isListChanged && isNotSelectingSpecificPlace) {
+    const currentIdsString = currentPlaceIds.sort().join(',');
+
+    // 1. 리스트 구성이 바뀌었을 때 (필터, 검색 등)
+    const isListChanged = prevPlaceIdsRef.current !== currentIdsString;
+
+    // 2. 방금 선택을 취소했을 때 (SelectedPlace: 있음 -> 없음)
+    const isJustDeselected = prevSelectedPlaceRef.current !== null && selectedPlace === null;
+
+    // 3. 방금 내 위치를 껐을 때 (LocationFocused: 켜짐 -> 꺼짐)
+    const isLocationJustTurnedOff =
+      prevLocationFocusedRef.current === true && isLocationFocused === false;
+
+    // 조건: 마커가 있고 + (현재 특정 장소 선택 중이 아님) + (위 3가지 트리거 중 하나 발생)
+    if (
+      currentPlaceIds.length > 0 &&
+      !selectedPlace &&
+      (isListChanged || isJustDeselected || isLocationJustTurnedOff)
+    ) {
       mapInstance.setBounds(bounds);
     }
 
+    // --- (C) 상태 업데이트 (다음 비교를 위해) ---
     prevPlaceIdsRef.current = currentIdsString;
-  }, [mapInstance, places, mode, isFavorite, selectedPlace]);
+    prevSelectedPlaceRef.current = selectedPlace;
+    prevLocationFocusedRef.current = isLocationFocused;
+  }, [mapInstance, places, mode, isFavorite, selectedPlace, isLocationFocused]); // ⭐ 의존성 추가됨
 
-  // 3. ⭐ [핵심 수정] 선택된 장소로 이동 및 확대 (강력한 방어 코드)
+  // 3. 선택된 장소로 이동 (기존 유지)
   useEffect(() => {
-    // (1) 데이터가 없으면 즉시 종료
     if (!mapInstance || !selectedPlace) return;
 
-    // (2) 좌표를 실수(float)로 변환
     const lat = parseFloat(selectedPlace.latitude);
     const lng = parseFloat(selectedPlace.longitude);
 
-    // (3) ⭐ 좌표가 이상하면(NaN) 절대 이동하지 않음 (콘솔로 확인 가능)
     if (isNaN(lat) || isNaN(lng)) {
-      console.error('❌ 잘못된 좌표 감지됨:', selectedPlace);
+      console.error('❌ 잘못된 좌표:', selectedPlace);
       return;
     }
 
     const pos = new window.kakao.maps.LatLng(lat, lng);
 
-    // (4) panTo 대신 setCenter 사용 (확실하게 이동시키기 위해)
-    // 약간의 딜레이를 주어 렌더링 충돌 방지
+    // 드래그 중이거나 다른 동작과 겹치지 않게 딜레이
     const timer = setTimeout(() => {
-      // 지도 중심을 강제로 해당 위치로 똽! 찍어버림 (튀는 현상 방지)
       mapInstance.setCenter(pos);
-
-      // 그 후 레벨 확인해서 확대
       if (mapInstance.getLevel() > 3) {
         mapInstance.setLevel(3, { animate: true });
       }
