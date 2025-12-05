@@ -26,7 +26,7 @@ export default function PlaceItem({ place, mode, onSelect, isSelected }) {
       onClick={handleClick}
       style={{
         borderBottom: '1px solid rgba(0,0,0,0.05)',
-        backgroundColor: isSelected ? 'rgba(120, 195, 71, 0.08)' : 'white',
+        backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.02)' : 'white',
       }}
       className={`
         pl-6 pr-[18px] py-4 

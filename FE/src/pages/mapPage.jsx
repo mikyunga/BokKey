@@ -22,39 +22,18 @@ export default function MapPage() {
   const [selectedPlace, setSelectedPlace] = useState(null);
 
   const [showFavorites, setShowFavorites] = useState(false);
-
   const [showOpenOnly, setShowOpenOnly] = useState(false);
   const [showDeliveryOnly, setShowDeliveryOnly] = useState(false);
 
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState(null);
-
   const [isLocationFocused, setIsLocationFocused] = useState(false);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [detailFilterActive, setDetailFilterActive] = useState(false);
-
   const [isDetailCollapsed, setIsDetailCollapsed] = useState(false);
 
   const [copyToast, setCopyToast] = useState(false);
-  const closeTimerRef = useRef(null);
-
-  const { favorites } = useFavorites();
-
-  const toggleDetailCollapse = () => setIsDetailCollapsed((prev) => !prev);
-
-  const closeDetailPanel = () => {
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-    closeTimerRef.current = setTimeout(() => {
-      setSelectedPlace(null);
-      closeTimerRef.current = null;
-    }, 250);
-  };
-
-  const handleCopySuccess = () => {
-    setCopyToast(true);
-    setTimeout(() => setCopyToast(false), 2000);
-  };
 
   const [panelFilters, setPanelFilters] = useState({
     targets: [],
@@ -62,13 +41,15 @@ export default function MapPage() {
     times: [],
     region: null,
   });
-
   const [panelTop, setPanelTop] = useState(0);
 
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
+  const closeTimerRef = useRef(null);
 
+  const { favorites } = useFavorites();
   const [searchParams, setSearchParams] = useState(null);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setSearchParams(new URLSearchParams(window.location.search));
@@ -79,40 +60,22 @@ export default function MapPage() {
     mapRef.current = mapInstance;
   }, []);
 
-  // ⭐ 지도 이동 useEffect - selectedPlace만 의존
-  useEffect(() => {
-    if (selectedPlace && mapRef.current) {
-      const lat = Number(selectedPlace.latitude);
-      const lng = Number(selectedPlace.longitude);
+  // ❌ [삭제됨] 여기서 지도를 이동시키던 로직 제거!
+  // MapContainer가 알아서 움직입니다. 중복 운전 방지.
 
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const pos = new window.kakao.maps.LatLng(lat, lng);
-
-        // ⭐ 즐겨찾기에서도 작동하도록 딜레이 추가
-        setTimeout(() => {
-          if (mapRef.current) {
-            mapRef.current.panTo(pos);
-            if (mapRef.current.getLevel() > 4) {
-              mapRef.current.setLevel(3, { animate: true });
-            }
-          }
-        }, 150);
-      }
-    }
-  }, [selectedPlace]);
-
+  // 내 위치 기능
   const handleMyLocation = () => {
     if (isLocationFocused) {
       setIsLocationFocused(false);
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.setMap(null);
+        currentLocationMarkerRef.current = null;
+      }
       return;
     }
 
     if (!navigator.geolocation) {
-      setLocationError('이 브라우저는 위치 기능을 지원하지 않습니다.');
-      return;
-    }
-    if (!mapRef.current) {
-      setLocationError('지도가 로드되지 않았습니다.');
+      setLocationError('위치 기능을 사용할 수 없습니다.');
       return;
     }
 
@@ -120,6 +83,8 @@ export default function MapPage() {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (!mapRef.current) return;
+
         const { latitude, longitude } = pos.coords;
         const kakaoLatLng = new window.kakao.maps.LatLng(latitude, longitude);
 
@@ -154,6 +119,7 @@ export default function MapPage() {
     );
   };
 
+  // 필터링 로직
   const filteredPlaces = useMemo(() => {
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
@@ -176,7 +142,6 @@ export default function MapPage() {
     if (mode === 'child' && showDeliveryOnly) places = places.filter((p) => p.delivery);
 
     const { targets, days, times, region } = panelFilters;
-
     if (targets.length > 0) {
       places = places.filter((place) => {
         const rawTarget = place.targets || place.target_name;
@@ -184,15 +149,12 @@ export default function MapPage() {
         return targets.every((t) => arr.some((pt) => pt.includes(t)));
       });
     }
-
     if (days.length > 0) {
       places = places.filter((p) => days.every((d) => p.meal_days?.includes(d)));
     }
-
     if (times.length > 0) {
       places = places.filter((p) => times.every((t) => p.meal_time?.includes(t)));
     }
-
     if (region) {
       const value = region === 'nationwide' ? '전국' : '지역한정';
       places = places.filter((p) => p.target === value);
@@ -213,28 +175,12 @@ export default function MapPage() {
   const displayPlaces = useMemo(() => {
     if (showFavorites) {
       let favPlaces = favorites[mode] || [];
-
-      if (showOpenOnly) {
-        favPlaces = favPlaces.filter((p) => p.isOpen);
-      }
-      if (mode === 'child' && showDeliveryOnly) {
-        favPlaces = favPlaces.filter((p) => p.delivery);
-      }
+      if (showOpenOnly) favPlaces = favPlaces.filter((p) => p.isOpen);
+      if (mode === 'child' && showDeliveryOnly) favPlaces = favPlaces.filter((p) => p.delivery);
       return favPlaces;
     }
     return filteredPlaces;
   }, [showFavorites, favorites, mode, filteredPlaces, showOpenOnly, showDeliveryOnly]);
-
-  const handlePanelApply = (filters, hasActive) => {
-    setPanelFilters(filters);
-    setDetailFilterActive(hasActive);
-    setIsFilterOpen(false);
-  };
-
-  const handleOpenFilter = (pos) => {
-    if (pos?.top) setPanelTop(pos.top);
-    setIsFilterOpen(true);
-  };
 
   const handleModeChange = (newMode) => {
     setMode(newMode);
@@ -247,26 +193,61 @@ export default function MapPage() {
     setShowDeliveryOnly(false);
     setPanelFilters({ targets: [], days: [], times: [], region: null });
     setIsFilterOpen(false);
+    setDetailFilterActive(false);
+
+    setShowFavorites(false);
+    setIsDetailCollapsed(false);
+
     setIsLocationFocused(false);
+    setIsLoadingLocation(false);
+    setLocationError(null);
+
+    if (mapRef.current) {
+      if (currentLocationMarkerRef.current) {
+        currentLocationMarkerRef.current.setMap(null);
+        currentLocationMarkerRef.current = null;
+      }
+      const defaultCenter = new window.kakao.maps.LatLng(37.5665, 126.978);
+      mapRef.current.setCenter(defaultCenter);
+      mapRef.current.setLevel(3);
+    }
   };
 
-  // ⭐ 장소 선택 핸들러: 내 위치 해제 + 상태 업데이트
   const handleSelectPlace = (place) => {
-    console.log('🎯 장소 선택됨:', place.name);
-    console.log('📍 위도:', place.latitude, typeof place.latitude);
-    console.log('📍 경도:', place.longitude, typeof place.longitude);
-    console.log('🗂️ 전체 place 객체:', place);
-
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
     }
-
-    // 내 위치 고정 해제
     setIsLocationFocused(false);
     setIsDetailCollapsed(false);
     setSelectedPlace(place);
   };
+
+  const handlePanelApply = (filters, hasActive) => {
+    setPanelFilters(filters);
+    setDetailFilterActive(hasActive);
+    setIsFilterOpen(false);
+  };
+
+  const handleOpenFilter = (pos) => {
+    if (pos?.top) setPanelTop(pos.top);
+    setIsFilterOpen(true);
+  };
+
+  const closeDetailPanel = () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(() => {
+      setSelectedPlace(null);
+      closeTimerRef.current = null;
+    }, 250);
+  };
+
+  const handleCopySuccess = () => {
+    setCopyToast(true);
+    setTimeout(() => setCopyToast(false), 2000);
+  };
+
+  const toggleDetailCollapse = () => setIsDetailCollapsed((prev) => !prev);
 
   useEffect(() => {
     if (!searchParams) return;
@@ -280,6 +261,7 @@ export default function MapPage() {
       if (target) {
         setSelectedPlace(target);
         setIsDetailCollapsed(false);
+        // URL로 들어왔을 때만 예외적으로 여기서 이동 처리 (초기 로딩이므로 충돌 위험 적음)
         setTimeout(() => {
           if (mapRef.current) {
             const pos = new window.kakao.maps.LatLng(target.latitude, target.longitude);
@@ -308,15 +290,7 @@ export default function MapPage() {
       </style>
 
       {copyToast && (
-        <div
-          className={`
-          fixed top-6 left-1/2 transform -translate-x-1/2
-          px-6 py-2 rounded-[5px]
-          bg-black-_70 text-white-_100 text-[14px]
-          shadow-[0_2px_5px_rgba(0,0,0,0.25)] z-[9999]
-          animate-fadeInOut
-        `}
-        >
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 px-6 py-2 rounded-[5px] bg-black-_70 text-white-_100 text-[14px] shadow-[0_2px_5px_rgba(0,0,0,0.25)] z-[9999] animate-fadeInOut">
           복사가 완료되었습니다.
         </div>
       )}
