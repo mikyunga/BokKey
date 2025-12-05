@@ -32,8 +32,15 @@ export default function MapPage() {
 
   const [isDetailCollapsed, setIsDetailCollapsed] = useState(false);
 
+  const [copyToast, setCopyToast] = useState(false);
+
   const toggleDetailCollapse = () => setIsDetailCollapsed((prev) => !prev);
   const closeDetailPanel = () => setSelectedPlace(null);
+
+  const handleCopySuccess = () => {
+    setCopyToast(true);
+    setTimeout(() => setCopyToast(false), 2000);
+  };
 
   const [panelFilters, setPanelFilters] = useState({
     targets: [],
@@ -213,6 +220,35 @@ export default function MapPage() {
 
   return (
     <div className="relative w-full h-screen overflow-visible flex flex-col">
+      <style>
+        {`
+          @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+          }
+          .animate-fadeInOut {
+            animation: fadeInOut 2s ease-in-out;
+          }
+        `}
+      </style>
+
+      {/* 토스트 노티 */}
+      {copyToast && (
+        <div
+          className={`
+          fixed top-6 left-1/2 transform -translate-x-1/2
+          px-4 py-3 rounded-lg
+          bg-black text-white text-[14px]
+          shadow-lg z-[9999]
+          animate-fadeInOut
+        `}
+        >
+          복사가 완료되었습니다.
+        </div>
+      )}
+
       <CategoryToggle mode={mode} onModeChange={handleModeChange} />
 
       {/* ========== 전체 레이아웃 ========== */}
@@ -258,6 +294,7 @@ export default function MapPage() {
               isCollapsed={isDetailCollapsed}
               onToggleCollapse={toggleDetailCollapse}
               onClose={closeDetailPanel}
+              onCopySuccess={handleCopySuccess}
             />
           </div>
         )}
