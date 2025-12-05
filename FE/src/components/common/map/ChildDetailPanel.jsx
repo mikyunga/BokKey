@@ -131,7 +131,7 @@ export default function ChildDetailPanel({
             !animReady
               ? 'opacity-0 -translate-x-2 scale-[0.995]'
               : isCollapsed
-                ? 'opacity-0 -translate-x-2 scale-[0.995] duration-180 ease-in'
+                ? 'opacity-0 -translate-x-4 scale-[0.97] duration-220 ease-in'
                 : 'opacity-100 translate-x-0 scale-100 duration-300 ease-out'
           }  
         `}

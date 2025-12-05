@@ -35,7 +35,12 @@ export default function MapPage() {
   const [copyToast, setCopyToast] = useState(false);
 
   const toggleDetailCollapse = () => setIsDetailCollapsed((prev) => !prev);
-  const closeDetailPanel = () => setSelectedPlace(null);
+  const closeDetailPanel = () => {
+    // Do NOT collapse when closing — collapse shrinks width instantly.
+    setTimeout(() => {
+      setSelectedPlace(null); // unmount after exit motion
+    }, 250); // match exit animation duration
+  };
 
   const handleCopySuccess = () => {
     setCopyToast(true);
@@ -214,8 +219,8 @@ export default function MapPage() {
 
   /** ⭐ 카드 선택 */
   const handleSelectPlace = (place) => {
+    setIsDetailCollapsed(false); // ensure panel opens expanded
     setSelectedPlace(place);
-    setIsDetailCollapsed(false);
   };
 
   return (
