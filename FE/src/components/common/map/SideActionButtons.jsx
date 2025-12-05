@@ -1,7 +1,6 @@
 'use client';
 import { Loader } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; // ⭐ useLocation 추가
 import { IconLocationBlack, IconStarYellow, IconLocationMain } from '../../../utils/icons';
 
 export default function SideActionButtons({
@@ -9,24 +8,17 @@ export default function SideActionButtons({
   isLoadingLocation,
   locationError,
   isLocationFocused,
-}) {
-  const navigate = useNavigate();
-  const location = useLocation(); // ⭐ 현재 경로 확인용
 
+  onToggleFavorites,
+  isFavoritesOpen,
+}) {
   const [isHoveringLocation, setIsHoveringLocation] = useState(false);
   const [isHoveringFavorite, setIsHoveringFavorite] = useState(false);
-
-  // ⭐ 현재 경로가 '/favorites' 인지 확인
-  const isFavoritesActive = location.pathname === '/favorites';
-
-  const handleFavoriteClick = () => {
-    navigate('/favorites');
-  };
 
   return (
     <>
       <div className="flex items-center gap-2 font-medium">
-        {/* 1. 내 위치 버튼 */}
+        {/* 내 위치 버튼 */}
         <button
           onClick={onMyLocation}
           disabled={isLoadingLocation}
@@ -42,16 +34,12 @@ export default function SideActionButtons({
             rounded-full text-[14px] whitespace-nowrap
             transition-all duration-200
             border
-            ${
-              isLocationFocused
-                ? 'border-[#78C347] text-[#78C347]' // 활성: 초록
-                : 'border-transparent text-black' // 비활성: 검정
-            }
+            ${isLocationFocused ? 'border-[#95D769]' : 'border-transparent text-black'}
             ${isLoadingLocation ? 'cursor-wait' : 'cursor-pointer'}
           `}
         >
           {isLoadingLocation ? (
-            <Loader className="w-4 h-4 animate-spin" />
+            <Loader className="w-4 h-4 animate-spin text-[#78C347]" />
           ) : (
             <img
               src={isLocationFocused ? IconLocationMain : IconLocationBlack}
@@ -62,9 +50,9 @@ export default function SideActionButtons({
           <span>내 위치</span>
         </button>
 
-        {/* 2. 즐겨찾기 버튼 */}
+        {/* 즐겨찾기 버튼 */}
         <button
-          onClick={handleFavoriteClick}
+          onClick={onToggleFavorites}
           onMouseEnter={() => setIsHoveringFavorite(true)}
           onMouseLeave={() => setIsHoveringFavorite(false)}
           style={{
@@ -77,12 +65,7 @@ export default function SideActionButtons({
             rounded-full text-[14px] whitespace-nowrap
             transition-all duration-200
             border
-            ${
-              /* ⭐ [핵심 수정] 즐겨찾기 활성화 시 노란색 테두리와 글자색 적용 */
-              isFavoritesActive
-                ? 'border-[#FFE32B]' // 활성: 노랑(#FFE32B) 테두리 + 글씨
-                : 'border-transparent text-black' // 비활성: 투명 테두리 + 검정 글씨
-            }
+            ${isFavoritesOpen ? 'border-[#FFE32B] ' : 'border-transparent text-black'}
           `}
         >
           <img src={IconStarYellow} className="h-[21px]" alt="즐겨찾기" />

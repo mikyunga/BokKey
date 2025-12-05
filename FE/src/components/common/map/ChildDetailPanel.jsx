@@ -3,7 +3,7 @@
 import { ChevronDown, ChevronUp, MapPin, Phone, Clock, Star, CarFront } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useFavorites } from '../../../contexts/FavoriteContext';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ... SmartTooltip 컴포넌트는 보내주신 디자인(픽스된 버전) 그대로 유지 ...
 function SmartTooltip({ text, children, targetRef, className = '' }) {

@@ -38,10 +38,21 @@ export default function PlaceList({
     }
   };
 
+  // ⭐ PlaceItem에서 받은 place만 전달하도록 수정
+  const handlePlaceSelect = (place) => {
+    console.log('🟢 PlaceList에서 받음:', place.name);
+    console.log('🟢 onSelectPlace 함수:', onSelectPlace ? '있음' : '없음!!');
+    if (onSelectPlace) {
+      onSelectPlace(place);
+    } else {
+      console.error('❌ PlaceList의 onSelectPlace가 undefined입니다!');
+    }
+  };
+
   return (
     <div className="flex-1 min-h-0 h-full">
       <div className="relative h-full flex flex-col">
-        {/* ìƒë‹¨ í—¤ë" */}
+        {/* 상단 헤더 */}
         <div
           ref={headerRef}
           className="sticky top-0 z-10 bg-white py-4 px-6 border-b border-gray-stroke02"
@@ -94,7 +105,7 @@ export default function PlaceList({
           </div>
         </div>
 
-        {/* ë¦¬ìŠ¤íŠ¸ */}
+        {/* 리스트 */}
         <div className="flex-1 overflow-y-auto overlay-scrollbar">
           {places.map((place) => (
             <PlaceItem
@@ -102,7 +113,7 @@ export default function PlaceList({
               place={place}
               mode={mode}
               isSelected={selectedPlace && selectedPlace.id === place.id}
-              onSelect={(place, top) => onSelectPlace(place, top)}
+              onSelect={handlePlaceSelect}
             />
           ))}
 

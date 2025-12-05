@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 
-// ... (나머지 import 동일) ...
 import MapContainer from '../components/common/map/MapContainer';
 import CategoryToggle from '../components/common/map/CategoryToggle';
 import Sidebar from '../components/common/map/SideBar';
@@ -12,9 +11,9 @@ import DetailPanel from '../components/common/map/DetailPanel';
 
 import { CHILD_PLACES, SENIOR_PLACES } from '../constants/mockData';
 import { REGIONS } from '../constants/region';
+import { useFavorites } from '../contexts/FavoriteContext';
 
 export default function MapPage() {
-  // ... (기존 state들 동일) ...
   const [mode, setMode] = useState('child');
   const [sido, setSido] = useState('');
   const [sigungu, setSigungu] = useState('');
@@ -22,11 +21,14 @@ export default function MapPage() {
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
 
+  const [showFavorites, setShowFavorites] = useState(false);
+
   const [showOpenOnly, setShowOpenOnly] = useState(false);
   const [showDeliveryOnly, setShowDeliveryOnly] = useState(false);
 
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [locationError, setLocationError] = useState(null);
+
   const [isLocationFocused, setIsLocationFocused] = useState(false);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -35,8 +37,9 @@ export default function MapPage() {
   const [isDetailCollapsed, setIsDetailCollapsed] = useState(false);
 
   const [copyToast, setCopyToast] = useState(false);
-
   const closeTimerRef = useRef(null);
+
+  const { favorites } = useFavorites();
 
   const toggleDetailCollapse = () => setIsDetailCollapsed((prev) => !prev);
 
@@ -65,25 +68,42 @@ export default function MapPage() {
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
 
+  const [searchParams, setSearchParams] = useState(null);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSearchParams(new URLSearchParams(window.location.search));
+    }
+  }, []);
+
   const handleMapReady = useCallback((mapInstance) => {
     mapRef.current = mapInstance;
   }, []);
 
+  // ⭐ 지도 이동 useEffect - selectedPlace만 의존
   useEffect(() => {
-    if (selectedPlace && mapRef.current && !isLocationFocused) {
-      const pos = new window.kakao.maps.LatLng(selectedPlace.latitude, selectedPlace.longitude);
-      setTimeout(() => {
-        mapRef.current.setCenter(pos);
-        mapRef.current.setLevel(3);
-      }, 120);
+    if (selectedPlace && mapRef.current) {
+      const lat = Number(selectedPlace.latitude);
+      const lng = Number(selectedPlace.longitude);
+
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const pos = new window.kakao.maps.LatLng(lat, lng);
+
+        // ⭐ 즐겨찾기에서도 작동하도록 딜레이 추가
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.panTo(pos);
+            if (mapRef.current.getLevel() > 4) {
+              mapRef.current.setLevel(3, { animate: true });
+            }
+          }
+        }, 150);
+      }
     }
-  }, [selectedPlace, isLocationFocused]);
+  }, [selectedPlace]);
 
   const handleMyLocation = () => {
-    // ... (내 위치 로직 동일) ...
     if (isLocationFocused) {
       setIsLocationFocused(false);
-      mapRef.current.setLevel(10);
       return;
     }
 
@@ -135,7 +155,6 @@ export default function MapPage() {
   };
 
   const filteredPlaces = useMemo(() => {
-    // ... (필터 로직 동일) ...
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
     if (sido) {
@@ -191,6 +210,21 @@ export default function MapPage() {
     panelFilters,
   ]);
 
+  const displayPlaces = useMemo(() => {
+    if (showFavorites) {
+      let favPlaces = favorites[mode] || [];
+
+      if (showOpenOnly) {
+        favPlaces = favPlaces.filter((p) => p.isOpen);
+      }
+      if (mode === 'child' && showDeliveryOnly) {
+        favPlaces = favPlaces.filter((p) => p.delivery);
+      }
+      return favPlaces;
+    }
+    return filteredPlaces;
+  }, [showFavorites, favorites, mode, filteredPlaces, showOpenOnly, showDeliveryOnly]);
+
   const handlePanelApply = (filters, hasActive) => {
     setPanelFilters(filters);
     setDetailFilterActive(hasActive);
@@ -203,7 +237,6 @@ export default function MapPage() {
   };
 
   const handleModeChange = (newMode) => {
-    // ... (모드 변경 로직 동일) ...
     setMode(newMode);
     setSelectedFilters([]);
     setSido('');
@@ -217,18 +250,49 @@ export default function MapPage() {
     setIsLocationFocused(false);
   };
 
+  // ⭐ 장소 선택 핸들러: 내 위치 해제 + 상태 업데이트
   const handleSelectPlace = (place) => {
+    console.log('🎯 장소 선택됨:', place.name);
+    console.log('📍 위도:', place.latitude, typeof place.latitude);
+    console.log('📍 경도:', place.longitude, typeof place.longitude);
+    console.log('🗂️ 전체 place 객체:', place);
+
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
     }
+
+    // 내 위치 고정 해제
+    setIsLocationFocused(false);
     setIsDetailCollapsed(false);
     setSelectedPlace(place);
   };
 
+  useEffect(() => {
+    if (!searchParams) return;
+    const selectedId = searchParams.get('selected');
+    const modeParam = searchParams.get('mode');
+    if (selectedId) {
+      if (modeParam && mode !== modeParam) {
+        setMode(modeParam);
+      }
+      const target = displayPlaces.find((p) => String(p.id) === String(selectedId));
+      if (target) {
+        setSelectedPlace(target);
+        setIsDetailCollapsed(false);
+        setTimeout(() => {
+          if (mapRef.current) {
+            const pos = new window.kakao.maps.LatLng(target.latitude, target.longitude);
+            mapRef.current.panTo(pos);
+            mapRef.current.setLevel(3);
+          }
+        }, 150);
+      }
+    }
+  }, [displayPlaces, searchParams]);
+
   return (
     <div className="relative w-full h-screen overflow-visible flex flex-col">
-      {/* ... (스타일 및 토스트 동일) ... */}
       <style>
         {`
           @keyframes fadeInOut {
@@ -243,7 +307,6 @@ export default function MapPage() {
         `}
       </style>
 
-      {/* 토스트 노티 */}
       {copyToast && (
         <div
           className={`
@@ -261,11 +324,12 @@ export default function MapPage() {
       <CategoryToggle mode={mode} onModeChange={handleModeChange} />
 
       <div className="flex w-full h-full">
-        {/* ⭐ [핵심 수정] Sidebar를 div로 감싸고 onMouseDown에서 이벤트 전파를 막습니다(stopPropagation).
-             이렇게 하면 사이드바를 클릭했을 때 '바깥 클릭'으로 인식되어 패널이 닫히는 것을 방지합니다. */}
         <div className="z-20 h-full flex-shrink-0" onMouseDown={(e) => e.stopPropagation()}>
           <Sidebar
             mode={mode}
+            showFavorites={showFavorites}
+            onCloseFavorites={() => setShowFavorites(false)}
+            places={displayPlaces}
             sido={sido}
             setSido={setSido}
             sigungu={sigungu}
@@ -274,7 +338,6 @@ export default function MapPage() {
             setSearchQuery={setSearchQuery}
             selectedFilters={selectedFilters}
             setSelectedFilters={setSelectedFilters}
-            filteredPlaces={filteredPlaces}
             selectedPlace={selectedPlace}
             setSelectedPlace={handleSelectPlace}
             showOpenOnly={showOpenOnly}
@@ -284,11 +347,9 @@ export default function MapPage() {
             onOpenFilter={handleOpenFilter}
             detailFilterActive={detailFilterActive}
             setDetailFilterActive={setDetailFilterActive}
-            panelFilters={panelFilters}
           />
         </div>
 
-        {/* DetailPanel */}
         {selectedPlace && (
           <div
             className="absolute z-30"
@@ -298,11 +359,9 @@ export default function MapPage() {
               transform: 'translateY(-50%)',
               width: isDetailCollapsed ? '42px' : '380px',
             }}
-            // ⭐ 패널 자체를 눌렀을 때도 닫히지 않도록 여기서도 막아두면 안전합니다.
             onMouseDown={(e) => e.stopPropagation()}
           >
             <DetailPanel
-              // 키 값을 주어 장소가 바뀌면 아예 새로 렌더링되게 하여 상태 꼬임을 방지합니다.
               key={selectedPlace.id}
               place={selectedPlace}
               mode={mode}
@@ -314,7 +373,6 @@ export default function MapPage() {
           </div>
         )}
 
-        {/* 지도 영역 */}
         <div className="relative flex-1 h-full">
           <div className="absolute left-6 top-6 z-40">
             <SideActionButtons
@@ -322,12 +380,14 @@ export default function MapPage() {
               isLoadingLocation={isLoadingLocation}
               locationError={locationError}
               isLocationFocused={isLocationFocused}
+              isFavoritesOpen={showFavorites}
+              onToggleFavorites={() => setShowFavorites((prev) => !prev)}
             />
           </div>
 
           <MapContainer
             mode={mode}
-            places={filteredPlaces}
+            places={displayPlaces}
             selectedPlace={selectedPlace}
             onMapReady={handleMapReady}
           />
@@ -338,7 +398,6 @@ export default function MapPage() {
               style={{
                 top: `${Math.max(0, panelTop - 24)}px`,
               }}
-              // 필터 패널 클릭 시에도 닫히지 않게 처리
               onMouseDown={(e) => e.stopPropagation()}
             >
               <div className="pointer-events-auto h-full">

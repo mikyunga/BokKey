@@ -2,15 +2,19 @@
 
 import { MapPin, Phone, User } from 'lucide-react';
 import { CHILD_FILTERS } from '../../../constants/filters';
-
 import FavoriteButton from './FavoriteButton';
 
-export default function PlaceItem({ place, mode, onSelect }) {
+export default function PlaceItem({ place, mode, onSelect, isSelected }) {
   const isChildMode = mode === 'child';
 
-  const handleClick = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    onSelect(place, rect.top);
+  // ⭐ place만 전달하도록 단순화
+  const handleClick = () => {
+    console.log('🔵 PlaceItem 클릭됨:', place.name);
+    if (onSelect) {
+      onSelect(place);
+    } else {
+      console.warn('⚠️ onSelect가 없습니다!');
+    }
   };
 
   const categoryLabel =
@@ -19,10 +23,12 @@ export default function PlaceItem({ place, mode, onSelect }) {
 
   return (
     <div
-      onClick={(e) => handleClick(e)}
-      style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}
+      onClick={handleClick}
+      style={{
+        borderBottom: '1px solid rgba(0,0,0,0.05)',
+        backgroundColor: isSelected ? 'rgba(120, 195, 71, 0.08)' : 'white',
+      }}
       className={`
-        bg-white 
         pl-6 pr-[18px] py-4 
         cursor-pointer 
         flex flex-col gap-[6px]
@@ -42,7 +48,10 @@ export default function PlaceItem({ place, mode, onSelect }) {
               inline-block
               max-w-[75%]
             "
-            onClick={() => navigator.clipboard.writeText(place.name)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(place.name);
+            }}
           >
             {place.name}
           </h4>
@@ -50,7 +59,9 @@ export default function PlaceItem({ place, mode, onSelect }) {
             {categoryLabel}
           </span>
         </div>
-        <FavoriteButton place={place} mode={mode} />
+        <div onClick={(e) => e.stopPropagation()}>
+          <FavoriteButton place={place} mode={mode} />
+        </div>
       </div>
 
       {/* 주소, 전화번호 */}
