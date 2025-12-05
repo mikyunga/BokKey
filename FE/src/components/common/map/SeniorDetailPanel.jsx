@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useFavorites } from '../../../contexts/FavoriteContext';
+// ⭐ Framer Motion 추가
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ... SmartTooltip은 동일하게 유지 ...
 function SmartTooltip({ text, children, targetRef }) {
@@ -94,25 +96,38 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
   const { toggleFavorite, isFavorite } = useFavorites();
   const favorite = isFavorite(place?.id, 'senior');
 
-  const getCategoryText = () => {
-    if (place?.categoryText) return place.categoryText;
-    return '무료급식소';
-  };
-
   // 상세정보 라벨 스타일 (지번, 급식장소 등 - 회색 유지)
   const labelClass =
     'text-[12px] px-[4px] py-[1px] rounded-[3px] text-black-_30 font-medium flex-shrink-0 h-fit items-center';
   const labelStyle = { backgroundColor: 'rgba(0,0,0,0.04)' };
 
-  // ⭐ 섹션 라벨 스타일 (Child 패널과 CSS 완벽 동일하게 수정)
-  // padding: px-[4px] py-[1px]
-  // margin: mb-3
-  // text: text-[13px]
-  // color: Orange (#FF9238)
+  // ⭐ 섹션 라벨 스타일 (오렌지색 적용)
   const sectionLabelClass = 'px-[4px] py-[1px] mb-3 rounded-[4px] text-[13px] font-medium w-fit';
   const sectionLabelStyle = {
     backgroundColor: 'rgba(255,146,56,0.08)',
     color: '#FF9238',
+  };
+
+  // ⭐ 드롭다운 애니메이션 설정 (marginTop을 여기서 제어)
+  const dropdownVariants = {
+    hidden: {
+      height: 0,
+      opacity: 0,
+      marginTop: 0,
+      overflow: 'hidden',
+    },
+    visible: {
+      height: 'auto',
+      opacity: 1,
+      marginTop: 8, // ⭐ 여기가 열릴 때 여백을 담당합니다.
+      transition: { duration: 0.2, ease: 'easeOut' },
+    },
+    exit: {
+      height: 0,
+      opacity: 0,
+      marginTop: 0, // ⭐ 닫힐 때 여백도 자연스럽게 0으로 줄어듭니다.
+      transition: { duration: 0.2, ease: 'easeIn' },
+    },
   };
 
   return (
@@ -173,7 +188,7 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
 
         {/* -------------------- 📌 급식소 안내 -------------------- */}
         <div>
-          {/* ⭐ 섹션 라벨: Child 패널과 동일한 오렌지 스타일 */}
+          {/* ⭐ 섹션 라벨: 오렌지색 적용 */}
           <div className={sectionLabelClass} style={sectionLabelStyle}>
             급식소 안내
           </div>
@@ -206,24 +221,35 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
                   )}
                 </div>
 
-                {showAddressDetail && (
-                  <div className="mt-[8px] pl-[2px] flex items-start gap-[6px] animate-fadeIn">
-                    <span className={labelClass} style={labelStyle}>
-                      지번
-                    </span>
-
-                    <span
-                      className={`text-[14px] break-words opacity-30 ${
-                        isValidInfo(place?.lotAddress)
-                          ? 'cursor-pointer copy-link'
-                          : 'cursor-default'
-                      }`}
-                      onClick={(e) => copyToClipboard(place?.lotAddress, e)}
+                {/* ⭐ 주소 상세 애니메이션 적용 */}
+                <AnimatePresence>
+                  {showAddressDetail && (
+                    <motion.div
+                      // ❗ 중요 수정: 여기서 'mt-[8px]' 클래스를 제거했습니다.
+                      // variants의 marginTop 제어와 충돌을 방지하여 부드럽게 닫히게 합니다.
+                      className="pl-[2px] flex items-start gap-[6px]"
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
                     >
-                      {place?.lotAddress || '정보 없음'}
-                    </span>
-                  </div>
-                )}
+                      <span className={labelClass} style={labelStyle}>
+                        지번
+                      </span>
+
+                      <span
+                        className={`text-[14px] break-words opacity-30 ${
+                          isValidInfo(place?.lotAddress)
+                            ? 'cursor-pointer copy-link'
+                            : 'cursor-default'
+                        }`}
+                        onClick={(e) => copyToClipboard(place?.lotAddress, e)}
+                      >
+                        {place?.lotAddress || '정보 없음'}
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </div>
@@ -263,7 +289,7 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
           <div className="border-b opacity-50 my-4"></div>
 
           {/* -------------------- 📌 이용 조건 -------------------- */}
-          {/* ⭐ 섹션 라벨: Child 패널과 동일한 오렌지 스타일 */}
+          {/* ⭐ 섹션 라벨: 오렌지색 적용 */}
           <div className={sectionLabelClass} style={sectionLabelStyle}>
             이용 조건
           </div>
