@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+// import { useState } from 'react';
 import { useRef, useEffect } from 'react';
 import { IconLogo } from '../../../utils/icons';
 import SearchBar from './SearchBar';
