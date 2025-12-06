@@ -22,8 +22,7 @@ export default function InputField({
         onChange={onChange}
         className={`w-full h-[51px] px-[16px] py-[14px] outline-none border border-gray-stroke05 rounded-[8px] bg-white 
           placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main 
-          transition-all duration-300 ease-in-out
-          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300
+          focus:placeholder:opacity-30
           ${className}`}
       />
       {showPasswordToggle && (

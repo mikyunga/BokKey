@@ -32,7 +32,7 @@ const EmailVerify = ({ value, onChange }) => {
   };
 
   return (
-    <div className="flex flex-col gap-[10px]">
+    <div className="flex flex-col gap-[6px]">
       <div className="text-[15px] font-bold text-gray">아이디</div>
 
       {/* 이메일 입력 */}
@@ -53,7 +53,7 @@ const EmailVerify = ({ value, onChange }) => {
           className="w-full outline-none flex-1 disabled:bg-transparent
           placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main
           transition-all duration-300 ease-in-out
-          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300"
+          focus:placeholder:opacity-30"
           disabled={emailVerified}
         />
         <button

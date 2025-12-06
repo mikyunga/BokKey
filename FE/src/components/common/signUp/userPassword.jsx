@@ -48,7 +48,7 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
   return (
     <>
       {/* 비밀번호 입력 */}
-      <div className="flex flex-col gap-[10px]">
+      <div className="flex flex-col gap-[6px]">
         <div className="text-[15px] font-semibold text-gray">비밀번호</div>
         <div
           className={`w-full flex items-center px-[16px] py-[14px] gap-[12px]
@@ -77,10 +77,10 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
             onFocus={() => setIsPasswordFocused(true)}
             onBlur={() => setIsPasswordFocused(false)}
             placeholder="비밀번호를 입력해주세요."
-            className="w-full outline-none placeholder-gray-stroke30
+            className="w-full outline-none
             placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main 
           transition-all duration-300 ease-in-out
-          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300"
+          focus:placeholder:opacity-30"
           />
           <button
             type="button"
@@ -130,7 +130,7 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
       </div>
 
       {/* 비밀번호 확인 */}
-      <div className="flex flex-col gap-[10px]">
+      <div className="flex flex-col gap-[6px]">
         <div className="text-[15px] font-semibold text-gray">비밀번호 확인</div>
         <div
           className={`w-full flex items-center px-[16px] py-[14px] gap-[12px]
@@ -147,7 +147,7 @@ const UserPassWord = ({ value, onChange, setIsPasswordValidAll }) => {
             className="w-full outline-none
             placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main 
           transition-all duration-300 ease-in-out
-          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300"
+          focus:placeholder:opacity-30 "
           />
           <button
             type="button"
