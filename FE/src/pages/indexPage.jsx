@@ -49,24 +49,28 @@ export default function Index() {
           <div className="absolute top-[35%] left-1/2 -translate-x-1/2 pointer-events-auto z-10">
             {/* ✅ 수정: Link 컴포넌트 제거, onClick 핸들러 추가 */}
             <button
-              onClick={handleNavigate} // 👈 클릭 시 navigate('/map') 실행
+              onClick={handleNavigate}
+              // 👇 디자인 수정: border를 inline style에서 class로 옮기고 hover 효과 추가
               className="
               flex items-center gap-[3px] 
               rounded-[10px] px-6 py-[12px]
               transition-all duration-300 whitespace-nowrap
-              animate-float hover:animate-none group"
+              animate-float hover:animate-none group
+              border-2 border-[rgba(0,0,0,0.1)] hover:border-[rgba(0,0,0,0.2)]
+              "
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.75)',
                 backdropFilter: 'blur(5px)',
                 WebkitBackdropFilter: 'blur(5px)',
-                border: '2px solid rgba(0, 0, 0, 0.1)',
+                // border: '2px solid rgba(0, 0, 0, 0.1)', // 👈 여기서 제거하고 className으로 이동
                 boxShadow: '0px 4px 10px 0px rgba(0, 0, 0, 0.05)',
               }}
             >
               {/* 텍스트 및 아이콘 로직은 동일 */}
               <span
-                className="text-[16px] font-medium tracking-[-0.025em] mr-3"
-                style={{ color: 'rgba(0, 0, 0, 0.7)' }}
+                // 👇 디자인 수정: color를 inline style에서 class로 옮기고 group-hover 효과 추가
+                className="text-[16px] font-medium tracking-[-0.025em] mr-3 text-[rgba(0,0,0,0.7)] group-hover:text-black"
+                // style={{ color: 'rgba(0, 0, 0, 0.7)' }} // 👈 여기서 제거
               >
                 내 주변 식사 장소 찾기
               </span>
