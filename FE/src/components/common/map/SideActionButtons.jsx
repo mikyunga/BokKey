@@ -30,7 +30,7 @@ export default function SideActionButtons({
           }}
           className={`
             flex items-center gap-1
-            pl-[11px] pr-[12px] py-[8px]
+            pl-[11px] pr-[12px] py-[7px]
             rounded-full text-[14px] whitespace-nowrap
             transition-all duration-200
             border
@@ -61,7 +61,7 @@ export default function SideActionButtons({
           }}
           className={`
             flex items-center gap-[2px]
-            pl-[11px] pr-[12px] py-[8px]
+            pl-[11px] pr-[12px] py-[7px]
             rounded-full text-[14px] whitespace-nowrap
             transition-all duration-200
             border
