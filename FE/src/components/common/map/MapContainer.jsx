@@ -32,11 +32,12 @@ export default function MapContainer({
   const mapRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const markersMapRef = useRef(new Map());
+  const customOverlayRef = useRef(null); // ⭐ 말풍선 Overlay
 
   const prevPlaceIdsRef = useRef('');
   const prevSelectedPlaceRef = useRef(null);
   const prevLocationFocusedRef = useRef(false);
-  const prevModeRef = useRef(mode); // ⭐ 이전 모드 추적
+  const prevModeRef = useRef(mode);
 
   const { isFavorite } = useFavorites();
 
@@ -62,17 +63,22 @@ export default function MapContainer({
     }
   }, [onMapReady, mapInstance]);
 
-  // ⭐⭐⭐ 모드가 바뀌면 모든 마커 제거
+  // ⭐ 모드가 바뀌면 모든 마커 제거
   useEffect(() => {
     if (prevModeRef.current !== mode) {
       console.log('🔄 모드 변경 감지:', prevModeRef.current, '→', mode);
       console.log('🗑️ 모든 마커 제거 중... (총', markersMapRef.current.size, '개)');
 
-      // 모든 마커를 지도에서 제거하고 Map 초기화
       markersMapRef.current.forEach((marker, id) => {
         marker.setMap(null);
       });
       markersMapRef.current.clear();
+
+      // ⭐ 말풍선도 제거
+      if (customOverlayRef.current) {
+        customOverlayRef.current.setMap(null);
+        customOverlayRef.current = null;
+      }
 
       console.log('✅ 마커 제거 완료');
       prevModeRef.current = mode;
@@ -88,7 +94,6 @@ export default function MapContainer({
 
     console.log('🎯 마커 업데이트 시작 - 현재 모드:', mode, '/ 장소 개수:', places.length);
 
-    // --- (A) 마커 그리기 로직 ---
     places.forEach((place) => {
       if (!place.latitude || !place.longitude) return;
       const lat = parseFloat(place.latitude);
@@ -99,17 +104,34 @@ export default function MapContainer({
       const position = new window.kakao.maps.LatLng(lat, lng);
       bounds.extend(position);
 
+      // ⭐⭐⭐ 선택된 장소인지 확인
+      const isSelected = selectedPlace && selectedPlace.id === place.id;
+
+      // ⭐ 마커 크기 결정 (선택되면 크게)
+      const markerSize = isSelected
+        ? new window.kakao.maps.Size(48, 48)
+        : new window.kakao.maps.Size(34, 34);
+
+      const markerOffset = isSelected
+        ? new window.kakao.maps.Point(24, 48)
+        : new window.kakao.maps.Point(17, 34);
+
       // 마커 이미지 결정
       let markerImage = null;
       if (isFavorite(place.id, mode)) {
-        const imageSize = new window.kakao.maps.Size(34, 34);
-        const imageOption = { offset: new window.kakao.maps.Point(17, 34) };
-        markerImage = new window.kakao.maps.MarkerImage(IconYellow, imageSize, imageOption);
+        markerImage = new window.kakao.maps.MarkerImage(IconYellow, markerSize, {
+          offset: markerOffset,
+        });
       } else if (mode === 'child') {
         const categoryData = CATEGORY_MARKERS[place.category] || CATEGORY_MARKERS.restaurant;
-        const imageSize = new window.kakao.maps.Size(34, 34);
-        const imageOption = { offset: new window.kakao.maps.Point(17, 34) };
-        markerImage = new window.kakao.maps.MarkerImage(categoryData.url, imageSize, imageOption);
+        markerImage = new window.kakao.maps.MarkerImage(categoryData.url, markerSize, {
+          offset: markerOffset,
+        });
+      } else {
+        // senior 모드일 때 기본 마커 (빨간색)
+        markerImage = new window.kakao.maps.MarkerImage(IconRed, markerSize, {
+          offset: markerOffset,
+        });
       }
 
       // 기존 마커가 있으면 업데이트, 없으면 생성
@@ -118,7 +140,6 @@ export default function MapContainer({
         existingMarker.setImage(markerImage);
         existingMarker.setPosition(position);
       } else {
-        // ⭐ 새 마커 생성
         const newMarker = new window.kakao.maps.Marker({
           position,
           map: mapInstance,
@@ -127,7 +148,6 @@ export default function MapContainer({
           clickable: true,
         });
 
-        // ⭐⭐⭐ 클릭 이벤트 리스너 등록 (현재 place를 클로저로 캡처)
         window.kakao.maps.event.addListener(newMarker, 'click', () => {
           console.log('🖱️ 마커 클릭됨:', place.name, '/ ID:', place.id);
           if (onSelectPlace) {
@@ -152,17 +172,11 @@ export default function MapContainer({
 
     console.log('📍 최종 마커 개수:', markersMapRef.current.size);
 
-    // --- (B) 지도 범위 재설정 로직 ---
     const currentIdsString = currentPlaceIds.sort().join(',');
-
-    // 1. 리스트 구성이 바뀌었을 때 (필터, 검색 등)
     const isListChanged = prevPlaceIdsRef.current !== currentIdsString;
-
-    // 2. 내 위치를 껐을 때
     const isLocationJustTurnedOff =
       prevLocationFocusedRef.current === true && isLocationFocused === false;
 
-    // 조건: 마커가 있고 + (현재 선택된 장소가 없음) + (리스트가 바뀌었거나 OR 내 위치가 꺼졌을 때)
     if (
       currentPlaceIds.length > 0 &&
       !selectedPlace &&
@@ -171,32 +185,85 @@ export default function MapContainer({
       mapInstance.setBounds(bounds);
     }
 
-    // --- (C) 상태 업데이트 ---
     prevPlaceIdsRef.current = currentIdsString;
     prevSelectedPlaceRef.current = selectedPlace;
     prevLocationFocusedRef.current = isLocationFocused;
   }, [mapInstance, places, mode, isFavorite, selectedPlace, isLocationFocused, onSelectPlace]);
 
-  // 3. 선택된 장소로 이동
+  // ⭐⭐⭐ 3. 선택된 장소에 말풍선 표시
   useEffect(() => {
-    if (!mapInstance || !selectedPlace) return;
+    if (!mapInstance || !selectedPlace || typeof window.kakao === 'undefined') return;
 
     const lat = parseFloat(selectedPlace.latitude);
     const lng = parseFloat(selectedPlace.longitude);
 
     if (isNaN(lat) || isNaN(lng)) return;
 
-    const pos = new window.kakao.maps.LatLng(lat, lng);
+    const position = new window.kakao.maps.LatLng(lat, lng);
 
+    // 기존 말풍선 제거
+    if (customOverlayRef.current) {
+      customOverlayRef.current.setMap(null);
+    }
+
+    // ⭐ 말풍선 HTML 생성
+    const content = document.createElement('div');
+    content.style.cssText = `
+      position: relative;
+      bottom: 60px;
+      background: white;
+      padding: 4px 8px;
+      border-radius: 5px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      font-size: 12px;
+      font-weight: 600;
+      color: black;
+      white-space: nowrap;
+      border: 1px solid rgba(0,0,0,0.3);
+      overflow: visible;
+    `;
+    // 말풍선 꼬리 추가 (가로만 얇게 - 회전 고려)
+    const tail = document.createElement('div');
+    tail.style.cssText = `
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-right: 1px solid rgba(0,0,0,0.3);
+    border-bottom: 1px solid rgba(0,0,0,0.3);
+`;
+
+    content.textContent = selectedPlace.name;
+    content.appendChild(tail);
+
+    // CustomOverlay 생성
+    const customOverlay = new window.kakao.maps.CustomOverlay({
+      position: position,
+      content: content,
+      yAnchor: 1,
+    });
+
+    customOverlay.setMap(mapInstance);
+    customOverlayRef.current = customOverlay;
+
+    // 지도 중심 이동
     const timer = setTimeout(() => {
-      mapInstance.setCenter(pos);
-      // 줌 레벨이 너무 넓으면(숫자가 크면) 조금 확대해줌
+      mapInstance.setCenter(position);
       if (mapInstance.getLevel() > 3) {
         mapInstance.setLevel(3, { animate: true });
       }
     }, 50);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (customOverlayRef.current) {
+        customOverlayRef.current.setMap(null);
+        customOverlayRef.current = null;
+      }
+    };
   }, [mapInstance, selectedPlace]);
 
   return (
