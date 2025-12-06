@@ -7,6 +7,7 @@ import SearchBar from './SearchBar';
 import LocationDropdowns from './LocationDropdowns';
 import SearchFilter from './SearchFilter';
 import PlaceList from './PlaceList';
+import { useNavigate } from 'react-router-dom';
 
 export default function Sidebar({
   mode,
@@ -38,6 +39,8 @@ export default function Sidebar({
   onSelectFromFavorites,
 }) {
   const headerRef = useRef(null);
+  const navigate = useNavigate();
+  const goHome = () => navigate('/');
 
   useEffect(() => {
     if (onHeaderHeightChange) {
@@ -69,7 +72,12 @@ export default function Sidebar({
       ) : (
         <div ref={headerRef} className="px-6 pt-6 pb-4 p-4 border-b border-gray-stroke05">
           <div className="flex items-center justify-between mb-4">
-            <img src={IconLogo} alt="복키 로고" className="h-[24px] object-contain flex-shrink-0" />
+            <img
+              src={IconLogo}
+              alt="복키 로고"
+              onClick={goHome}
+              className="h-[24px] object-contain flex-shrink-0 cursor-pointer"
+            />
 
             <div className="flex-shrink-0">
               <LocationDropdowns
