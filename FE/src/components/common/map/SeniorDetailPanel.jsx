@@ -144,6 +144,9 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
       .copy-link:hover {
         text-decoration: underline;
       }
+      .select-text {
+        user-select: text;
+      }
       `}
       </style>
 
@@ -151,6 +154,7 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
         ref={panelRef}
         className={`
           bg-[#FFFFFF]
+          select-text
           p-6
           cursor-default
           flex flex-col gap-[8px]
@@ -263,8 +267,11 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
               </span>
               <span
                 className={`text-[14px] leading-[1.35] break-words pt-[1px] ${
-                  isValidInfo(place?.place) ? 'opacity-70' : 'opacity-30'
+                  isValidInfo(place?.place)
+                    ? 'opacity-70 cursor-pointer copy-link'
+                    : 'opacity-30 cursor-default'
                 }`}
+                onClick={(e) => copyToClipboard(place?.place, e)}
               >
                 {place?.place || '정보 없음'}
               </span>
@@ -304,9 +311,17 @@ export default function SeniorDetailPanel({ place, isCollapsed, onClose, onCopyS
                     ? place.target_name.length > 0
                     : isValidInfo(place?.target_name)
                 )
-                  ? 'opacity-70'
-                  : 'opacity-30'
+                  ? 'opacity-70 cursor-pointer copy-link'
+                  : 'opacity-30 cursor-default'
               }`}
+              onClick={(e) =>
+                copyToClipboard(
+                  Array.isArray(place?.target_name)
+                    ? place.target_name.join(', ')
+                    : place?.target_name,
+                  e
+                )
+              }
             >
               {Array.isArray(place?.target_name)
                 ? place.target_name.join(', ')
