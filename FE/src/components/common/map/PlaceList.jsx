@@ -46,7 +46,7 @@ export default function PlaceList({
 
       // 💡 계산 로직: 아이템의 중간이 리스트 높이의 35% 지점(약간 위)에 오도록 설정
       // (보통 중앙은 0.5인데, 0.35 정도로 잡으면 시야상 보기 좋은 상단부에 위치합니다)
-      const targetScrollTop = itemTop - listHeight * 0.35 + itemHeight / 2;
+      const targetScrollTop = itemTop - listHeight * 0.2 + itemHeight / 2;
 
       list.scrollTo({
         top: targetScrollTop,
