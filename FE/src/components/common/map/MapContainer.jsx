@@ -27,7 +27,7 @@ export default function MapContainer({
   selectedPlace,
   onMapReady,
   isLocationFocused,
-  onSelectPlace, // ⭐ 핀 클릭 시 실행될 함수 (MapPage에서 전달받음)
+  onSelectPlace,
 }) {
   const mapRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
@@ -36,6 +36,7 @@ export default function MapContainer({
   const prevPlaceIdsRef = useRef('');
   const prevSelectedPlaceRef = useRef(null);
   const prevLocationFocusedRef = useRef(false);
+  const prevModeRef = useRef(mode); // ⭐ 이전 모드 추적
 
   const { isFavorite } = useFavorites();
 
@@ -61,12 +62,31 @@ export default function MapContainer({
     }
   }, [onMapReady, mapInstance]);
 
+  // ⭐⭐⭐ 모드가 바뀌면 모든 마커 제거
+  useEffect(() => {
+    if (prevModeRef.current !== mode) {
+      console.log('🔄 모드 변경 감지:', prevModeRef.current, '→', mode);
+      console.log('🗑️ 모든 마커 제거 중... (총', markersMapRef.current.size, '개)');
+
+      // 모든 마커를 지도에서 제거하고 Map 초기화
+      markersMapRef.current.forEach((marker, id) => {
+        marker.setMap(null);
+      });
+      markersMapRef.current.clear();
+
+      console.log('✅ 마커 제거 완료');
+      prevModeRef.current = mode;
+    }
+  }, [mode]);
+
   // 2. 마커 업데이트 및 이벤트 리스너 등록
   useEffect(() => {
     if (!mapInstance || !places || typeof window.kakao === 'undefined') return;
 
     const bounds = new window.kakao.maps.LatLngBounds();
     const currentPlaceIds = [];
+
+    console.log('🎯 마커 업데이트 시작 - 현재 모드:', mode, '/ 장소 개수:', places.length);
 
     // --- (A) 마커 그리기 로직 ---
     places.forEach((place) => {
@@ -104,17 +124,19 @@ export default function MapContainer({
           map: mapInstance,
           title: place.name,
           image: markerImage,
-          clickable: true, // ⭐ 클릭 가능하도록 설정
+          clickable: true,
         });
 
-        // ⭐⭐⭐ 클릭 이벤트 리스너 등록 (핵심 로직)
+        // ⭐⭐⭐ 클릭 이벤트 리스너 등록 (현재 place를 클로저로 캡처)
         window.kakao.maps.event.addListener(newMarker, 'click', () => {
+          console.log('🖱️ 마커 클릭됨:', place.name, '/ ID:', place.id);
           if (onSelectPlace) {
             onSelectPlace(place);
           }
         });
 
         markersMapRef.current.set(place.id, newMarker);
+        console.log('  ✅ 새 마커 생성:', place.name, '(ID:', place.id, ')');
       }
     });
 
@@ -122,10 +144,13 @@ export default function MapContainer({
     const currentIdSet = new Set(currentPlaceIds);
     markersMapRef.current.forEach((marker, id) => {
       if (!currentIdSet.has(id)) {
+        console.log('  🗑️ 마커 제거:', id);
         marker.setMap(null);
         markersMapRef.current.delete(id);
       }
     });
+
+    console.log('📍 최종 마커 개수:', markersMapRef.current.size);
 
     // --- (B) 지도 범위 재설정 로직 ---
     const currentIdsString = currentPlaceIds.sort().join(',');

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import MapContainer from '../components/common/map/MapContainer';
 import CategoryToggle from '../components/common/map/CategoryToggle';
@@ -20,6 +21,7 @@ export default function MapPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedPlace, setSelectedPlace] = useState(null);
+  const [selectedPlaceMode, setSelectedPlaceMode] = useState(null);
 
   const [showFavorites, setShowFavorites] = useState(false);
   const [showOpenOnly, setShowOpenOnly] = useState(false);
@@ -46,9 +48,16 @@ export default function MapPage() {
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
   const closeTimerRef = useRef(null);
+  const modeRef = useRef(mode); // ⭐ 최신 mode를 항상 참조하기 위한 ref
 
   const { favorites } = useFavorites();
   const [searchParams, setSearchParams] = useState(null);
+
+  // ⭐ modeRef를 항상 최신으로 유지
+  useEffect(() => {
+    modeRef.current = mode;
+    console.log('🔥 mode 업데이트됨:', mode);
+  }, [mode]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -60,12 +69,11 @@ export default function MapPage() {
     mapRef.current = mapInstance;
   }, []);
 
-  // ⭐ [유지] 필터 변경 시 선택된 장소 해제
   useEffect(() => {
     setSelectedPlace(null);
+    setSelectedPlaceMode(null);
   }, [selectedFilters, searchQuery, sido, sigungu, showOpenOnly, showDeliveryOnly, panelFilters]);
 
-  // 내 위치 기능
   const handleMyLocation = () => {
     if (isLocationFocused) {
       setIsLocationFocused(false);
@@ -121,7 +129,6 @@ export default function MapPage() {
     );
   };
 
-  // 필터링 로직
   const filteredPlaces = useMemo(() => {
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
@@ -185,21 +192,27 @@ export default function MapPage() {
   }, [showFavorites, favorites, mode, filteredPlaces, showOpenOnly, showDeliveryOnly]);
 
   const handleModeChange = (newMode) => {
+    console.log('🔄 모드 변경:', mode, '→', newMode);
+
+    // ⭐⭐⭐ 1. 먼저 선택된 장소를 초기화 (DetailPanel 즉시 닫기)
+    setSelectedPlace(null);
+    setSelectedPlaceMode(null);
+    setIsDetailCollapsed(false);
+
+    // ⭐⭐⭐ 2. 그 다음 mode 변경
     setMode(newMode);
+
+    // 3. 나머지 상태 초기화
     setSelectedFilters([]);
     setSido('');
     setSigungu('');
     setSearchQuery('');
-    setSelectedPlace(null);
     setShowOpenOnly(false);
     setShowDeliveryOnly(false);
     setPanelFilters({ targets: [], days: [], times: [], region: null });
     setIsFilterOpen(false);
     setDetailFilterActive(false);
-
     setShowFavorites(false);
-    setIsDetailCollapsed(false);
-
     setIsLocationFocused(false);
     setIsLoadingLocation(false);
     setLocationError(null);
@@ -215,7 +228,33 @@ export default function MapPage() {
     }
   };
 
-  const handleSelectPlace = (place) => {
+  // ⭐⭐⭐ 핵심 수정: modeRef.current를 사용하여 항상 최신 mode 참조
+  const handleSelectPlace = useCallback((place) => {
+    const currentMode = modeRef.current; // ⭐ ref에서 최신 mode 가져오기
+
+    console.log('═══════════════════════════════════════');
+    console.log('📍 장소 선택 이벤트 발생');
+    console.log('  - 선택된 장소:', place?.name);
+    console.log('  - 현재 mode (ref):', currentMode);
+    console.log('  - place.category:', place?.category);
+    console.log('  - place.target_name:', place?.target_name);
+    console.log('  - place.meal_days:', place?.meal_days);
+
+    // ⭐⭐⭐ 추가 검증: place가 현재 mode와 맞는 데이터인지 확인
+    const isChildPlace = place?.category !== undefined;
+    const isSeniorPlace = place?.target_name !== undefined || place?.meal_days !== undefined;
+
+    if (currentMode === 'child' && !isChildPlace) {
+      console.error('❌ child 모드인데 senior 데이터가 전달됨!');
+      console.log('═══════════════════════════════════════');
+      return;
+    }
+    if (currentMode === 'senior' && !isSeniorPlace) {
+      console.error('❌ senior 모드인데 child 데이터가 전달됨!');
+      console.log('═══════════════════════════════════════');
+      return;
+    }
+
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
@@ -223,7 +262,13 @@ export default function MapPage() {
     setIsLocationFocused(false);
     setIsDetailCollapsed(false);
     setSelectedPlace(place);
-  };
+    setSelectedPlaceMode(currentMode); // ⭐ ref의 값을 사용
+
+    console.log('✅ 장소 선택 완료');
+    console.log('  - selectedPlace 설정:', place?.name);
+    console.log('  - selectedPlaceMode 설정:', currentMode);
+    console.log('═══════════════════════════════════════');
+  }, []); // ⭐ dependency 없음 - modeRef는 항상 최신값
 
   const handlePanelApply = (filters, hasActive) => {
     setPanelFilters(filters);
@@ -240,6 +285,7 @@ export default function MapPage() {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     closeTimerRef.current = setTimeout(() => {
       setSelectedPlace(null);
+      setSelectedPlaceMode(null);
       closeTimerRef.current = null;
     }, 250);
   };
@@ -262,6 +308,7 @@ export default function MapPage() {
       const target = displayPlaces.find((p) => String(p.id) === String(selectedId));
       if (target) {
         setSelectedPlace(target);
+        setSelectedPlaceMode(modeParam || mode);
         setIsDetailCollapsed(false);
         setTimeout(() => {
           if (mapRef.current) {
@@ -272,7 +319,7 @@ export default function MapPage() {
         }, 150);
       }
     }
-  }, [displayPlaces, searchParams]);
+  }, [displayPlaces, searchParams, mode]);
 
   return (
     <div className="relative w-full h-screen overflow-visible flex flex-col">
@@ -325,31 +372,35 @@ export default function MapPage() {
           />
         </div>
 
-        {/* ⭐ 선택된 장소가 있으면 상세 패널 렌더링 */}
-        {selectedPlace && (
-          <div
-            className="absolute z-30"
-            style={{
-              top: '50%',
-              left: '396px',
-              transform: 'translateY(-50%)',
-              width: isDetailCollapsed ? '42px' : '380px',
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-          >
-            <DetailPanel
-              key={selectedPlace.id}
-              place={selectedPlace}
-              mode={mode}
-              isCollapsed={isDetailCollapsed}
-              onToggleCollapse={toggleDetailCollapse}
-              onClose={closeDetailPanel}
-              onCopySuccess={handleCopySuccess}
-            />
-          </div>
-        )}
-
         <div className="relative flex-1 h-full">
+          <AnimatePresence>
+            {selectedPlace && selectedPlaceMode && (
+              <motion.div
+                key="detail-panel-wrapper"
+                className="absolute z-30"
+                style={{
+                  top: '50%',
+                  left: '24px',
+                  width: isDetailCollapsed ? '42px' : '380px',
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, x: -20, y: '-50%' }}
+                animate={{ opacity: 1, x: 0, y: '-50%' }}
+                exit={{ opacity: 0, x: -20, y: '-50%', transition: { duration: 0.2 } }}
+              >
+                <DetailPanel
+                  key={`${selectedPlaceMode}-${selectedPlace.id}`}
+                  place={selectedPlace}
+                  mode={selectedPlaceMode}
+                  isCollapsed={isDetailCollapsed}
+                  onToggleCollapse={toggleDetailCollapse}
+                  onClose={closeDetailPanel}
+                  onCopySuccess={handleCopySuccess}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="absolute left-6 top-6 z-40">
             <SideActionButtons
               onMyLocation={handleMyLocation}
@@ -361,12 +412,11 @@ export default function MapPage() {
             />
           </div>
 
-          {/* ⭐ MapContainer에 onSelectPlace prop 전달 */}
           <MapContainer
             mode={mode}
             places={displayPlaces}
             selectedPlace={selectedPlace}
-            onSelectPlace={handleSelectPlace} // 🔴 여기가 추가된 핵심 기능입니다!
+            onSelectPlace={handleSelectPlace}
             onMapReady={handleMapReady}
             isLocationFocused={isLocationFocused}
           />
