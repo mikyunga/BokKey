@@ -56,6 +56,7 @@ import IconGreen from '../assets/icon-green.svg';
 import IconSkyblue from '../assets/icon-skyblue.svg';
 import IconBlue from '../assets/icon-blue.svg';
 import IconPurple from '../assets/icon-purple.svg';
+import IconBlack from '../assets/icon-black.svg';
 
 export {
   IconAlarmBlack,
@@ -115,5 +116,6 @@ export {
   IconSkyblue,
   IconBlue,
   IconPurple,
+  IconBlack,
   IconArrowDown,
 };
