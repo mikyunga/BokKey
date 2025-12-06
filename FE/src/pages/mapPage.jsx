@@ -60,8 +60,7 @@ export default function MapPage() {
     mapRef.current = mapInstance;
   }, []);
 
-  // ⭐ [추가됨] 필터(카테고리, 지역, 검색 등)가 바뀌면 선택된 장소 해제
-  // -> 그래야 MapContainer가 "선택된 게 없으니 전체 범위를 보여주자"라고 판단합니다.
+  // ⭐ [유지] 필터 변경 시 선택된 장소 해제
   useEffect(() => {
     setSelectedPlace(null);
   }, [selectedFilters, searchQuery, sido, sigungu, showOpenOnly, showDeliveryOnly, panelFilters]);
@@ -264,7 +263,6 @@ export default function MapPage() {
       if (target) {
         setSelectedPlace(target);
         setIsDetailCollapsed(false);
-        // URL로 들어왔을 때만 예외적으로 여기서 이동 처리 (초기 로딩이므로 충돌 위험 적음)
         setTimeout(() => {
           if (mapRef.current) {
             const pos = new window.kakao.maps.LatLng(target.latitude, target.longitude);
@@ -327,6 +325,7 @@ export default function MapPage() {
           />
         </div>
 
+        {/* ⭐ 선택된 장소가 있으면 상세 패널 렌더링 */}
         {selectedPlace && (
           <div
             className="absolute z-30"
@@ -362,12 +361,14 @@ export default function MapPage() {
             />
           </div>
 
+          {/* ⭐ MapContainer에 onSelectPlace prop 전달 */}
           <MapContainer
             mode={mode}
             places={displayPlaces}
             selectedPlace={selectedPlace}
+            onSelectPlace={handleSelectPlace} // 🔴 여기가 추가된 핵심 기능입니다!
             onMapReady={handleMapReady}
-            isLocationFocused={isLocationFocused} // ⭐ [수정됨] 이 prop이 있어야 내 위치 끌 때 전체 뷰로 돌아갑니다.
+            isLocationFocused={isLocationFocused}
           />
 
           {isFilterOpen && (

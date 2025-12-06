@@ -1,13 +1,15 @@
 'use client';
 
+// ⭐ 1. forwardRef 불러오기
+import { forwardRef } from 'react';
 import { MapPin, Phone, User } from 'lucide-react';
 import { CHILD_FILTERS } from '../../../constants/filters';
 import FavoriteButton from './FavoriteButton';
 
-export default function PlaceItem({ place, mode, onSelect, isSelected }) {
+// ⭐ 2. 컴포넌트를 forwardRef로 감싸고, 두 번째 인자로 ref 받기
+const PlaceItem = forwardRef(({ place, mode, onSelect, isSelected }, ref) => {
   const isChildMode = mode === 'child';
 
-  // ⭐ place만 전달하도록 단순화
   const handleClick = () => {
     console.log('🔵 PlaceItem 클릭됨:', place.name);
     if (onSelect) {
@@ -23,6 +25,7 @@ export default function PlaceItem({ place, mode, onSelect, isSelected }) {
 
   return (
     <div
+      ref={ref} // ⭐ 3. 여기에 ref 연결! (이게 있어야 스크롤이 됩니다)
       onClick={handleClick}
       style={{
         borderBottom: '1px solid rgba(0,0,0,0.05)',
@@ -123,4 +126,9 @@ export default function PlaceItem({ place, mode, onSelect, isSelected }) {
       </div>
     </div>
   );
-}
+});
+
+// ⭐ 4. 디버깅용 이름 설정
+PlaceItem.displayName = 'PlaceItem';
+
+export default PlaceItem;

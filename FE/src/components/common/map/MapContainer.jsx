@@ -27,13 +27,13 @@ export default function MapContainer({
   selectedPlace,
   onMapReady,
   isLocationFocused,
+  onSelectPlace, // ⭐ 핀 클릭 시 실행될 함수 (MapPage에서 전달받음)
 }) {
   const mapRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
   const markersMapRef = useRef(new Map());
 
   const prevPlaceIdsRef = useRef('');
-  // prevSelectedPlaceRef는 더 이상 트리거로 쓰지 않지만 로직 유지를 위해 남겨둘 수 있습니다.
   const prevSelectedPlaceRef = useRef(null);
   const prevLocationFocusedRef = useRef(false);
 
@@ -61,7 +61,7 @@ export default function MapContainer({
     }
   }, [onMapReady, mapInstance]);
 
-  // 2. 마커 업데이트 및 "자동 범위 조정(SetBounds)" 로직
+  // 2. 마커 업데이트 및 이벤트 리스너 등록
   useEffect(() => {
     if (!mapInstance || !places || typeof window.kakao === 'undefined') return;
 
@@ -79,6 +79,7 @@ export default function MapContainer({
       const position = new window.kakao.maps.LatLng(lat, lng);
       bounds.extend(position);
 
+      // 마커 이미지 결정
       let markerImage = null;
       if (isFavorite(place.id, mode)) {
         const imageSize = new window.kakao.maps.Size(34, 34);
@@ -91,21 +92,33 @@ export default function MapContainer({
         markerImage = new window.kakao.maps.MarkerImage(categoryData.url, imageSize, imageOption);
       }
 
+      // 기존 마커가 있으면 업데이트, 없으면 생성
       if (markersMapRef.current.has(place.id)) {
         const existingMarker = markersMapRef.current.get(place.id);
         existingMarker.setImage(markerImage);
         existingMarker.setPosition(position);
       } else {
+        // ⭐ 새 마커 생성
         const newMarker = new window.kakao.maps.Marker({
           position,
           map: mapInstance,
           title: place.name,
           image: markerImage,
+          clickable: true, // ⭐ 클릭 가능하도록 설정
         });
+
+        // ⭐⭐⭐ 클릭 이벤트 리스너 등록 (핵심 로직)
+        window.kakao.maps.event.addListener(newMarker, 'click', () => {
+          if (onSelectPlace) {
+            onSelectPlace(place);
+          }
+        });
+
         markersMapRef.current.set(place.id, newMarker);
       }
     });
 
+    // 화면에 없는 마커 제거
     const currentIdSet = new Set(currentPlaceIds);
     markersMapRef.current.forEach((marker, id) => {
       if (!currentIdSet.has(id)) {
@@ -114,22 +127,17 @@ export default function MapContainer({
       }
     });
 
-    // --- (B) ⭐ 핵심 수정: 언제 지도를 전체 뷰로 맞출 것인가? ---
-
+    // --- (B) 지도 범위 재설정 로직 ---
     const currentIdsString = currentPlaceIds.sort().join(',');
 
-    // 1. 리스트 구성이 바뀌었을 때 (필터, 검색 등) -> 전체 보기 O
+    // 1. 리스트 구성이 바뀌었을 때 (필터, 검색 등)
     const isListChanged = prevPlaceIdsRef.current !== currentIdsString;
 
-    // 2. [삭제됨] 방금 선택을 취소했을 때 -> 전체 보기 X (그대로 유지)
-    // const isJustDeselected = prevSelectedPlaceRef.current !== null && selectedPlace === null;
-
-    // 3. 방금 내 위치를 껐을 때 -> 전체 보기 O
+    // 2. 내 위치를 껐을 때
     const isLocationJustTurnedOff =
       prevLocationFocusedRef.current === true && isLocationFocused === false;
 
-    // 조건: 마커가 있고 + (현재 특정 장소 선택 중이 아님) + (리스트가 바뀌었거나 OR 내 위치가 꺼졌을 때만!)
-    // ❌ isJustDeselected 조건은 뺐습니다!
+    // 조건: 마커가 있고 + (현재 선택된 장소가 없음) + (리스트가 바뀌었거나 OR 내 위치가 꺼졌을 때)
     if (
       currentPlaceIds.length > 0 &&
       !selectedPlace &&
@@ -142,9 +150,9 @@ export default function MapContainer({
     prevPlaceIdsRef.current = currentIdsString;
     prevSelectedPlaceRef.current = selectedPlace;
     prevLocationFocusedRef.current = isLocationFocused;
-  }, [mapInstance, places, mode, isFavorite, selectedPlace, isLocationFocused]);
+  }, [mapInstance, places, mode, isFavorite, selectedPlace, isLocationFocused, onSelectPlace]);
 
-  // 3. 선택된 장소로 이동 (기존 유지)
+  // 3. 선택된 장소로 이동
   useEffect(() => {
     if (!mapInstance || !selectedPlace) return;
 
@@ -157,6 +165,7 @@ export default function MapContainer({
 
     const timer = setTimeout(() => {
       mapInstance.setCenter(pos);
+      // 줌 레벨이 너무 넓으면(숫자가 크면) 조금 확대해줌
       if (mapInstance.getLevel() > 3) {
         mapInstance.setLevel(3, { animate: true });
       }
