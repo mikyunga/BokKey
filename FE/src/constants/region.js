@@ -198,7 +198,7 @@ export const REGIONS = [
   { region_code: 198, province: '경기도', district: '의정부시' },
   { region_code: 199, province: '부산광역시', district: '북구' },
   { region_code: 200, province: '전북특별자치도', district: '고창군' },
-  { region_code: 201, province: '강원도', district: '평창군' },
+  { region_code: 201, province: '강원특별자치도', district: '평창군' },
   { region_code: 202, province: '서울특별시', district: '광진구' },
   { region_code: 203, province: '광주광역시', district: '동구' },
   { region_code: 204, province: '경상북도', district: '영천시' },
