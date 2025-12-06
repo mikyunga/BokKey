@@ -2,7 +2,7 @@ const Button = ({ text, onClick, disabled, isActive, type = 'button' }) => {
   return (
     <button
       type={type}
-      className={`relative w-full h-[46px] tracking-[-0.025em] rounded-[8px] text-white overflow-hidden  font-medium
+      className={`relative w-full h-[50px] tracking-[-0.025em] rounded-[8px] text-white overflow-hidden  font-medium
         ${disabled ? 'bg-main-_30 cursor-not-allowed' : 'bg-main'}
       `}
       onClick={onClick}

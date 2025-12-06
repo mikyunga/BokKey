@@ -1,25 +1,26 @@
 import { Routes, Route } from 'react-router-dom';
 import Index from './pages/indexPage';
-// import Main from './pages/MainPage';
-// import MyPage from './pages/MyPage';
-import NotFound from './pages/notFound';
-// import BookMarkPage from './pages/bookMarkPage';
 import LoginPage from './pages/loginPage';
 import SignUpPage from './pages/signUpPage';
+import FavoritesPage from './pages/favoritesPage';
+import MapPage from './pages/mapPage'; // 💡 지도 페이지 추가
+import NotFound from './pages/notFound';
 
 function App() {
   return (
     <>
       <Routes>
-        {/* 식당 선택 */}
+        {/* 메인 랜딩 페이지 */}
         <Route path="/" element={<Index />} />
-        {/* 1. 로그인 */}
+
+        {/* 💡 지도 페이지 (이미지의 그 화면) */}
+        <Route path="/map" element={<MapPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
+
+        {/* 로그인/회원가입 */}
         <Route path="/login" element={<LoginPage />} />
-        {/* 2. 회원가입 */}
         <Route path="/signup" element={<SignUpPage />} />
-        {/* main/선택된 식당으로 이동*/}
-        {/* <Route path="/mypage" element={<MyPage />} /> */}
-        {/* <Route path="/bookmark" element={<BookMarkPage />} /> */}
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
