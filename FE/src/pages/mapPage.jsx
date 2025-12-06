@@ -14,6 +14,9 @@ import { CHILD_PLACES, SENIOR_PLACES } from '../constants/mockData';
 import { REGIONS } from '../constants/region';
 import { useFavorites } from '../contexts/FavoriteContext';
 
+// ⭐ IconBlack 임포트 추가
+import { IconBlack } from '../utils/icons';
+
 export default function MapPage() {
   const [mode, setMode] = useState('child');
   const [sido, setSido] = useState('');
@@ -47,13 +50,13 @@ export default function MapPage() {
 
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
+  const currentLocationOverlayRef = useRef(null); // ⭐ 현 위치 말풍선
   const closeTimerRef = useRef(null);
-  const modeRef = useRef(mode); // ⭐ 최신 mode를 항상 참조하기 위한 ref
+  const modeRef = useRef(mode);
 
   const { favorites } = useFavorites();
   const [searchParams, setSearchParams] = useState(null);
 
-  // ⭐ modeRef를 항상 최신으로 유지
   useEffect(() => {
     modeRef.current = mode;
     console.log('🔥 mode 업데이트됨:', mode);
@@ -70,16 +73,28 @@ export default function MapPage() {
   }, []);
 
   useEffect(() => {
+    console.log('🔄 필터/검색 조건 변경 - selectedPlace 초기화');
     setSelectedPlace(null);
     setSelectedPlaceMode(null);
   }, [selectedFilters, searchQuery, sido, sigungu, showOpenOnly, showDeliveryOnly, panelFilters]);
 
+  useEffect(() => {
+    console.log('🔥 mode useEffect 실행 - selectedPlace 강제 초기화');
+    setSelectedPlace(null);
+    setSelectedPlaceMode(null);
+  }, [mode]);
+
+  // ⭐⭐⭐ 내 위치 기능 (수정됨: IconBlack 사용)
   const handleMyLocation = () => {
     if (isLocationFocused) {
       setIsLocationFocused(false);
       if (currentLocationMarkerRef.current) {
         currentLocationMarkerRef.current.setMap(null);
         currentLocationMarkerRef.current = null;
+      }
+      if (currentLocationOverlayRef.current) {
+        currentLocationOverlayRef.current.setMap(null);
+        currentLocationOverlayRef.current = null;
       }
       return;
     }
@@ -101,14 +116,19 @@ export default function MapPage() {
         mapRef.current.setCenter(kakaoLatLng);
         mapRef.current.setLevel(3);
 
+        // 기존 마커/오버레이 제거
         if (currentLocationMarkerRef.current) {
           currentLocationMarkerRef.current.setMap(null);
         }
+        if (currentLocationOverlayRef.current) {
+          currentLocationOverlayRef.current.setMap(null);
+        }
 
+        // ⭐ IconBlack 마커 생성 (여기가 수정됨)
         const markerImage = new window.kakao.maps.MarkerImage(
-          'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="%234A90E2" stroke="white" stroke-width="2"/><circle cx="20" cy="20" r="6" fill="white"/></svg>',
-          new window.kakao.maps.Size(40, 40),
-          { offset: new window.kakao.maps.Point(20, 20) }
+          IconBlack,
+          new window.kakao.maps.Size(34, 34),
+          { offset: new window.kakao.maps.Point(17, 17) }
         );
 
         const marker = new window.kakao.maps.Marker({
@@ -118,6 +138,47 @@ export default function MapPage() {
         });
 
         currentLocationMarkerRef.current = marker;
+
+        // ⭐ "현 위치" 말풍선 생성
+        const overlayContent = document.createElement('div');
+        overlayContent.style.cssText = `
+          position: relative;
+          bottom: 25px;
+          background: white;
+          padding: 4px 8px;
+          border-radius: 5px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+          font-size: 12px;
+          font-weight: 600;
+          color: black;
+          white-space: nowrap;
+          border: 1px solid rgba(0,0,0,0.3);
+        `;
+
+        const tail = document.createElement('div');
+        tail.style.cssText = `
+          position: absolute;
+          bottom: -4px;
+          left: 50%;
+          transform: translateX(-50%) rotate(45deg);
+          width: 6px;
+          height: 6px;
+          background: white;
+          border-right: 1px solid rgba(0,0,0,0.3);
+          border-bottom: 1px solid rgba(0,0,0,0.3);
+        `;
+
+        overlayContent.textContent = '현 위치';
+        overlayContent.appendChild(tail);
+
+        const customOverlay = new window.kakao.maps.CustomOverlay({
+          position: kakaoLatLng,
+          content: overlayContent,
+          yAnchor: 1,
+        });
+
+        customOverlay.setMap(mapRef.current);
+        currentLocationOverlayRef.current = customOverlay;
 
         setIsLoadingLocation(false);
         setIsLocationFocused(true);
@@ -194,15 +255,12 @@ export default function MapPage() {
   const handleModeChange = (newMode) => {
     console.log('🔄 모드 변경:', mode, '→', newMode);
 
-    // ⭐⭐⭐ 1. 먼저 선택된 장소를 초기화 (DetailPanel 즉시 닫기)
     setSelectedPlace(null);
     setSelectedPlaceMode(null);
     setIsDetailCollapsed(false);
 
-    // ⭐⭐⭐ 2. 그 다음 mode 변경
     setMode(newMode);
 
-    // 3. 나머지 상태 초기화
     setSelectedFilters([]);
     setSido('');
     setSigungu('');
@@ -222,15 +280,18 @@ export default function MapPage() {
         currentLocationMarkerRef.current.setMap(null);
         currentLocationMarkerRef.current = null;
       }
+      if (currentLocationOverlayRef.current) {
+        currentLocationOverlayRef.current.setMap(null);
+        currentLocationOverlayRef.current = null;
+      }
       const defaultCenter = new window.kakao.maps.LatLng(37.5665, 126.978);
       mapRef.current.setCenter(defaultCenter);
       mapRef.current.setLevel(3);
     }
   };
 
-  // ⭐⭐⭐ 핵심 수정: modeRef.current를 사용하여 항상 최신 mode 참조
   const handleSelectPlace = useCallback((place) => {
-    const currentMode = modeRef.current; // ⭐ ref에서 최신 mode 가져오기
+    const currentMode = modeRef.current;
 
     console.log('═══════════════════════════════════════');
     console.log('📍 장소 선택 이벤트 발생');
@@ -240,7 +301,6 @@ export default function MapPage() {
     console.log('  - place.target_name:', place?.target_name);
     console.log('  - place.meal_days:', place?.meal_days);
 
-    // ⭐⭐⭐ 추가 검증: place가 현재 mode와 맞는 데이터인지 확인
     const isChildPlace = place?.category !== undefined;
     const isSeniorPlace = place?.target_name !== undefined || place?.meal_days !== undefined;
 
@@ -262,13 +322,13 @@ export default function MapPage() {
     setIsLocationFocused(false);
     setIsDetailCollapsed(false);
     setSelectedPlace(place);
-    setSelectedPlaceMode(currentMode); // ⭐ ref의 값을 사용
+    setSelectedPlaceMode(currentMode);
 
     console.log('✅ 장소 선택 완료');
     console.log('  - selectedPlace 설정:', place?.name);
     console.log('  - selectedPlaceMode 설정:', currentMode);
     console.log('═══════════════════════════════════════');
-  }, []); // ⭐ dependency 없음 - modeRef는 항상 최신값
+  }, []);
 
   const handlePanelApply = (filters, hasActive) => {
     setPanelFilters(filters);

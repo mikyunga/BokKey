@@ -10,6 +10,7 @@ import {
   IconRed,
   IconSkyblue,
   IconYellow,
+  IconBlack,
 } from '../../../utils/icons';
 
 const CATEGORY_MARKERS = {
