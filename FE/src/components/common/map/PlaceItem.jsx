@@ -29,7 +29,7 @@ const PlaceItem = forwardRef(({ place, mode, onSelect, isSelected }, ref) => {
       onClick={handleClick}
       style={{
         borderBottom: '1px solid rgba(0,0,0,0.05)',
-        backgroundColor: isSelected ? 'rgba(0, 0, 0, 0.02)' : 'white',
+        backgroundColor: isSelected && 'rgba(0, 0, 0, 0.02)',
       }}
       className={`
         pl-6 pr-[18px] py-4 
@@ -37,7 +37,7 @@ const PlaceItem = forwardRef(({ place, mode, onSelect, isSelected }, ref) => {
         flex flex-col gap-[6px]
         max-h-48
         transition-colors duration-100
-        hover:bg-black-_02
+        hover:bg-black-_01
       `}
     >
       {/* 상단: 가게 이름 + 업종, 오른쪽 star */}
