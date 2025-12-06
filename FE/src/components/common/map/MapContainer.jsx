@@ -129,7 +129,7 @@ export default function MapContainer({
         });
       } else {
         // senior 모드일 때 기본 마커 (빨간색)
-        markerImage = new window.kakao.maps.MarkerImage(IconRed, markerSize, {
+        markerImage = new window.kakao.maps.MarkerImage(IconGreen, markerSize, {
           offset: markerOffset,
         });
       }
@@ -210,7 +210,7 @@ export default function MapContainer({
     const content = document.createElement('div');
     content.style.cssText = `
       position: relative;
-      bottom: 60px;
+      bottom: 56px;
       background: white;
       padding: 4px 8px;
       border-radius: 5px;
