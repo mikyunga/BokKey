@@ -174,7 +174,7 @@ export const REGIONS = [
   { region_code: 174, province: '충청북도', district: '괴산군' },
   { region_code: 175, province: '제주특별자치도', district: '제주시' },
   { region_code: 176, province: '부산광역시', district: '서구' },
-  { region_code: 177, province: '전라북도', district: '순창군' },
+  { region_code: 177, province: '전북특별자치도', district: '순창군' },
   { region_code: 178, province: '전라남도', district: '함평군' },
   { region_code: 179, province: '경기도', district: '여주시' },
   { region_code: 180, province: '전북특별자치도', district: '완주군' },
