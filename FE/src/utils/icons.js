@@ -3,6 +3,7 @@ import IconAlarmMain from '../assets/icon-alarm-main.svg';
 import IconAlarm from '../assets/icon-alarm.svg';
 import IconArrowLeft from '../assets/icon-arrow-left.svg';
 import IconArrowRight from '../assets/icon-arrow-right.svg';
+import IconArrowDown from '../assets/icon-arrow-down.svg';
 import IconArrowSign from '../assets/icon-arrow-sign.svg';
 import IconBike from '../assets/icon-bike.svg';
 import IconBookmark from '../assets/icon-bookmark.svg';
@@ -29,6 +30,8 @@ import IconForward from '../assets/icon-forward.svg';
 import IconHome from '../assets/icon-home.svg';
 import IconLocationBlack from '../assets/icon-location-black.svg';
 import IconLocationWhite from '../assets/icon-location-white.svg';
+import IconLocationGrey from '../assets/icon-location-grey.svg';
+import IconLocationMain from '../assets/icon-location-main.svg';
 import IconLogo from '../assets/icon-logo.svg';
 import IconLogout from '../assets/icon-logout.svg';
 import IconLunch from '../assets/icon-lunch.svg';
@@ -46,6 +49,14 @@ import IconTriangleRight from '../assets/icon-triangle-right.svg';
 import IconTuneMain from '../assets/icon-tune-main.svg';
 import IconTune from '../assets/icon-tune.svg';
 import IconIphone from '../assets/icon-iphone.svg';
+import IconRed from '../assets/icon-red.svg';
+import IconOrange from '../assets/icon-orange.svg';
+import IconYellow from '../assets/icon-yellow.svg';
+import IconGreen from '../assets/icon-green.svg';
+import IconSkyblue from '../assets/icon-skyblue.svg';
+import IconBlue from '../assets/icon-blue.svg';
+import IconPurple from '../assets/icon-purple.svg';
+import IconBlack from '../assets/icon-black.svg';
 
 export {
   IconAlarmBlack,
@@ -79,6 +90,8 @@ export {
   IconHome,
   IconLocationBlack,
   IconLocationWhite,
+  IconLocationGrey,
+  IconLocationMain,
   IconLogo,
   IconLogout,
   IconLunch,
@@ -96,4 +109,13 @@ export {
   IconTuneMain,
   IconTune,
   IconIphone,
+  IconRed,
+  IconOrange,
+  IconYellow,
+  IconGreen,
+  IconSkyblue,
+  IconBlue,
+  IconPurple,
+  IconBlack,
+  IconArrowDown,
 };

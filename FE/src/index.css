@@ -136,3 +136,88 @@ body {
     }
   }
 }
+/* ===== PlaceList 스크롤바 - Overlay 방식 ===== */
+.overlay-scrollbar {
+  scrollbar-gutter: stable; /* 레이아웃 밀림 방지 */
+}
+
+.overlay-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.overlay-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.overlay-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.overlay-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Transparent Dropdown Custom - Ultra Soft + Inner Offset ===== */
+.dropdown-scrollbar {
+  scrollbar-gutter: stable; /* 레이아웃 안정화 */
+}
+
+.dropdown-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.01);
+  border-radius: 999px;
+}
+
+.dropdown-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* 리스트 아이템 */
+.dropdown-item {
+  background: transparent;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.dropdown-item.selected {
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.2);
+}
+
+/* ===== PlaceItem 카드 스크롤 ===== */
+.cardScroll {
+  scrollbar-gutter: stable; /* 레이아웃 밀림 방지 */
+}
+
+.cardScroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.cardScroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.cardScroll::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.cardScroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}

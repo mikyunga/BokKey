@@ -11,6 +11,8 @@ export default {
           DEFAULT: 'rgb(var(--color-main) / <alpha-value>)',
           _10: 'rgba(149, 215, 105, 0.1)',
           _30: 'rgba(149, 215, 105, 0.3)',
+          selectedText: 'rgba(149, 215, 105, 0.7)',
+          unselectedText: 'rgba(149, 215, 105, 0.3)',
         },
         filter: {
           DEFAULT: 'rgb(var(--color-filter) / <alpha-value>)',
@@ -20,7 +22,7 @@ export default {
         },
         black: {
           DEFAULT: 'rgb(var(--color-black) / <alpha-value>)',
-          buttonStroke: 'rgba(0,0,0, 0.05)',
+          buttonStroke: 'rgba(0, 0, 0, 0.05)',
           buttonFill: 'rgba(149, 215, 105, 0.1)',
           _01: 'rgba(0, 0, 0, 0.01)',
           _02: 'rgba(0, 0, 0, 0.02)',
@@ -51,30 +53,33 @@ export default {
           stroke50: 'rgba(0, 0, 0, 0.5)',
           stroke60: 'rgba(0, 0, 0, 0.6)',
           stroke70: 'rgba(0, 0, 0, 0.7)',
+          dropdownBottomBorder: 'rgba(221, 221, 221, 1)',
+          selectedText: 'rgba(0, 0, 0, 0.7)',
+          unselectedText: 'rgba(0, 0, 0, 0.3)',
         },
         white: {
           DEFAULT: 'rgb(var(--color-white) / <alpha-value>)',
-          _05: 'rgba(255,255,255,0.5)',
-          _100: 'rgba(255,255,255,1)',
+          _05: 'rgba(255, 255, 255, 0.5)',
+          _100: 'rgba(255, 255, 255, 1)',
         },
         border: {
-          DEFAULT: 'rgba(221, 221, 221, <alpha-value>)',
+          DEFAULT: 'rgba(221, 221, 221, 1)',
         },
         rederror: {
-          DEFAULT: 'rgba(255,88,88,1)',
+          DEFAULT: 'rgba(255, 88, 88, 1)',
         },
         orange: {
           DEFAULT: 'rgb(var(--color-orange) / <alpha-value>)',
+          _80: 'rgba(255, 146, 56, 0.8)',
+          _05: 'rgba(255, 146, 56, 0.05)',
         },
-        _80: 'rgba(255, 146, 56, 0.8)',
-        _05: 'rgba(255, 146, 56, 0.05)',
       },
       boxShadow: {
         'custom-drop': '0px 0px 40px 0px rgba(0, 0, 0, 0.1)',
         card: '0px 1px 10px rgba(0, 0, 0, 0.03)',
-        modal: '0px 30px 80px 0px rgba(0,0,0,0.15)',
-        custom: '0px 1px 4px 0px rgba(0,0,0,0.1)',
-        dropDown: '0px 0px 10px 0px rgba(0,0,0,0.03)',
+        modal: '0px 30px 80px 0px rgba(0, 0, 0, 0.15)',
+        custom: '0px 1px 4px 0px rgba(0, 0, 0, 0.1)',
+        dropDown: '0px 0px 10px 0px rgba(0, 0, 0, 0.03)',
       },
       keyframes: {
         float: {
@@ -97,10 +102,4 @@ export default {
     },
   },
   plugins: [],
-  experimental: {
-    classRegex: [
-      ['className="([^"]+)"', 1],
-      ['className={`([^`]+)`', 1],
-    ],
-  },
 };

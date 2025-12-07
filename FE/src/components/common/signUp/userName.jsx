@@ -13,21 +13,21 @@ const UserName = ({ value, onChange }) => {
   return (
     <>
       {/* 사용자명 */}
-      <div className="flex flex-col gap-[10px]">
+      <div className="flex flex-col gap-[6px]">
         <div className="text-[15px] font-semibold text-gray">사용자명</div>
         <input
           type="text"
           placeholder="한글, 영어, 숫자 포함 2~8글자"
           value={value}
           onChange={handleUserNameChange}
-          className={`w-full outline-none h-[51px]
+          className={`w-full outline-none h-[50px]
               px-[16px] py-[14px] 
               border ${isUserNameValid ? 'border-gray-stroke08' : 'border-rederror'}
               rounded-[8px]
               ${isUserNameValid ? 'focus-within:border-main' : 'focus-within:border-rederror'}
               placeholder-gray-stroke30 tracking-[-0.025em] focus:border-main 
           transition-all duration-300 ease-in-out
-          focus:placeholder:opacity-0 [&::placeholder]:transition-opacity [&::placeholder]:duration-300`}
+          focus:placeholder:opacity-30 `}
         />
         {!isUserNameValid && (
           <div className="text-rederror text-[14px] font-medium leading-[1.4]">
