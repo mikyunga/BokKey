@@ -16,12 +16,11 @@ import { useFavorites } from '../contexts/FavoriteContext';
 import { IconBlack } from '../utils/icons';
 
 // =====================================================================
-// ⭐ 1. 시간 파싱 및 비교 헬퍼 함수 (로직 분리)
+// 1. 시간 파싱 및 비교 로직 (이전과 동일)
 // =====================================================================
 
 const parseTime = (str) => {
   if (!str || str.includes('휴무') || str.includes('정보 없음')) return null;
-  // '~'가 없으면 시간으로 간주하기 어려움
   if (!str.includes('~')) return null;
 
   const [open, close] = str.split('~').map((t) => t.trim());
@@ -34,100 +33,60 @@ const compareTime = (now, open, close) => {
 
   const nowMin = now.getHours() * 60 + now.getMinutes();
   const openMin = oH * 60 + oM;
-  let closeMin = cH * 60 + cM;
+  const closeMin = cH * 60 + cM;
 
-  // 0:00 ~ 0:00 인 경우 (보통 24시간이거나 데이터 오류, 일단 영업중으로 치려면 로직 필요하나 여기선 시간비교만 수행)
-  // 마감 시간이 0:00 이면 24:00(다음날 0시)으로 간주
-  if (closeMin === 0 && openMin !== 0) {
-    closeMin = 24 * 60;
-  }
-
-  // 자정을 넘기는 가게 (예: 18:00 ~ 02:00)
   if (closeMin < openMin) {
-    // 현재 시간이 오픈시간보다 크거나, 새벽시간(0시~마감)보다 작으면 영업중
-    return nowMin >= openMin || nowMin < closeMin;
+    return nowMin >= openMin || nowMin <= closeMin;
   }
-
-  // 일반적인 경우 (예: 10:00 ~ 22:00)
-  return nowMin >= openMin && nowMin < closeMin;
+  return nowMin >= openMin && nowMin <= closeMin;
 };
 
 // =====================================================================
-// ⭐ 2. 핵심 로직: 상태 업데이트 함수
+// 2. 영업 상태 업데이트 함수
 // =====================================================================
 
 const updateOpenStatus = (places, now = new Date()) => {
-  const currentDay = now.getDay(); // 0(일) ~ 6(토)
+  const currentDay = now.getDay();
   const isWeekend = currentDay === 0 || currentDay === 6;
   const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
   const currentDayName = dayNames[currentDay];
 
   return places.map((place) => {
-    let targetTimeStr = place.time; // 기본은 평일 시간 사용
-    let logicLog = '평일 시간 사용'; // 디버깅용
+    let targetTimeStr = place.time;
 
-    // --- [1] 사용할 시간 문자열 결정 ---
+    // 주말/공휴일 시간 결정 로직
     if (isWeekend) {
-      // 주말인 경우
       if (place.holidayTime && place.holidayTime.includes('휴무')) {
-        // 명시적으로 '휴무'라고 되어있으면 시간 문자열을 null로 설정 (영업종료 처리됨)
         targetTimeStr = null;
-        logicLog = '주말: 휴무 문자열 감지됨';
       } else if (
         place.holidayTime &&
         place.holidayTime.includes('~') &&
         place.holidayTime !== '0:00 ~ 0:00'
       ) {
-        // 유효한 시간 형식이 있고, '0:00 ~ 0:00'(데이터 누락 추정)이 아니면 holidayTime 사용
         targetTimeStr = place.holidayTime;
-        logicLog = '주말: holidayTime 유효함';
       } else {
-        // holidayTime이 없거나 '0:00 ~ 0:00' 같은 이상한 값이면 -> 평일 시간(place.time)으로 폴백
-        // 노다지숯불구이 같은 케이스가 여기서 구제됨
-        targetTimeStr = place.time;
-        logicLog = '주말: holidayTime 부적절 -> 평일 time으로 대체';
+        targetTimeStr = place.time; // holidayTime 없으면 평일 시간 사용
       }
     }
 
-    // --- [2] 파싱 및 비교 ---
     let isRealTimeOpen = false;
     const timeObj = parseTime(targetTimeStr);
 
     if (timeObj) {
       isRealTimeOpen = compareTime(now, timeObj.open, timeObj.close);
-    } else {
-      // 파싱 실패하거나 '휴무'인 경우 닫음
-      isRealTimeOpen = false;
     }
 
-    // --- [3] 무료급식소(Senior) 요일 체크 추가 로직 ---
-    // Senior 데이터는 meal_days가 있으면 요일이 맞아야 함
+    // 노인급식소 요일 체크
     if (place.meal_days && Array.isArray(place.meal_days)) {
       if (!place.meal_days.includes(currentDayName)) {
         isRealTimeOpen = false;
-        logicLog += ' -> (Senior) 오늘 운영요일 아님';
       }
-    }
-
-    // --- [4] 디버깅 로그 (왕대박 등 확인용) ---
-    if (
-      place.name.includes('왕대박') ||
-      place.name.includes('노다지') ||
-      place.name.includes('속초카츠')
-    ) {
-      console.error(`🔍 [${place.name}] 상태체크 (${now.toLocaleTimeString()})`);
-      console.error(`   - 주말여부: ${isWeekend}, holidayOpen(UI용): ${place.holidayOpen}`);
-      console.error(`   - 원본 time: ${place.time}, 원본 holidayTime: ${place.holidayTime}`);
-      console.error(`   - 🛠️ 로직판단: ${logicLog}`);
-      console.error(`   - 최종적용 시간: ${targetTimeStr || '없음(휴무)'}`);
-      console.error(`   - 결과: ${isRealTimeOpen ? '✅ 영업중' : '🔴 영업종료'}`);
-      console.error('------------------------------------------------');
     }
 
     return {
       ...place,
       isRealTimeOpen: isRealTimeOpen,
-      isOpen: isRealTimeOpen, // UI 렌더링 호환성 위해 덮어쓰기
+      isOpen: isRealTimeOpen, // UI 호환성
     };
   });
 };
@@ -169,6 +128,7 @@ export default function MapPage() {
   const closeTimerRef = useRef(null);
   const modeRef = useRef(mode);
 
+  // ⭐ Context에서 favorites 가져오기
   const { favorites } = useFavorites();
   const [searchParams, setSearchParams] = useState(null);
 
@@ -178,7 +138,6 @@ export default function MapPage() {
     const interval = setInterval(() => {
       setTick((prev) => prev + 1);
     }, 60 * 1000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -211,15 +170,12 @@ export default function MapPage() {
   ]);
 
   // =====================================================================
-  // ⭐ filteredPlaces: updateOpenStatus 호출하여 영업상태 최신화
+  // filteredPlaces (일반 모드 데이터)
   // =====================================================================
   const filteredPlaces = useMemo(() => {
     let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
     const now = new Date();
 
-    console.log(`🔄 [데이터 갱신] Tick: ${tick}, 현재시간: ${now.toLocaleTimeString()}`);
-
-    // ⭐ 여기서 로직 함수 호출!
     let updatedPlaces = updateOpenStatus(places, now);
 
     if (sido) {
@@ -237,7 +193,6 @@ export default function MapPage() {
       updatedPlaces = updatedPlaces.filter((p) => selectedFilters.includes(p.category));
     }
 
-    // ⭐ 계산된 isRealTimeOpen으로 필터링
     if (showOpenOnly) {
       updatedPlaces = updatedPlaces.filter((p) => p.isRealTimeOpen);
     }
@@ -278,20 +233,35 @@ export default function MapPage() {
   ]);
 
   // =====================================================================
-  // ⭐ displayPlaces: 즐겨찾기 목록에도 동일 로직 적용
+  // ⭐ displayPlaces (즐겨찾기 핀 문제 해결의 핵심!)
   // =====================================================================
   const displayPlaces = useMemo(() => {
     if (showFavorites) {
       const now = new Date();
-      let favPlaces = favorites[mode] || [];
+      // 1. Context에 저장된 즐겨찾기 목록 가져오기 (여기에 옛날 데이터가 있을 수 있음)
+      const rawFavs = favorites[mode] || [];
 
-      // 즐겨찾기 목록 최신화
-      favPlaces = updateOpenStatus(favPlaces, now);
+      // 2. 현재 소스 코드에 있는 최신 목데이터 가져오기
+      const sourceData = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
 
-      if (showOpenOnly) favPlaces = favPlaces.filter((p) => p.isRealTimeOpen);
-      if (mode === 'child' && showDeliveryOnly) favPlaces = favPlaces.filter((p) => p.delivery);
+      // 3. ⭐ 데이터 병합 (Hydration)
+      // 저장된 즐겨찾기의 ID를 이용해 최신 목데이터를 찾아서 덮어씌웁니다.
+      // 이렇게 하면 목데이터에 있는 최신 좌표(latitude, longitude)가 적용되어 핀이 살아납니다.
+      let hydratedFavs = rawFavs.map((fav) => {
+        const original = sourceData.find((p) => String(p.id) === String(fav.id));
+        // 원본이 있으면 최신 데이터로 교체, 없으면(삭제된 데이터 등) 저장된 값 유지
+        return original ? { ...fav, ...original } : fav;
+      });
 
-      return favPlaces;
+      // 4. 최신 데이터 기준으로 영업 시간 재계산
+      hydratedFavs = updateOpenStatus(hydratedFavs, now);
+
+      // 5. 필터링
+      if (showOpenOnly) hydratedFavs = hydratedFavs.filter((p) => p.isRealTimeOpen);
+      if (mode === 'child' && showDeliveryOnly)
+        hydratedFavs = hydratedFavs.filter((p) => p.delivery);
+
+      return hydratedFavs;
     }
     return filteredPlaces;
   }, [showFavorites, favorites, mode, filteredPlaces, showOpenOnly, showDeliveryOnly, tick]);
@@ -436,6 +406,11 @@ export default function MapPage() {
   const handleSelectPlace = useCallback((place) => {
     const currentMode = modeRef.current;
 
+    // ⭐ 클릭 시 디버깅 정보 출력
+    console.error(
+      `📍 [클릭] ${place.name} (현재상태: ${place.isRealTimeOpen ? '영업중' : '영업종료'})`
+    );
+
     const isChildPlace = place?.category !== undefined;
     const isSeniorPlace = place?.target_name !== undefined || place?.meal_days !== undefined;
 
@@ -551,6 +526,7 @@ export default function MapPage() {
             onOpenFilter={handleOpenFilter}
             detailFilterActive={detailFilterActive}
             setDetailFilterActive={setDetailFilterActive}
+            onModeChange={handleModeChange}
           />
         </div>
 
