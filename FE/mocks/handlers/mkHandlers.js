@@ -1,4 +1,4 @@
-import { rest, HttpResponse } from 'msw';
+import { rest, http, HttpResponse } from 'msw';
 
 // ✅ mockUsers를 SignUpHandlers 밖에서도 접근 가능하게 유지
 export const mockUsers = [
@@ -15,45 +15,36 @@ export const mockUsers = [
 // --- 1. 로그인/로그아웃 핸들러 (V2 통일) ---
 
 export const loginHandlers = [
-  // 로그인
-  rest.post('/api/login', async ({ request }) => {
-    const { id, password } = await request.json(); // ✅ request.json() 사용
+  rest.post('/api/login', async (req, res, ctx) => {
+    const { username, password } = await req.json();
 
-    const user = mockUsers.find((u) => u.id === id);
+    console.log(`[MSW v1] 로그인 시도: ID=${username}, PW=${password}`);
 
-    if (!user) {
-      return HttpResponse.json({ message: '존재하지 않는 사용자입니다.' }, { status: 404 });
+    if ((username === 'test' || username === 'test1234') && password === '1234') {
+      return res(
+        ctx.status(200),
+        ctx.json({
+          message: '로그인 성공',
+          user: {
+            id: 1,
+            username,
+            nickname: '테스트유저',
+            role: 'USER',
+          },
+          accessToken: 'fake-access-token-12345',
+          refreshToken: 'fake-refresh-token-67890',
+        })
+      );
     }
 
-    if (user.password !== password) {
-      return HttpResponse.json({ message: '아이디 또는 비밀번호가 틀렸습니다.' }, { status: 401 });
-    }
-
-    return HttpResponse.json(
-      {
-        accessToken: 'fake-access-token',
-        refreshToken: 'fake-refresh-token',
-        user_data: {
-          id: user.id,
-          nickname: user.nickname,
-          role: 'USER',
-          created_at: user.created_at,
-          last_login_at: new Date().toISOString(),
-        },
-      },
-      { status: 200 }
-    );
+    return res(ctx.status(401), ctx.json({ message: '아이디 또는 비밀번호가 일치하지 않습니다.' }));
   }),
 
-  // 로그아웃
-  rest.post('/api/logout', async () => {
-    return HttpResponse.json(
-      {
-        success: true,
-        message: '로그아웃 성공',
-      },
-      { status: 200 }
-    );
+  // ------------------------------------------------
+  // [로그아웃 핸들러]
+  // ------------------------------------------------
+  rest.post('/api/logout', (req, res, ctx) => {
+    return res(ctx.status(200), ctx.json({ success: true, message: '로그아웃 성공' }));
   }),
 ];
 
