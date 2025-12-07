@@ -13,9 +13,83 @@ import DetailPanel from '../components/common/map/DetailPanel';
 import { CHILD_PLACES, SENIOR_PLACES } from '../constants/mockData';
 import { REGIONS } from '../constants/region';
 import { useFavorites } from '../contexts/FavoriteContext';
-
-// ⭐ IconBlack 임포트 추가
 import { IconBlack } from '../utils/icons';
+
+// =====================================================================
+// 1. 시간 파싱 및 비교 로직 (이전과 동일)
+// =====================================================================
+
+const parseTime = (str) => {
+  if (!str || str.includes('휴무') || str.includes('정보 없음')) return null;
+  if (!str.includes('~')) return null;
+
+  const [open, close] = str.split('~').map((t) => t.trim());
+  return { open, close };
+};
+
+const compareTime = (now, open, close) => {
+  const [oH, oM] = open.split(':').map(Number);
+  const [cH, cM] = close.split(':').map(Number);
+
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const openMin = oH * 60 + oM;
+  const closeMin = cH * 60 + cM;
+
+  if (closeMin < openMin) {
+    return nowMin >= openMin || nowMin <= closeMin;
+  }
+  return nowMin >= openMin && nowMin <= closeMin;
+};
+
+// =====================================================================
+// 2. 영업 상태 업데이트 함수
+// =====================================================================
+
+const updateOpenStatus = (places, now = new Date()) => {
+  const currentDay = now.getDay();
+  const isWeekend = currentDay === 0 || currentDay === 6;
+  const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+  const currentDayName = dayNames[currentDay];
+
+  return places.map((place) => {
+    let targetTimeStr = place.time;
+
+    // 주말/공휴일 시간 결정 로직
+    if (isWeekend) {
+      if (place.holidayTime && place.holidayTime.includes('휴무')) {
+        targetTimeStr = null;
+      } else if (
+        place.holidayTime &&
+        place.holidayTime.includes('~') &&
+        place.holidayTime !== '0:00 ~ 0:00'
+      ) {
+        targetTimeStr = place.holidayTime;
+      } else {
+        targetTimeStr = place.time; // holidayTime 없으면 평일 시간 사용
+      }
+    }
+
+    let isRealTimeOpen = false;
+    const timeObj = parseTime(targetTimeStr);
+
+    if (timeObj) {
+      isRealTimeOpen = compareTime(now, timeObj.open, timeObj.close);
+    }
+
+    // 노인급식소 요일 체크
+    if (place.meal_days && Array.isArray(place.meal_days)) {
+      if (!place.meal_days.includes(currentDayName)) {
+        isRealTimeOpen = false;
+      }
+    }
+
+    return {
+      ...place,
+      isRealTimeOpen: isRealTimeOpen,
+      isOpen: isRealTimeOpen, // UI 호환성
+    };
+  });
+};
 
 export default function MapPage() {
   const [mode, setMode] = useState('child');
@@ -50,16 +124,25 @@ export default function MapPage() {
 
   const mapRef = useRef(null);
   const currentLocationMarkerRef = useRef(null);
-  const currentLocationOverlayRef = useRef(null); // ⭐ 현 위치 말풍선
+  const currentLocationOverlayRef = useRef(null);
   const closeTimerRef = useRef(null);
   const modeRef = useRef(mode);
 
+  // ⭐ Context에서 favorites 가져오기
   const { favorites } = useFavorites();
   const [searchParams, setSearchParams] = useState(null);
 
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((prev) => prev + 1);
+    }, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     modeRef.current = mode;
-    console.log('🔥 mode 업데이트됨:', mode);
   }, [mode]);
 
   useEffect(() => {
@@ -73,18 +156,116 @@ export default function MapPage() {
   }, []);
 
   useEffect(() => {
-    console.log('🔄 필터/검색 조건 변경 - selectedPlace 초기화');
     setSelectedPlace(null);
     setSelectedPlaceMode(null);
-  }, [selectedFilters, searchQuery, sido, sigungu, showOpenOnly, showDeliveryOnly, panelFilters]);
+  }, [
+    selectedFilters,
+    searchQuery,
+    sido,
+    sigungu,
+    showOpenOnly,
+    showDeliveryOnly,
+    panelFilters,
+    mode,
+  ]);
 
-  useEffect(() => {
-    console.log('🔥 mode useEffect 실행 - selectedPlace 강제 초기화');
-    setSelectedPlace(null);
-    setSelectedPlaceMode(null);
-  }, [mode]);
+  // =====================================================================
+  // filteredPlaces (일반 모드 데이터)
+  // =====================================================================
+  const filteredPlaces = useMemo(() => {
+    let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
+    const now = new Date();
 
-  // ⭐⭐⭐ 내 위치 기능 (수정됨: IconBlack 사용)
+    let updatedPlaces = updateOpenStatus(places, now);
+
+    if (sido) {
+      const validCodes = REGIONS.filter(
+        (r) => r.province === sido && (!sigungu || r.district === sigungu)
+      ).map((r) => r.region_code);
+      updatedPlaces = updatedPlaces.filter((p) => validCodes.includes(Number(p.region_code)));
+    }
+
+    if (searchQuery) {
+      updatedPlaces = updatedPlaces.filter((p) => p.name.includes(searchQuery));
+    }
+
+    if (mode === 'child' && selectedFilters.length > 0) {
+      updatedPlaces = updatedPlaces.filter((p) => selectedFilters.includes(p.category));
+    }
+
+    if (showOpenOnly) {
+      updatedPlaces = updatedPlaces.filter((p) => p.isRealTimeOpen);
+    }
+
+    if (mode === 'child' && showDeliveryOnly)
+      updatedPlaces = updatedPlaces.filter((p) => p.delivery);
+
+    const { targets, days, times, region } = panelFilters;
+    if (targets.length > 0) {
+      updatedPlaces = updatedPlaces.filter((place) => {
+        const rawTarget = place.targets || place.target_name;
+        const arr = Array.isArray(rawTarget) ? rawTarget : rawTarget ? [rawTarget] : [];
+        return targets.every((t) => arr.some((pt) => pt.includes(t)));
+      });
+    }
+    if (days.length > 0) {
+      updatedPlaces = updatedPlaces.filter((p) => days.every((d) => p.meal_days?.includes(d)));
+    }
+    if (times.length > 0) {
+      updatedPlaces = updatedPlaces.filter((p) => times.every((t) => p.meal_time?.includes(t)));
+    }
+    if (region) {
+      const value = region === 'nationwide' ? '전국' : '지역한정';
+      updatedPlaces = updatedPlaces.filter((p) => p.target === value);
+    }
+
+    return updatedPlaces;
+  }, [
+    mode,
+    sido,
+    sigungu,
+    searchQuery,
+    selectedFilters,
+    showOpenOnly,
+    showDeliveryOnly,
+    panelFilters,
+    tick,
+  ]);
+
+  // =====================================================================
+  // ⭐ displayPlaces (즐겨찾기 핀 문제 해결의 핵심!)
+  // =====================================================================
+  const displayPlaces = useMemo(() => {
+    if (showFavorites) {
+      const now = new Date();
+      // 1. Context에 저장된 즐겨찾기 목록 가져오기 (여기에 옛날 데이터가 있을 수 있음)
+      const rawFavs = favorites[mode] || [];
+
+      // 2. 현재 소스 코드에 있는 최신 목데이터 가져오기
+      const sourceData = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
+
+      // 3. ⭐ 데이터 병합 (Hydration)
+      // 저장된 즐겨찾기의 ID를 이용해 최신 목데이터를 찾아서 덮어씌웁니다.
+      // 이렇게 하면 목데이터에 있는 최신 좌표(latitude, longitude)가 적용되어 핀이 살아납니다.
+      let hydratedFavs = rawFavs.map((fav) => {
+        const original = sourceData.find((p) => String(p.id) === String(fav.id));
+        // 원본이 있으면 최신 데이터로 교체, 없으면(삭제된 데이터 등) 저장된 값 유지
+        return original ? { ...fav, ...original } : fav;
+      });
+
+      // 4. 최신 데이터 기준으로 영업 시간 재계산
+      hydratedFavs = updateOpenStatus(hydratedFavs, now);
+
+      // 5. 필터링
+      if (showOpenOnly) hydratedFavs = hydratedFavs.filter((p) => p.isRealTimeOpen);
+      if (mode === 'child' && showDeliveryOnly)
+        hydratedFavs = hydratedFavs.filter((p) => p.delivery);
+
+      return hydratedFavs;
+    }
+    return filteredPlaces;
+  }, [showFavorites, favorites, mode, filteredPlaces, showOpenOnly, showDeliveryOnly, tick]);
+
   const handleMyLocation = () => {
     if (isLocationFocused) {
       setIsLocationFocused(false);
@@ -116,7 +297,6 @@ export default function MapPage() {
         mapRef.current.setCenter(kakaoLatLng);
         mapRef.current.setLevel(3);
 
-        // 기존 마커/오버레이 제거
         if (currentLocationMarkerRef.current) {
           currentLocationMarkerRef.current.setMap(null);
         }
@@ -124,7 +304,6 @@ export default function MapPage() {
           currentLocationOverlayRef.current.setMap(null);
         }
 
-        // ⭐ IconBlack 마커 생성 (여기가 수정됨)
         const markerImage = new window.kakao.maps.MarkerImage(
           IconBlack,
           new window.kakao.maps.Size(34, 34),
@@ -139,7 +318,6 @@ export default function MapPage() {
 
         currentLocationMarkerRef.current = marker;
 
-        // ⭐ "현 위치" 말풍선 생성
         const overlayContent = document.createElement('div');
         overlayContent.style.cssText = `
           position: relative;
@@ -190,77 +368,12 @@ export default function MapPage() {
     );
   };
 
-  const filteredPlaces = useMemo(() => {
-    let places = mode === 'child' ? CHILD_PLACES : SENIOR_PLACES;
-
-    if (sido) {
-      const validCodes = REGIONS.filter(
-        (r) => r.province === sido && (!sigungu || r.district === sigungu)
-      ).map((r) => r.region_code);
-      places = places.filter((p) => validCodes.includes(Number(p.region_code)));
-    }
-
-    if (searchQuery) {
-      places = places.filter((p) => p.name.includes(searchQuery));
-    }
-
-    if (mode === 'child' && selectedFilters.length > 0) {
-      places = places.filter((p) => selectedFilters.includes(p.category));
-    }
-
-    if (showOpenOnly) places = places.filter((p) => p.isOpen);
-    if (mode === 'child' && showDeliveryOnly) places = places.filter((p) => p.delivery);
-
-    const { targets, days, times, region } = panelFilters;
-    if (targets.length > 0) {
-      places = places.filter((place) => {
-        const rawTarget = place.targets || place.target_name;
-        const arr = Array.isArray(rawTarget) ? rawTarget : rawTarget ? [rawTarget] : [];
-        return targets.every((t) => arr.some((pt) => pt.includes(t)));
-      });
-    }
-    if (days.length > 0) {
-      places = places.filter((p) => days.every((d) => p.meal_days?.includes(d)));
-    }
-    if (times.length > 0) {
-      places = places.filter((p) => times.every((t) => p.meal_time?.includes(t)));
-    }
-    if (region) {
-      const value = region === 'nationwide' ? '전국' : '지역한정';
-      places = places.filter((p) => p.target === value);
-    }
-
-    return places;
-  }, [
-    mode,
-    sido,
-    sigungu,
-    searchQuery,
-    selectedFilters,
-    showOpenOnly,
-    showDeliveryOnly,
-    panelFilters,
-  ]);
-
-  const displayPlaces = useMemo(() => {
-    if (showFavorites) {
-      let favPlaces = favorites[mode] || [];
-      if (showOpenOnly) favPlaces = favPlaces.filter((p) => p.isOpen);
-      if (mode === 'child' && showDeliveryOnly) favPlaces = favPlaces.filter((p) => p.delivery);
-      return favPlaces;
-    }
-    return filteredPlaces;
-  }, [showFavorites, favorites, mode, filteredPlaces, showOpenOnly, showDeliveryOnly]);
-
   const handleModeChange = (newMode) => {
-    console.log('🔄 모드 변경:', mode, '→', newMode);
-
     setSelectedPlace(null);
     setSelectedPlaceMode(null);
     setIsDetailCollapsed(false);
 
     setMode(newMode);
-
     setSelectedFilters([]);
     setSido('');
     setSigungu('');
@@ -285,7 +398,7 @@ export default function MapPage() {
         currentLocationOverlayRef.current = null;
       }
       const defaultCenter = new window.kakao.maps.LatLng(37.5665, 126.978);
-      mapRef.current.setCenter(defaultCenter);
+      mapRef.current.panTo(defaultCenter);
       mapRef.current.setLevel(3);
     }
   };
@@ -293,27 +406,16 @@ export default function MapPage() {
   const handleSelectPlace = useCallback((place) => {
     const currentMode = modeRef.current;
 
-    console.log('═══════════════════════════════════════');
-    console.log('📍 장소 선택 이벤트 발생');
-    console.log('  - 선택된 장소:', place?.name);
-    console.log('  - 현재 mode (ref):', currentMode);
-    console.log('  - place.category:', place?.category);
-    console.log('  - place.target_name:', place?.target_name);
-    console.log('  - place.meal_days:', place?.meal_days);
+    // ⭐ 클릭 시 디버깅 정보 출력
+    console.error(
+      `📍 [클릭] ${place.name} (현재상태: ${place.isRealTimeOpen ? '영업중' : '영업종료'})`
+    );
 
     const isChildPlace = place?.category !== undefined;
     const isSeniorPlace = place?.target_name !== undefined || place?.meal_days !== undefined;
 
-    if (currentMode === 'child' && !isChildPlace) {
-      console.error('❌ child 모드인데 senior 데이터가 전달됨!');
-      console.log('═══════════════════════════════════════');
-      return;
-    }
-    if (currentMode === 'senior' && !isSeniorPlace) {
-      console.error('❌ senior 모드인데 child 데이터가 전달됨!');
-      console.log('═══════════════════════════════════════');
-      return;
-    }
+    if (currentMode === 'child' && !isChildPlace) return;
+    if (currentMode === 'senior' && !isSeniorPlace) return;
 
     if (closeTimerRef.current) {
       clearTimeout(closeTimerRef.current);
@@ -323,11 +425,6 @@ export default function MapPage() {
     setIsDetailCollapsed(false);
     setSelectedPlace(place);
     setSelectedPlaceMode(currentMode);
-
-    console.log('✅ 장소 선택 완료');
-    console.log('  - selectedPlace 설정:', place?.name);
-    console.log('  - selectedPlaceMode 설정:', currentMode);
-    console.log('═══════════════════════════════════════');
   }, []);
 
   const handlePanelApply = (filters, hasActive) => {
@@ -429,6 +526,7 @@ export default function MapPage() {
             onOpenFilter={handleOpenFilter}
             detailFilterActive={detailFilterActive}
             setDetailFilterActive={setDetailFilterActive}
+            onModeChange={handleModeChange}
           />
         </div>
 
@@ -483,8 +581,9 @@ export default function MapPage() {
 
           {isFilterOpen && (
             <div
-              className="absolute left-[px] z-50 p-2 pointer-events-none flex flex-col justify-start"
+              className="absolute z-50 p-2 pointer-events-none flex flex-col justify-start"
               style={{
+                left: `0px`,
                 top: `${Math.max(0, panelTop - 24)}px`,
               }}
               onMouseDown={(e) => e.stopPropagation()}

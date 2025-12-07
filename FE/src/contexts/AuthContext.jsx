@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import api from '../utils/api'; // axios 인스턴스
+// import api from '../utils/api'; // API 요청 안 할 거니까 주석 처리하거나 무시하세요
 
 const AuthContext = createContext();
 
@@ -9,72 +9,60 @@ export const AuthProvider = ({ children }) => {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ✅ 로그인 함수
+  // ✅ [수정됨] API 통신 없이 바로 로그인 시키는 함수
   const login = async (id, password) => {
     setLoading(true);
     setErrorMsg('');
-    try {
-      const res = await api.post('/api/login', { id, password });
-      const { accessToken, user_data } = res.data;
 
-      setAccessToken(accessToken);
-      setUser(user_data);
-    } catch (err) {
-      if (err.response?.data?.message) {
-        setErrorMsg(err.response.data.message);
+    try {
+      // 실제 통신하는 척 0.5초 딜레이 (자연스러운 UX 위해)
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      console.log(`[AuthContext] 로그인 시도: ${id} / ${password}`);
+
+      // 💡 아이디/비번 하드코딩 검사
+      if ((id === 'test' || id === 'test1234') && password === '1234') {
+        // 로그인 성공 데이터 가짜로 생성
+        const fakeUser = {
+          user_id: 1,
+          role: 'USER',
+          nickname: '테스트유저',
+          email: 'test@example.com',
+        };
+        const fakeToken = 'fake-access-token-12345';
+
+        // 상태 업데이트
+        setAccessToken(fakeToken);
+        setUser(fakeUser);
+        console.log('✅ 로그인 성공 (Bypass Mode)');
       } else {
-        setErrorMsg('로그인 중 오류가 발생했습니다.');
+        // 실패 처리
+        throw new Error('아이디 또는 비밀번호가 일치하지 않습니다.');
       }
-      throw err;
+    } catch (err) {
+      console.error('로그인 실패:', err);
+      setErrorMsg(err.message || '로그인 중 오류가 발생했습니다.');
+      throw err; // LoginForm에서 catch할 수 있게 던짐
     } finally {
       setLoading(false);
     }
   };
+
+  // ✅ [수정됨] 로그아웃도 API 없이 상태만 비움
   const logout = async () => {
     try {
-      const res = await api.post(
-        '/api/logout',
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (res.data?.success) {
-        setUser(null);
-        setAccessToken('');
-        return { success: true }; // ✅ 명시적으로 리턴 추가
-      } else {
-        return { success: false, error: '로그아웃 실패' };
-      }
+      setUser(null);
+      setAccessToken('');
+      return { success: true };
     } catch (err) {
-      console.error('로그아웃 실패:', err);
-      return { success: false, error: '로그아웃 중 오류가 발생했습니다.' }; // ✅ 예외 상황도 리턴
+      return { success: false, error: '로그아웃 실패' };
     }
   };
-  // ✅ 회원가입 함수 추가
+
+  // ✅ 회원가입 (일단 성공 처리)
   const signup = async (nickname, id, password) => {
-    try {
-      const res = await api.post('/api/signup', { nickname, id, password });
-      const { accessToken, user_data } = res.data;
-
-      if (accessToken && user_data) {
-        setAccessToken(accessToken);
-        setUser(user_data); // 🔥 회원가입 즉시 유저 상태 등록
-        return { success: true };
-      } else if (res.data.message) {
-        return { success: false, error: res.data.message };
-      }
-
-      return { success: false, error: '알 수 없는 오류가 발생했습니다.' };
-    } catch (err) {
-      if (err.response?.data?.message) {
-        return { success: false, error: err.response.data.message };
-      }
-      return { success: false, error: '회원가입 중 오류가 발생했습니다.' };
-    }
+    // 그냥 성공했다고 침
+    return { success: true };
   };
 
   return (

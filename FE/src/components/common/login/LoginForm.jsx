@@ -1,11 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom'; // 💡 Link 컴포넌트 import 추가
+import { Link, useNavigate } from 'react-router-dom';
 import InputField from './InputField';
 import Checkbox from './Checkbox';
 import KakaoLoginButton from './KakaoLoginButton';
 import { IconLogo } from '../../../utils/icons';
+
+// 💡 중요: login.js 대신 AuthContext를 가져옵니다.
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function LoginForm() {
   const [username, setUsername] = useState('');
@@ -13,32 +16,40 @@ export default function LoginForm() {
   const [autoLogin, setAutoLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // 유효성 검사
+  const navigate = useNavigate();
+
+  // 💡 AuthContext에서 login 함수와 에러 메시지를 가져옵니다.
+  const { login, errorMsg } = useAuth();
+
   const isFormValid = username.length > 0 && password.length > 0;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isFormValid) return;
-    console.log('[v0] Login:', { username, password, autoLogin });
-  };
 
-  const handleKakaoLogin = () => {
-    console.log('[v0] Kakao login');
+    try {
+      // 💡 Context의 login 함수 호출
+      // (AuthContext 내부에서 api.post 요청을 보냄 -> MSW가 가로챔)
+      await login(username, password);
+
+      console.log('로그인 성공');
+      navigate('/map');
+    } catch (error) {
+      console.error('로그인 실패 핸들링:', error);
+      // 에러 메시지는 AuthContext의 errorMsg 또는 catch 블록에서 처리
+      alert('아이디 또는 비밀번호를 확인해주세요.');
+    }
   };
 
   return (
     <div className="flex flex-col items-center bg-white rounded-2xl p-10 border-[2px] border-black-_04 shadow-[0px_4px_40px_0px_rgba(0,0,0,0.02)]">
-      {/* 로고 */}
       <div className="flex items-center justify-center gap-1">
         <img src={IconLogo} className="h-[18px]" alt="logo" />
       </div>
 
-      {/* 타이틀 */}
       <h1 className="text-[28px] font-bold text-center mt-4 mb-8">로그인</h1>
 
-      {/* 폼 너비 고정 */}
       <form onSubmit={handleSubmit} className="w-[320px] flex flex-col">
-        {/* 입력창 그룹 */}
         <div className="flex flex-col w-full">
           <InputField
             placeholder="아이디를 입력해주세요."
@@ -61,11 +72,12 @@ export default function LoginForm() {
           />
         </div>
 
-        {/* 자동 로그인 & 회원가입 */}
+        {/* 에러 메시지 표시용 (선택 사항) */}
+        {errorMsg && <p className="text-red-500 text-xs mt-2 text-center">{errorMsg}</p>}
+
         <div className="flex items-center justify-between pt-4 w-full px-[1px]">
           <Checkbox checked={autoLogin} onChange={setAutoLogin} label="자동 로그인" />
 
-          {/* 💡 수정됨: button 태그를 Link 컴포넌트로 교체 */}
           <Link
             to="/signup"
             className="text-[14px] leading-[140%] tracking-[-0.025em] text-black-_30 hover:text-black-_50 transition-colors"
@@ -74,7 +86,6 @@ export default function LoginForm() {
           </Link>
         </div>
 
-        {/* 로그인 버튼 */}
         <button
           type="submit"
           disabled={!isFormValid}
@@ -87,7 +98,6 @@ export default function LoginForm() {
           로그인
         </button>
 
-        {/* 소셜 로그인 구분선 */}
         <div className="flex items-center gap-3 mt-7 mb-6 w-full">
           <div className="flex-1 h-px bg-gray-stroke08" />
           <span className="text-[14px] leading-[140%] tracking-[-0.025em] text-black-_50">
@@ -96,8 +106,7 @@ export default function LoginForm() {
           <div className="flex-1 h-px bg-gray-stroke08" />
         </div>
 
-        {/* 카카오 로그인 */}
-        <KakaoLoginButton onClick={handleKakaoLogin} />
+        <KakaoLoginButton onClick={() => console.log('kakao')} />
       </form>
     </div>
   );
